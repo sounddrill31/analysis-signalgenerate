@@ -2,7 +2,7 @@
  * File: genAnalysisLogic.c
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 09-Sep-2026 14:13:58
+ * C/C++ source code generated on  : 09-Sep-2026 14:22:23
  */
 
 /* Include Files */
@@ -17,182 +17,157 @@
 #include "spectrogram.h"
 #include "omp.h"
 #include <emmintrin.h>
-#include <math.h>
 
 /* Function Definitions */
 /*
- * force dynamic arrays
+ * Time domain operations
+ *  Create time vector corresponding to the input samples
  *
  * Arguments    : const emxArray_real_T *x
  *                double Fs
  *                emxArray_real_T *t
  *                emxArray_real_T *freq
  *                emxArray_real_T *fftMagnitude
- *                double stftTime_data[]
- *                int stftTime_size[2]
+ *                double stftTime[1845]
  *                double stftFreq[513]
  *                emxArray_real_T *stftMagnitude
  * Return Type  : void
  */
 void genAnalysisLogic(const emxArray_real_T *x, double Fs, emxArray_real_T *t,
                       emxArray_real_T *freq, emxArray_real_T *fftMagnitude,
-                      double stftTime_data[], int stftTime_size[2],
-                      double stftFreq[513], emxArray_real_T *stftMagnitude)
+                      double stftTime[1845], double stftFreq[513],
+                      emxArray_real_T *stftMagnitude)
 {
-  emxArray_creal_T *X;
-  emxArray_creal_T *b_X;
+  static const int offsets[4] = {0, 1, 2, 3};
+  __m128d r7;
+  emxArray_creal_T *r3;
   emxArray_creal_T *stftData;
-  creal_T b_x;
-  creal_T *X_data;
-  creal_T *b_X_data;
+  emxArray_int32_T *r4;
+  emxArray_real_T *r;
+  emxArray_real_T *r2;
+  creal_T *r6;
   double dv[2];
-  double b_ai;
-  double b_ar;
+  double ai;
+  double im;
+  double re;
   double *fftMagnitude_data;
+  double *freq_data;
+  double *r1;
   double *t_data;
   int i;
   int i1;
-  int loop_ub;
-  int scalarLB;
-  int vectorUB;
-  int x_tmp;
+  int i2;
+  int *r5;
   if (!isInitialized_genAnalysisLogic) {
     genAnalysisLogic_initialize();
   }
-  /*  Simple matlab function for Audio Signal Analysis */
-  /*  Time domain operations */
-  /*  Create time vector corresponding to the input samples */
-  if (x->size[1] - 1 < 0) {
-    t->size[1] = 0;
-  } else {
-    scalarLB = t->size[0] * t->size[1];
-    t->size[0] = 1;
-    t->size[1] = x->size[1];
-    emxEnsureCapacity_real_T(t, scalarLB);
-    t_data = t->data;
-    scalarLB = x->size[1] - 1;
-    for (i = 0; i <= scalarLB; i++) {
-      t_data[i] = i;
-    }
-  }
-  loop_ub = t->size[1];
-  scalarLB = t->size[0] * t->size[1];
-  t->size[0] = 1;
-  emxEnsureCapacity_real_T(t, scalarLB);
+  emxInit_real_T(&r, 1);
+  i = r->size[0];
+  r->size[0] = 472587;
+  emxEnsureCapacity_real_T(r, i);
+  r1 = r->data;
+  emxInit_real_T(&r2, 1);
+  i = r2->size[0];
+  r2->size[0] = 945176;
+  emxEnsureCapacity_real_T(r2, i);
+  emxInit_creal_T(&r3);
+  i = r3->size[0];
+  r3->size[0] = 945176;
+  emxEnsureCapacity_creal_T(r3, i);
+  emxInit_int32_T(&r4);
+  i = r4->size[0];
+  r4->size[0] = 472587;
+  emxEnsureCapacity_int32_T(r4, i);
+  r5 = r4->data;
+  emxInit_creal_T(&stftData);
+  i = stftData->size[0];
+  stftData->size[0] = 946485;
+  emxEnsureCapacity_creal_T(stftData, i);
+  i = stftMagnitude->size[0];
+  stftMagnitude->size[0] = 946485;
+  emxEnsureCapacity_real_T(stftMagnitude, i);
+  i = fftMagnitude->size[0];
+  fftMagnitude->size[0] = 472589;
+  emxEnsureCapacity_real_T(fftMagnitude, i);
+  fftMagnitude_data = fftMagnitude->data;
+  i = freq->size[0];
+  freq->size[0] = 472589;
+  emxEnsureCapacity_real_T(freq, i);
+  freq_data = freq->data;
+  i = t->size[0];
+  t->size[0] = 945176;
+  emxEnsureCapacity_real_T(t, i);
   t_data = t->data;
-  scalarLB = (t->size[1] / 2) << 1;
-  vectorUB = scalarLB - 2;
-  for (i = 0; i <= vectorUB; i += 2) {
-    _mm_storeu_pd(&t_data[i],
-                  _mm_div_pd(_mm_loadu_pd(&t_data[i]), _mm_set1_pd(Fs)));
-  }
-  for (i = scalarLB; i < loop_ub; i++) {
-    t_data[i] /= Fs;
-  }
+  /*  Simple matlab function for Audio Signal Analysis */
   /*  Frequency domain operations */
   /*  Calculate FFT */
-  emxInit_creal_T(&X, 2);
-  fft(x, X);
-  X_data = X->data;
   /*  Two-sided magnitude spectrum */
-  x_tmp = x->size[1];
-  b_x.re = x->size[1];
-  emxInit_creal_T(&b_X, 2);
-  scalarLB = b_X->size[0] * b_X->size[1];
-  b_X->size[0] = 1;
-  vectorUB = X->size[1];
-  b_X->size[1] = X->size[1];
-  emxEnsureCapacity_creal_T(b_X, scalarLB);
-  b_X_data = b_X->data;
-  scalarLB = X->size[1];
-  if (X->size[1] < 1600) {
-    for (i1 = 0; i1 < vectorUB; i1++) {
-      double ai;
-      double ar;
-      ar = X_data[i1].re;
-      ai = X_data[i1].im;
-      if (ai == 0.0) {
-        b_X_data[i1].re = ar / b_x.re;
-        b_X_data[i1].im = 0.0;
-      } else if (ar == 0.0) {
-        b_X_data[i1].re = 0.0;
-        b_X_data[i1].im = ai / b_x.re;
-      } else {
-        b_X_data[i1].re = ar / b_x.re;
-        b_X_data[i1].im = ai / b_x.re;
-      }
-    }
-  } else {
-#pragma omp parallel for num_threads(omp_get_max_threads()) private(b_ar, b_ai)
-
-    for (i1 = 0; i1 < scalarLB; i1++) {
-      b_ar = X_data[i1].re;
-      b_ai = X_data[i1].im;
-      if (b_ai == 0.0) {
-        b_X_data[i1].re = b_ar / b_x.re;
-        b_X_data[i1].im = 0.0;
-      } else if (b_ar == 0.0) {
-        b_X_data[i1].re = 0.0;
-        b_X_data[i1].im = b_ai / b_x.re;
-      } else {
-        b_X_data[i1].re = b_ar / b_x.re;
-        b_X_data[i1].im = b_ai / b_x.re;
-      }
-    }
-  }
-  emxFree_creal_T(&X);
-  emxInit_real_T(&t, 2);
-  b_abs(b_X, t);
-  t_data = t->data;
-  emxFree_creal_T(&b_X);
   /*  Single-sided magnitude spectrum */
-  loop_ub = (int)floor((double)x->size[1] / 2.0);
-  scalarLB = fftMagnitude->size[0] * fftMagnitude->size[1];
-  fftMagnitude->size[0] = 1;
-  fftMagnitude->size[1] = loop_ub + 1;
-  emxEnsureCapacity_real_T(fftMagnitude, scalarLB);
-  fftMagnitude_data = fftMagnitude->data;
-  for (i = 0; i <= loop_ub; i++) {
-    fftMagnitude_data[i] = t_data[i];
+  fft(x, r3);
+  r6 = r3->data;
+#pragma omp parallel for num_threads(omp_get_max_threads()) private(im, ai, re)
+
+  for (i1 = 0; i1 < 945176; i1++) {
+    t_data[i1] = (double)i1 / Fs;
+    im = r6[i1].re;
+    ai = r6[i1].im;
+    if (ai == 0.0) {
+      re = im / 945176.0;
+      im = 0.0;
+    } else if (im == 0.0) {
+      re = 0.0;
+      im = ai / 945176.0;
+    } else {
+      re = im / 945176.0;
+      im = ai / 945176.0;
+    }
+    r6[i1].re = re;
+    r6[i1].im = im;
   }
+  b_abs(r3, r2);
+  t_data = r2->data;
+  emxFree_creal_T(&r3);
+  for (i2 = 0; i2 < 472589; i2++) {
+    fftMagnitude_data[i2] = t_data[i2];
+  }
+  emxFree_real_T(&r2);
   /*  Double the magnitude except DC and Nyquist components */
-  if (loop_ub + 1 > 2) {
-    scalarLB = ((loop_ub - 1) / 2) << 1;
-    vectorUB = scalarLB - 2;
-    for (i = 0; i <= vectorUB; i += 2) {
-      _mm_storeu_pd(&fftMagnitude_data[i + 1],
-                    _mm_mul_pd(_mm_set1_pd(2.0), _mm_loadu_pd(&t_data[i + 1])));
-    }
-    for (i = scalarLB; i <= loop_ub - 2; i++) {
-      fftMagnitude_data[i + 1] = 2.0 * t_data[i + 1];
-    }
+  r7 = _mm_set1_pd(2.0);
+  for (i2 = 0; i2 <= 472580; i2 += 4) {
+    _mm_storeu_si128(
+        (__m128i *)&r5[i2],
+        _mm_add_epi32(_mm_set1_epi32(i2 + 2),
+                      _mm_loadu_si128((const __m128i *)&offsets[0])));
+    _mm_storeu_pd(&r1[i2],
+                  _mm_mul_pd(r7, _mm_loadu_pd(&fftMagnitude_data[i2 + 1])));
+    _mm_storeu_pd(&r1[i2 + 2],
+                  _mm_mul_pd(r7, _mm_loadu_pd(&fftMagnitude_data[i2 + 3])));
   }
-  emxFree_real_T(&t);
+  r5[472584] = 472586;
+  r1[472584] = 2.0 * fftMagnitude_data[472585];
+  r5[472585] = 472587;
+  r1[472585] = 2.0 * fftMagnitude_data[472586];
+  r5[472586] = 472588;
+  r1[472586] = 2.0 * fftMagnitude_data[472587];
+  for (i2 = 0; i2 < 472587; i2++) {
+    fftMagnitude_data[r5[i2] - 1] = r1[i2];
+  }
+  emxFree_real_T(&r);
+  emxFree_int32_T(&r4);
   /*  Frequency axis */
-  scalarLB = freq->size[0] * freq->size[1];
-  freq->size[0] = 1;
-  freq->size[1] = loop_ub + 1;
-  emxEnsureCapacity_real_T(freq, scalarLB);
-  t_data = freq->data;
-  scalarLB = ((loop_ub + 1) / 2) << 1;
-  vectorUB = scalarLB - 2;
-  for (i = 0; i <= vectorUB; i += 2) {
-    __m128d r;
-    dv[0] = i;
-    dv[1] = (double)i + 1.0;
-    r = _mm_loadu_pd(&dv[0]);
-    _mm_storeu_pd(&t_data[i], _mm_div_pd(_mm_mul_pd(_mm_set1_pd(Fs), r),
-                                         _mm_set1_pd(x_tmp)));
+  for (i2 = 0; i2 <= 472586; i2 += 2) {
+    dv[0] = i2;
+    dv[1] = (double)i2 + 1.0;
+    r7 = _mm_loadu_pd(&dv[0]);
+    _mm_storeu_pd(&freq_data[i2], _mm_div_pd(_mm_mul_pd(_mm_set1_pd(Fs), r7),
+                                             _mm_set1_pd(945176.0)));
   }
-  for (i = scalarLB; i <= loop_ub; i++) {
-    t_data[i] = Fs * (double)i / (double)x_tmp;
-  }
+  freq_data[472588] = Fs * 472588.0 / 945176.0;
   /* Short Time Fourier Transform Chart */
   /*  Window length */
   /*  50% overlap */
   /*  Calculate STFT */
-  emxInit_creal_T(&stftData, 2);
-  spectrogram(x, Fs, stftData, stftFreq, stftTime_data, stftTime_size);
+  spectrogram(x, Fs, stftData, stftFreq, stftTime);
   /*  Magnitude of STFT */
   c_abs(stftData, stftMagnitude);
   emxFree_creal_T(&stftData);

@@ -2,7 +2,7 @@
  * File: genAnalysisLogic_types.h
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 09-Sep-2026 14:13:58
+ * C/C++ source code generated on  : 09-Sep-2026 14:22:23
  */
 
 #ifndef GENANALYSISLOGIC_TYPES_H
@@ -52,17 +52,6 @@ struct emxArray_int32_T {
 #define typedef_emxArray_int32_T
 typedef struct emxArray_int32_T emxArray_int32_T;
 #endif /* typedef_emxArray_int32_T */
-
-#ifndef typedef_emxArray_cuint8_T
-#define typedef_emxArray_cuint8_T
-typedef struct {
-  cuint8_T *data;
-  int *size;
-  int allocatedSize;
-  int numDimensions;
-  boolean_T canFreeData;
-} emxArray_cuint8_T;
-#endif /* typedef_emxArray_cuint8_T */
 
 #endif
 /*

@@ -2,7 +2,7 @@
  * File: _coder_genAnalysisLogic_api.h
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 09-Sep-2026 14:13:58
+ * C/C++ source code generated on  : 09-Sep-2026 14:22:23
  */
 
 #ifndef _CODER_GENANALYSISLOGIC_API_H
@@ -41,8 +41,8 @@ extern "C" {
 /* Function Declarations */
 void genAnalysisLogic(const emxArray_real_T *x, real_T Fs, emxArray_real_T *t,
                       emxArray_real_T *freq, emxArray_real_T *fftMagnitude,
-                      real_T stftTime_data[], int32_T stftTime_size[2],
-                      real_T stftFreq[513], emxArray_real_T *stftMagnitude);
+                      real_T stftTime[1845], real_T stftFreq[513],
+                      emxArray_real_T *stftMagnitude);
 
 void genAnalysisLogic_api(const mxArray *const prhs[2], int32_T nlhs,
                           const mxArray *plhs[6]);

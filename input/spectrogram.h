@@ -2,7 +2,7 @@
  * File: spectrogram.h
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 09-Sep-2026 14:13:58
+ * C/C++ source code generated on  : 09-Sep-2026 14:22:23
  */
 
 #ifndef SPECTROGRAM_H
@@ -21,7 +21,7 @@ extern "C" {
 /* Function Declarations */
 void spectrogram(const emxArray_real_T *x, double varargin_4,
                  emxArray_creal_T *varargout_1, double varargout_2[513],
-                 double varargout_3_data[], int varargout_3_size[2]);
+                 double varargout_3[1845]);
 
 #ifdef __cplusplus
 }

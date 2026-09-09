@@ -2,12 +2,13 @@
  * File: computeDFT.c
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 09-Sep-2026 14:13:58
+ * C/C++ source code generated on  : 09-Sep-2026 14:22:23
  */
 
 /* Include Files */
 #include "computeDFT.h"
 #include "FFTImplementationCallback.h"
+#include "genAnalysisLogic_emxutil.h"
 #include "genAnalysisLogic_types.h"
 #include "rt_nonfinite.h"
 #include "rt_nonfinite.h"
@@ -28,24 +29,23 @@ void computeDFT(const emxArray_real_T *xin, double varargin_1,
   double Fs1;
   double freq_res;
   int i;
-  if (xin->size[1] == 0) {
-    Xx->size[0] = 1024;
-    Xx->size[1] = 0;
-  } else {
-    g_FFTImplementationCallback_r2b(xin, Xx);
-  }
+  int i1;
+  i = Xx->size[0];
+  Xx->size[0] = 1889280;
+  emxEnsureCapacity_creal_T(Xx, i);
+  f_FFTImplementationCallback_r2b(xin, Xx);
   if (rtIsNaN(varargin_1)) {
     Fs1 = 6.283185307179586;
   } else {
     Fs1 = varargin_1;
   }
   freq_res = Fs1 / 1024.0;
-  for (i = 0; i <= 1022; i += 2) {
+  for (i1 = 0; i1 <= 1022; i1 += 2) {
     __m128d r;
-    dv[0] = i;
-    dv[1] = (double)i + 1.0;
+    dv[0] = i1;
+    dv[1] = (double)i1 + 1.0;
     r = _mm_loadu_pd(&dv[0]);
-    _mm_storeu_pd(&f[i], _mm_mul_pd(_mm_set1_pd(freq_res), r));
+    _mm_storeu_pd(&f[i1], _mm_mul_pd(_mm_set1_pd(freq_res), r));
   }
   f[512] = Fs1 / 2.0;
   f[1023] = Fs1 - freq_res;

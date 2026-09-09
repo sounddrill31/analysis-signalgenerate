@@ -2,7 +2,7 @@
  * File: genAnalysisLogic_emxutil.c
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 09-Sep-2026 14:13:58
+ * C/C++ source code generated on  : 09-Sep-2026 14:22:23
  */
 
 /* Include Files */
@@ -51,50 +51,6 @@ void emxEnsureCapacity_creal_T(emxArray_creal_T *emxArray, int oldNumel)
       }
     }
     emxArray->data = (creal_T *)newData;
-    emxArray->allocatedSize = newCapacity;
-    emxArray->canFreeData = true;
-  }
-}
-
-/*
- * Arguments    : emxArray_cuint8_T *emxArray
- *                int oldNumel
- * Return Type  : void
- */
-void emxEnsureCapacity_cuint8_T(emxArray_cuint8_T *emxArray, int oldNumel)
-{
-  int i;
-  int newNumel;
-  void *newData;
-  if (oldNumel < 0) {
-    oldNumel = 0;
-  }
-  newNumel = 1;
-  for (i = 0; i < emxArray->numDimensions; i++) {
-    newNumel *= emxArray->size[i];
-  }
-  if (newNumel > emxArray->allocatedSize) {
-    int newCapacity;
-    newCapacity = emxArray->allocatedSize;
-    if (newCapacity < 16) {
-      newCapacity = 16;
-    }
-    while (newCapacity < newNumel) {
-      if (newCapacity > 1073741823) {
-        newCapacity = MAX_int32_T;
-      } else {
-        newCapacity *= 2;
-      }
-    }
-    newData = malloc((unsigned int)newCapacity * sizeof(cuint8_T));
-    if (emxArray->data != NULL) {
-      memcpy(newData, emxArray->data,
-             sizeof(cuint8_T) * (unsigned int)oldNumel);
-      if (emxArray->canFreeData) {
-        free(emxArray->data);
-      }
-    }
-    emxArray->data = (cuint8_T *)newData;
     emxArray->allocatedSize = newCapacity;
     emxArray->canFreeData = true;
   }
@@ -203,22 +159,6 @@ void emxFree_creal_T(emxArray_creal_T **pEmxArray)
 }
 
 /*
- * Arguments    : emxArray_cuint8_T **pEmxArray
- * Return Type  : void
- */
-void emxFree_cuint8_T(emxArray_cuint8_T **pEmxArray)
-{
-  if (*pEmxArray != (emxArray_cuint8_T *)NULL) {
-    if (((*pEmxArray)->data != (cuint8_T *)NULL) && (*pEmxArray)->canFreeData) {
-      free((*pEmxArray)->data);
-    }
-    free((*pEmxArray)->size);
-    free(*pEmxArray);
-    *pEmxArray = (emxArray_cuint8_T *)NULL;
-  }
-}
-
-/*
  * Arguments    : emxArray_int32_T **pEmxArray
  * Return Type  : void
  */
@@ -252,35 +192,14 @@ void emxFree_real_T(emxArray_real_T **pEmxArray)
 
 /*
  * Arguments    : emxArray_creal_T **pEmxArray
- *                int numDimensions
  * Return Type  : void
  */
-void emxInit_creal_T(emxArray_creal_T **pEmxArray, int numDimensions)
+void emxInit_creal_T(emxArray_creal_T **pEmxArray)
 {
   emxArray_creal_T *emxArray;
-  int i;
   *pEmxArray = (emxArray_creal_T *)malloc(sizeof(emxArray_creal_T));
   emxArray = *pEmxArray;
   emxArray->data = (creal_T *)NULL;
-  emxArray->numDimensions = numDimensions;
-  emxArray->size = (int *)malloc(sizeof(int) * (unsigned int)numDimensions);
-  emxArray->allocatedSize = 0;
-  emxArray->canFreeData = true;
-  for (i = 0; i < numDimensions; i++) {
-    emxArray->size[i] = 0;
-  }
-}
-
-/*
- * Arguments    : emxArray_cuint8_T **pEmxArray
- * Return Type  : void
- */
-void emxInit_cuint8_T(emxArray_cuint8_T **pEmxArray)
-{
-  emxArray_cuint8_T *emxArray;
-  *pEmxArray = (emxArray_cuint8_T *)malloc(sizeof(emxArray_cuint8_T));
-  emxArray = *pEmxArray;
-  emxArray->data = (cuint8_T *)NULL;
   emxArray->numDimensions = 1;
   emxArray->size = (int *)malloc(sizeof(int));
   emxArray->allocatedSize = 0;
@@ -290,23 +209,19 @@ void emxInit_cuint8_T(emxArray_cuint8_T **pEmxArray)
 
 /*
  * Arguments    : emxArray_int32_T **pEmxArray
- *                int numDimensions
  * Return Type  : void
  */
-void emxInit_int32_T(emxArray_int32_T **pEmxArray, int numDimensions)
+void emxInit_int32_T(emxArray_int32_T **pEmxArray)
 {
   emxArray_int32_T *emxArray;
-  int i;
   *pEmxArray = (emxArray_int32_T *)malloc(sizeof(emxArray_int32_T));
   emxArray = *pEmxArray;
   emxArray->data = (int *)NULL;
-  emxArray->numDimensions = numDimensions;
-  emxArray->size = (int *)malloc(sizeof(int) * (unsigned int)numDimensions);
+  emxArray->numDimensions = 1;
+  emxArray->size = (int *)malloc(sizeof(int));
   emxArray->allocatedSize = 0;
   emxArray->canFreeData = true;
-  for (i = 0; i < numDimensions; i++) {
-    emxArray->size[i] = 0;
-  }
+  emxArray->size[0] = 0;
 }
 
 /*

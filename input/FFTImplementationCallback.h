@@ -2,7 +2,7 @@
  * File: FFTImplementationCallback.h
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 09-Sep-2026 14:13:58
+ * C/C++ source code generated on  : 09-Sep-2026 14:22:23
  */
 
 #ifndef FFTIMPLEMENTATIONCALLBACK_H
@@ -19,23 +19,13 @@ extern "C" {
 #endif
 
 /* Function Declarations */
-void c_FFTImplementationCallback_dob(const emxArray_real_T *x, int n2blue,
-                                     int nfft, const emxArray_real_T *costab,
+void c_FFTImplementationCallback_dob(const emxArray_real_T *x,
+                                     const emxArray_real_T *costab,
                                      const emxArray_real_T *sintab,
                                      const emxArray_real_T *sintabinv,
                                      emxArray_creal_T *y);
 
-void c_FFTImplementationCallback_gen(int nRows, boolean_T useRadix2,
-                                     emxArray_real_T *costab,
-                                     emxArray_real_T *sintab,
-                                     emxArray_real_T *sintabinv);
-
-void c_FFTImplementationCallback_r2b(const emxArray_real_T *x, int n1_unsigned,
-                                     const emxArray_real_T *costab,
-                                     const emxArray_real_T *sintab,
-                                     emxArray_creal_T *y);
-
-void g_FFTImplementationCallback_r2b(const emxArray_real_T *x,
+void f_FFTImplementationCallback_r2b(const emxArray_real_T *x,
                                      emxArray_creal_T *y);
 
 #ifdef __cplusplus

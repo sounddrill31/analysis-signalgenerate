@@ -2,7 +2,7 @@
 ## Makefile generated for component 'genAnalysisLogic'. 
 ## 
 ## Makefile     : genAnalysisLogic_rtw.mk
-## Generated on : Wed Sep 09 08:43:55 2026
+## Generated on : Wed Sep 09 08:51:59 2026
 ## Final product: ./genAnalysisLogic.a
 ## Product type : static-library
 ## 
@@ -192,7 +192,7 @@ DEFINES = $(DEFINES_CUSTOM) $(DEFINES_STANDARD)
 ## SOURCE FILES
 ###########################################################################
 
-SRCS = $(START_DIR)/codegen/lib/genAnalysisLogic/genAnalysisLogic_data.c $(START_DIR)/codegen/lib/genAnalysisLogic/rt_nonfinite.c $(START_DIR)/codegen/lib/genAnalysisLogic/rtGetNaN.c $(START_DIR)/codegen/lib/genAnalysisLogic/rtGetInf.c $(START_DIR)/codegen/lib/genAnalysisLogic/genAnalysisLogic_initialize.c $(START_DIR)/codegen/lib/genAnalysisLogic/genAnalysisLogic_terminate.c $(START_DIR)/codegen/lib/genAnalysisLogic/genAnalysisLogic.c $(START_DIR)/codegen/lib/genAnalysisLogic/fft.c $(START_DIR)/codegen/lib/genAnalysisLogic/FFTImplementationCallback.c $(START_DIR)/codegen/lib/genAnalysisLogic/abs.c $(START_DIR)/codegen/lib/genAnalysisLogic/spectrogram.c $(START_DIR)/codegen/lib/genAnalysisLogic/getSTFTColumns.c $(START_DIR)/codegen/lib/genAnalysisLogic/bsxfun.c $(START_DIR)/codegen/lib/genAnalysisLogic/computeDFT.c $(START_DIR)/codegen/lib/genAnalysisLogic/pspectrogram.c $(START_DIR)/codegen/lib/genAnalysisLogic/genAnalysisLogic_emxutil.c $(START_DIR)/codegen/lib/genAnalysisLogic/genAnalysisLogic_emxAPI.c
+SRCS = $(START_DIR)/codegen/lib/genAnalysisLogic/genAnalysisLogic_data.c $(START_DIR)/codegen/lib/genAnalysisLogic/rt_nonfinite.c $(START_DIR)/codegen/lib/genAnalysisLogic/rtGetNaN.c $(START_DIR)/codegen/lib/genAnalysisLogic/rtGetInf.c $(START_DIR)/codegen/lib/genAnalysisLogic/genAnalysisLogic_initialize.c $(START_DIR)/codegen/lib/genAnalysisLogic/genAnalysisLogic_terminate.c $(START_DIR)/codegen/lib/genAnalysisLogic/genAnalysisLogic.c $(START_DIR)/codegen/lib/genAnalysisLogic/fft.c $(START_DIR)/codegen/lib/genAnalysisLogic/FFTImplementationCallback.c $(START_DIR)/codegen/lib/genAnalysisLogic/abs.c $(START_DIR)/codegen/lib/genAnalysisLogic/spectrogram.c $(START_DIR)/codegen/lib/genAnalysisLogic/computeDFT.c $(START_DIR)/codegen/lib/genAnalysisLogic/pspectrogram.c $(START_DIR)/codegen/lib/genAnalysisLogic/genAnalysisLogic_emxutil.c $(START_DIR)/codegen/lib/genAnalysisLogic/genAnalysisLogic_emxAPI.c
 
 ALL_SRCS = $(SRCS)
 
@@ -200,7 +200,7 @@ ALL_SRCS = $(SRCS)
 ## OBJECTS
 ###########################################################################
 
-OBJS = genAnalysisLogic_data.o rt_nonfinite.o rtGetNaN.o rtGetInf.o genAnalysisLogic_initialize.o genAnalysisLogic_terminate.o genAnalysisLogic.o fft.o FFTImplementationCallback.o abs.o spectrogram.o getSTFTColumns.o bsxfun.o computeDFT.o pspectrogram.o genAnalysisLogic_emxutil.o genAnalysisLogic_emxAPI.o
+OBJS = genAnalysisLogic_data.o rt_nonfinite.o rtGetNaN.o rtGetInf.o genAnalysisLogic_initialize.o genAnalysisLogic_terminate.o genAnalysisLogic.o fft.o FFTImplementationCallback.o abs.o spectrogram.o computeDFT.o pspectrogram.o genAnalysisLogic_emxutil.o genAnalysisLogic_emxAPI.o
 
 ALL_OBJS = $(OBJS)
 
@@ -464,14 +464,6 @@ abs.o : $(START_DIR)/codegen/lib/genAnalysisLogic/abs.c
 
 
 spectrogram.o : $(START_DIR)/codegen/lib/genAnalysisLogic/spectrogram.c
-	$(CC) $(CFLAGS) -o "$@" "$<"
-
-
-getSTFTColumns.o : $(START_DIR)/codegen/lib/genAnalysisLogic/getSTFTColumns.c
-	$(CC) $(CFLAGS) -o "$@" "$<"
-
-
-bsxfun.o : $(START_DIR)/codegen/lib/genAnalysisLogic/bsxfun.c
 	$(CC) $(CFLAGS) -o "$@" "$<"
 
 

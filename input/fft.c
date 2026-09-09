@@ -2,7 +2,7 @@
  * File: fft.c
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 09-Sep-2026 14:13:58
+ * C/C++ source code generated on  : 09-Sep-2026 14:22:23
  */
 
 /* Include Files */
@@ -11,6 +11,8 @@
 #include "genAnalysisLogic_emxutil.h"
 #include "genAnalysisLogic_types.h"
 #include "rt_nonfinite.h"
+#include "omp.h"
+#include <math.h>
 
 /* Function Definitions */
 /*
@@ -20,91 +22,76 @@
  */
 void fft(const emxArray_real_T *x, emxArray_creal_T *y)
 {
-  emxArray_creal_T *yCol;
-  emxArray_real_T b_x;
   emxArray_real_T *costab;
+  emxArray_real_T *costab1q;
   emxArray_real_T *sintab;
   emxArray_real_T *sintabinv;
-  creal_T *yCol_data;
-  creal_T *y_data;
-  int c_x;
-  int d_x;
+  double b_sintabinv_tmp;
+  double sintabinv_tmp;
+  double *costab1q_data;
+  double *costab_data;
+  double *sintab_data;
+  double *sintabinv_data;
+  int b_k;
+  int c_k;
   int i;
-  if (x->size[1] == 0) {
-    y->size[0] = 1;
-    y->size[1] = 0;
-  } else {
-    int N2blue;
-    int pmax;
-    boolean_T useRadix2;
-    useRadix2 =
-        (((unsigned int)x->size[1] & (unsigned int)(x->size[1] - 1)) == 0U);
-    N2blue = 1;
-    if (useRadix2) {
-      pmax = x->size[1];
-    } else {
-      N2blue = (x->size[1] + x->size[1]) - 1;
-      pmax = 31;
-      if (N2blue <= 1) {
-        pmax = 0;
-      } else {
-        int pmin;
-        boolean_T exitg1;
-        pmin = 0;
-        exitg1 = false;
-        while (!exitg1 && (pmax - pmin > 1)) {
-          int k;
-          int pow2p;
-          k = (pmin + pmax) >> 1;
-          pow2p = 1 << k;
-          if (pow2p == N2blue) {
-            pmax = k;
-            exitg1 = true;
-          } else if (pow2p > N2blue) {
-            pmax = k;
-          } else {
-            pmin = k;
-          }
-        }
-      }
-      N2blue = 1 << pmax;
-      pmax = N2blue;
-    }
-    emxInit_real_T(&costab, 2);
-    emxInit_real_T(&sintab, 2);
-    emxInit_real_T(&sintabinv, 2);
-    c_FFTImplementationCallback_gen(pmax, useRadix2, costab, sintab, sintabinv);
-    emxInit_creal_T(&yCol, 1);
-    if (useRadix2) {
-      b_x = *x;
-      d_x = x->size[1];
-      b_x.size = &d_x;
-      b_x.numDimensions = 1;
-      c_FFTImplementationCallback_r2b(&b_x, x->size[1], costab, sintab, yCol);
-      yCol_data = yCol->data;
-    } else {
-      b_x = *x;
-      c_x = x->size[1];
-      b_x.size = &c_x;
-      b_x.numDimensions = 1;
-      c_FFTImplementationCallback_dob(&b_x, N2blue, x->size[1], costab, sintab,
-                                      sintabinv, yCol);
-      yCol_data = yCol->data;
-    }
-    emxFree_real_T(&sintabinv);
-    emxFree_real_T(&sintab);
-    emxFree_real_T(&costab);
-    N2blue = y->size[0] * y->size[1];
-    y->size[0] = 1;
-    pmax = x->size[1];
-    y->size[1] = x->size[1];
-    emxEnsureCapacity_creal_T(y, N2blue);
-    y_data = y->data;
-    for (i = 0; i < pmax; i++) {
-      y_data[i] = yCol_data[i];
-    }
-    emxFree_creal_T(&yCol);
+  int k;
+  emxInit_real_T(&costab1q, 1);
+  i = costab1q->size[0];
+  costab1q->size[0] = 524289;
+  emxEnsureCapacity_real_T(costab1q, i);
+  costab1q_data = costab1q->data;
+  emxInit_real_T(&sintabinv, 1);
+  i = sintabinv->size[0];
+  sintabinv->size[0] = 1048577;
+  emxEnsureCapacity_real_T(sintabinv, i);
+  sintabinv_data = sintabinv->data;
+  emxInit_real_T(&sintab, 1);
+  i = sintab->size[0];
+  sintab->size[0] = 1048577;
+  emxEnsureCapacity_real_T(sintab, i);
+  sintab_data = sintab->data;
+  emxInit_real_T(&costab, 1);
+  i = costab->size[0];
+  costab->size[0] = 1048577;
+  emxEnsureCapacity_real_T(costab, i);
+  costab_data = costab->data;
+  i = y->size[0];
+  y->size[0] = 945176;
+  emxEnsureCapacity_creal_T(y, i);
+  costab1q_data[0] = 1.0;
+#pragma omp parallel for num_threads(omp_get_max_threads())
+
+  for (k = 0; k < 262144; k++) {
+    costab1q_data[k + 1] = cos(2.996056226339143E-6 * ((double)k + 1.0));
   }
+#pragma omp parallel for num_threads(omp_get_max_threads())
+
+  for (b_k = 0; b_k < 262143; b_k++) {
+    costab1q_data[b_k + 262145] =
+        sin(2.996056226339143E-6 * (524288.0 - ((double)b_k + 262145.0)));
+  }
+  costab1q_data[524288] = 0.0;
+  costab_data[0] = 1.0;
+  sintab_data[0] = 0.0;
+#pragma omp parallel for num_threads(omp_get_max_threads()) private(           \
+        sintabinv_tmp, b_sintabinv_tmp)
+
+  for (c_k = 0; c_k < 524288; c_k++) {
+    sintabinv_tmp = costab1q_data[524287 - c_k];
+    sintabinv_data[c_k + 1] = sintabinv_tmp;
+    b_sintabinv_tmp = costab1q_data[c_k + 1];
+    sintabinv_data[c_k + 524289] = b_sintabinv_tmp;
+    costab_data[c_k + 1] = b_sintabinv_tmp;
+    sintab_data[c_k + 1] = -sintabinv_tmp;
+    costab_data[c_k + 524289] = -sintabinv_tmp;
+    sintab_data[c_k + 524289] = -b_sintabinv_tmp;
+  }
+  emxFree_real_T(&costab1q);
+  c_FFTImplementationCallback_dob(x, costab, sintab, sintabinv, y);
+  emxFree_real_T(&sintabinv);
+  emxFree_real_T(&sintab);
+  emxFree_real_T(&costab);
 }
 
 /*
