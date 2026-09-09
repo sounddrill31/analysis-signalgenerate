@@ -10,13 +10,19 @@ def parse_argument(arg_str):
     if not names: return None
     name = names[-1]
     
-    # Bypassing MATLAB's keyword quirks: Force strictly known inputs!
+    # 1. Hardcode inputs so MATLAB keywords can't break them
     if name == 'x':
         return {'type': 'array_in_emx', 'name': name}
     if name == 'Fs':
         return {'type': 'scalar_in', 'name': name}
     
-    # Everything else is an output array
+    # 2. Check if MATLAB optimized this output into a fixed-size array (like double freq[513])
+    array_match = re.search(r'\[\s*(\d+)\s*\]', arg)
+    if array_match:
+        size = int(array_match.group(1))
+        return {'type': 'array_out_fixed', 'name': name, 'size': size}
+        
+    # 3. Otherwise, it's a dynamic emxArray output
     return {'type': 'array_out_emx', 'name': name}
     
 def generate_wrapper(func_name):
@@ -29,7 +35,7 @@ def generate_wrapper(func_name):
     args = [a.strip() for a in args_str.split(',') if a.strip()]
     parsed_args = [parse_argument(arg) for arg in args if arg]
 
-    outputs = [p for p in parsed_args if p['type'] == 'array_out_emx']
+    outputs = [p for p in parsed_args if p['type'] in ('array_out_emx', 'array_out_fixed')]
 
     cpp = f"""#include <emscripten/bind.h>
 #include <emscripten/val.h>
@@ -65,6 +71,8 @@ val run_{func_name}(const val &x_js, double Fs) {{
 
     for p in parsed_args:
         name = p['name']
+        p_type = p['type']
+        
         if name == 'x':
             cpp += f"    size_t x_len = x_js[\"length\"].as<size_t>();\n"
             cpp += f"    int x_sz[2] = {{ 1, (int)x_len }};\n"
@@ -77,6 +85,10 @@ val run_{func_name}(const val &x_js, double Fs) {{
             emx_destroys.append("    emxDestroyArray_real_T(x);\n")
         elif name == 'Fs':
             call_args.append("Fs")
+        elif p_type == 'array_out_fixed':
+            size = p['size']
+            cpp += f"    std::vector<double> {name}_buf({size});\n"
+            call_args.append(f"{name}_buf.data()")
         else:
             cpp += f"    int {name}_sz[2] = {{ 0, 0 }};\n"
             cpp += f"    emxArray_real_T *{name} = emxCreateND_real_T(2, {name}_sz);\n"
@@ -88,11 +100,18 @@ val run_{func_name}(const val &x_js, double Fs) {{
     
     for p in outputs:
         name = p['name']
-        cpp += f"    int {name}_numels = 1;\n"
-        cpp += f"    for (int i = 0; i < {name}->numDimensions; ++i) {name}_numels *= {name}->size[i];\n"
-        cpp += f"    val {name}_view = val(typed_memory_view({name}_numels, {name}->data));\n"
-        cpp += f"    val {name}_js = val::global(\"Float64Array\").new_({name}_view);\n"
-        cpp += f"    result.set(\"{name}\", {name}_js);\n"
+        p_type = p['type']
+        if p_type == 'array_out_fixed':
+            size = p['size']
+            cpp += f"    val {name}_view = val(typed_memory_view({size}, {name}_buf.data()));\n"
+            cpp += f"    val {name}_js = val::global(\"Float64Array\").new_({name}_view);\n"
+            cpp += f"    result.set(\"{name}\", {name}_js);\n"
+        else:
+            cpp += f"    int {name}_numels = 1;\n"
+            cpp += f"    for (int i = 0; i < {name}->numDimensions; ++i) {name}_numels *= {name}->size[i];\n"
+            cpp += f"    val {name}_view = val(typed_memory_view({name}_numels, {name}->data));\n"
+            cpp += f"    val {name}_js = val::global(\"Float64Array\").new_({name}_view);\n"
+            cpp += f"    result.set(\"{name}\", {name}_js);\n"
 
     for d in emx_destroys:
         cpp += d
