@@ -1,0 +1,14 @@
+[workspace]
+authors = ["84176052+sounddrill31 <84176052+sounddrill31@users.noreply.github.com>"]
+channels = ["conda-forge"]
+name = "Emscripten Project MATLAB"
+platforms = ["linux-64"]
+version = "0.1.0"
+
+[tasks]
+export-web = "bash autowrap.sh"
+server = { cmd="caddy file-server --listen :8080 --root output/", depends-on="export-web" }
+
+[dependencies]
+emscripten = ">=4.0.9,<5"
+caddy = ">=2.11.4,<3"

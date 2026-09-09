@@ -1,0 +1,13 @@
+# pixi environments
+.pixi/*
+!.pixi/config.toml
+
+
+pixi.toml
+
+output/*
+
+gen
+mlrFiles.zip
+sDirFiles.zip
+wrapper.cpp

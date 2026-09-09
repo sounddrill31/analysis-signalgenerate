@@ -1,0 +1,28 @@
+name: Main
+
+on: 
+  push:
+  workflow_dispatch:
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - uses: prefix-dev/setup-pixi@v0.10.2
+        with:
+          pixi-version: v0.68.1
+      - name: Build
+        run: pixi run export-web
+      - name: Release
+        uses: softprops/action-gh-release@v3
+        with:
+          target_commitish: ${{ github.ref_name }}
+          tag_name: ${{ github.run_id }}
+          files: |
+            output/index.js
+            output/index.wasm
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
