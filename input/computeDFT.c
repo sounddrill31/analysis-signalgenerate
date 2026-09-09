@@ -2,7 +2,7 @@
  * File: computeDFT.c
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 09-Sep-2026 14:22:23
+ * C/C++ source code generated on  : 09-Sep-2026 14:34:56
  */
 
 /* Include Files */
@@ -33,7 +33,7 @@ void computeDFT(const emxArray_real_T *xin, double varargin_1,
   i = Xx->size[0];
   Xx->size[0] = 1889280;
   emxEnsureCapacity_creal_T(Xx, i);
-  f_FFTImplementationCallback_r2b(xin, Xx);
+  d_FFTImplementationCallback_doH(xin, Xx);
   if (rtIsNaN(varargin_1)) {
     Fs1 = 6.283185307179586;
   } else {

@@ -2,14 +2,12 @@
  * File: genAnalysisLogic_initialize.c
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 09-Sep-2026 14:22:23
+ * C/C++ source code generated on  : 09-Sep-2026 14:34:56
  */
 
 /* Include Files */
 #include "genAnalysisLogic_initialize.h"
-#include "genAnalysisLogic_data.h"
 #include "rt_nonfinite.h"
-#include "omp.h"
 
 /* Function Definitions */
 /*
@@ -18,8 +16,6 @@
  */
 void genAnalysisLogic_initialize(void)
 {
-  omp_init_nest_lock(&genAnalysisLogic_nestLockGlobal);
-  isInitialized_genAnalysisLogic = true;
 }
 
 /*

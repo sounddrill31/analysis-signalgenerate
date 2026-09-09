@@ -2,7 +2,7 @@
 ## Makefile generated for component 'genAnalysisLogic'. 
 ## 
 ## Makefile     : genAnalysisLogic_rtw.mk
-## Generated on : Wed Sep 09 08:51:59 2026
+## Generated on : Wed Sep 09 09:05:17 2026
 ## Final product: ./genAnalysisLogic.a
 ## Product type : static-library
 ## 
@@ -192,7 +192,7 @@ DEFINES = $(DEFINES_CUSTOM) $(DEFINES_STANDARD)
 ## SOURCE FILES
 ###########################################################################
 
-SRCS = $(START_DIR)/codegen/lib/genAnalysisLogic/genAnalysisLogic_data.c $(START_DIR)/codegen/lib/genAnalysisLogic/rt_nonfinite.c $(START_DIR)/codegen/lib/genAnalysisLogic/rtGetNaN.c $(START_DIR)/codegen/lib/genAnalysisLogic/rtGetInf.c $(START_DIR)/codegen/lib/genAnalysisLogic/genAnalysisLogic_initialize.c $(START_DIR)/codegen/lib/genAnalysisLogic/genAnalysisLogic_terminate.c $(START_DIR)/codegen/lib/genAnalysisLogic/genAnalysisLogic.c $(START_DIR)/codegen/lib/genAnalysisLogic/fft.c $(START_DIR)/codegen/lib/genAnalysisLogic/FFTImplementationCallback.c $(START_DIR)/codegen/lib/genAnalysisLogic/abs.c $(START_DIR)/codegen/lib/genAnalysisLogic/spectrogram.c $(START_DIR)/codegen/lib/genAnalysisLogic/computeDFT.c $(START_DIR)/codegen/lib/genAnalysisLogic/pspectrogram.c $(START_DIR)/codegen/lib/genAnalysisLogic/genAnalysisLogic_emxutil.c $(START_DIR)/codegen/lib/genAnalysisLogic/genAnalysisLogic_emxAPI.c
+SRCS = $(START_DIR)/codegen/lib/genAnalysisLogic/rt_nonfinite.c $(START_DIR)/codegen/lib/genAnalysisLogic/rtGetNaN.c $(START_DIR)/codegen/lib/genAnalysisLogic/rtGetInf.c $(START_DIR)/codegen/lib/genAnalysisLogic/genAnalysisLogic_initialize.c $(START_DIR)/codegen/lib/genAnalysisLogic/genAnalysisLogic_terminate.c $(START_DIR)/codegen/lib/genAnalysisLogic/genAnalysisLogic.c $(START_DIR)/codegen/lib/genAnalysisLogic/fft.c $(START_DIR)/codegen/lib/genAnalysisLogic/FFTImplementationCallback.c $(START_DIR)/codegen/lib/genAnalysisLogic/abs.c $(START_DIR)/codegen/lib/genAnalysisLogic/spectrogram.c $(START_DIR)/codegen/lib/genAnalysisLogic/computeDFT.c $(START_DIR)/codegen/lib/genAnalysisLogic/pspectrogram.c $(START_DIR)/codegen/lib/genAnalysisLogic/genAnalysisLogic_emxutil.c $(START_DIR)/codegen/lib/genAnalysisLogic/genAnalysisLogic_emxAPI.c
 
 ALL_SRCS = $(SRCS)
 
@@ -200,7 +200,7 @@ ALL_SRCS = $(SRCS)
 ## OBJECTS
 ###########################################################################
 
-OBJS = genAnalysisLogic_data.o rt_nonfinite.o rtGetNaN.o rtGetInf.o genAnalysisLogic_initialize.o genAnalysisLogic_terminate.o genAnalysisLogic.o fft.o FFTImplementationCallback.o abs.o spectrogram.o computeDFT.o pspectrogram.o genAnalysisLogic_emxutil.o genAnalysisLogic_emxAPI.o
+OBJS = rt_nonfinite.o rtGetNaN.o rtGetInf.o genAnalysisLogic_initialize.o genAnalysisLogic_terminate.o genAnalysisLogic.o fft.o FFTImplementationCallback.o abs.o spectrogram.o computeDFT.o pspectrogram.o genAnalysisLogic_emxutil.o genAnalysisLogic_emxAPI.o
 
 ALL_OBJS = $(OBJS)
 
@@ -220,7 +220,7 @@ LIBS =
 ## SYSTEM LIBRARIES
 ###########################################################################
 
-SYSTEM_LIBS = -L$(MATLAB_ROOT)/sys/os/glnxa64 -lm -liomp5
+SYSTEM_LIBS =  -lm
 
 ###########################################################################
 ## ADDITIONAL TOOLCHAIN FLAGS
@@ -230,21 +230,19 @@ SYSTEM_LIBS = -L$(MATLAB_ROOT)/sys/os/glnxa64 -lm -liomp5
 # C Compiler
 #---------------
 
-CFLAGS_OPTS = -fopenmp
 CFLAGS_TFL = -msse2 -fno-predictive-commoning
 CFLAGS_BASIC = $(DEFINES) $(INCLUDES)
 
-CFLAGS += $(CFLAGS_OPTS) $(CFLAGS_TFL) $(CFLAGS_BASIC)
+CFLAGS += $(CFLAGS_TFL) $(CFLAGS_BASIC)
 
 #-----------------
 # C++ Compiler
 #-----------------
 
-CPPFLAGS_OPTS = -fopenmp
 CPPFLAGS_TFL = -msse2 -fno-predictive-commoning
 CPPFLAGS_BASIC = $(DEFINES) $(INCLUDES)
 
-CPPFLAGS += $(CPPFLAGS_OPTS) $(CPPFLAGS_TFL) $(CPPFLAGS_BASIC)
+CPPFLAGS += $(CPPFLAGS_TFL) $(CPPFLAGS_BASIC)
 
 ###########################################################################
 ## INLINED COMMANDS
@@ -421,10 +419,6 @@ $(PRODUCT) : $(OBJS) $(PREBUILT_OBJS)
 
 %.o : $(START_DIR)/%.C
 	$(CPP) $(CPPFLAGS) -o "$@" "$<"
-
-
-genAnalysisLogic_data.o : $(START_DIR)/codegen/lib/genAnalysisLogic/genAnalysisLogic_data.c
-	$(CC) $(CFLAGS) -o "$@" "$<"
 
 
 rt_nonfinite.o : $(START_DIR)/codegen/lib/genAnalysisLogic/rt_nonfinite.c

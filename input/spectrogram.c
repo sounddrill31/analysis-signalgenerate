@@ -2,7 +2,7 @@
  * File: spectrogram.c
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 09-Sep-2026 14:22:23
+ * C/C++ source code generated on  : 09-Sep-2026 14:34:56
  */
 
 /* Include Files */
@@ -12,7 +12,6 @@
 #include "genAnalysisLogic_types.h"
 #include "pspectrogram.h"
 #include "rt_nonfinite.h"
-#include "omp.h"
 #include <emmintrin.h>
 
 /* Function Definitions */
@@ -1053,8 +1052,6 @@ void spectrogram(const emxArray_real_T *x, double varargin_4,
                                   0.08000867630758929,
                                   0.08000000000000002};
   __m128d r;
-  __m128d r1;
-  __m128d r2;
   emxArray_creal_T *b_y1;
   emxArray_real_T *c;
   double f[1024];
@@ -1062,8 +1059,6 @@ void spectrogram(const emxArray_real_T *x, double varargin_4,
   const double *x_data;
   double *c_data;
   int i;
-  int i1;
-  int i2;
   int iCol;
   int k;
   x_data = x->data;
@@ -1079,31 +1074,27 @@ void spectrogram(const emxArray_real_T *x, double varargin_4,
   i = varargout_1->size[0];
   varargout_1->size[0] = 946485;
   emxEnsureCapacity_creal_T(varargout_1, i);
-#pragma omp parallel for num_threads(omp_get_max_threads()) private(r, r2, i2, \
-                                                                        k)
-
   for (iCol = 0; iCol < 1845; iCol++) {
-    i2 = iCol << 9;
+    i = iCol << 9;
     for (k = 0; k <= 1022; k += 2) {
-      r2 = _mm_loadu_pd(&dv[k]);
-      r = _mm_loadu_pd(&x_data[k + i2]);
-      r = _mm_mul_pd(r2, r);
-      _mm_storeu_pd(&c_data[k + (iCol << 10)], r);
+      _mm_storeu_pd(
+          &c_data[k + (iCol << 10)],
+          _mm_mul_pd(_mm_loadu_pd(&dv[k]), _mm_loadu_pd(&x_data[k + i])));
     }
   }
   computeDFT(c, varargin_4, b_y1, f);
   emxFree_real_T(&c);
   formatSpectrogram(b_y1, varargin_4, varargout_1, varargout_2);
   emxFree_creal_T(&b_y1);
-  r1 = _mm_set1_pd(512.0);
-  for (i1 = 0; i1 <= 1842; i1 += 2) {
-    __m128d r3;
-    dv1[0] = i1;
-    dv1[1] = (double)i1 + 1.0;
-    r3 = _mm_loadu_pd(&dv1[0]);
-    _mm_storeu_pd(&varargout_3[i1],
-                  _mm_div_pd(_mm_add_pd(_mm_mul_pd(r1, r3), r1),
-                             _mm_set1_pd(varargin_4)));
+  r = _mm_set1_pd(512.0);
+  for (iCol = 0; iCol <= 1842; iCol += 2) {
+    __m128d r1;
+    dv1[0] = iCol;
+    dv1[1] = (double)iCol + 1.0;
+    r1 = _mm_loadu_pd(&dv1[0]);
+    _mm_storeu_pd(
+        &varargout_3[iCol],
+        _mm_div_pd(_mm_add_pd(_mm_mul_pd(r, r1), r), _mm_set1_pd(varargin_4)));
   }
   varargout_3[1844] = 944640.0 / varargin_4;
 }

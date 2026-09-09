@@ -22,7 +22,7 @@ echo "Compiling to WebAssembly using emcc..."
 emcc input/*.c wrapper.cpp \
     -msimd128 -msse2 \
     -s ALLOW_MEMORY_GROWTH=1 \
-    -s INITIAL_MEMORY=33554432 \
+    -s INITIAL_MEMORY=268435456 \
     --bind \
     -s MODULARIZE=1 \
     -s EXPORT_NAME="createWasmModule" \

@@ -2,20 +2,17 @@
  * File: genAnalysisLogic.c
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 09-Sep-2026 14:22:23
+ * C/C++ source code generated on  : 09-Sep-2026 14:34:56
  */
 
 /* Include Files */
 #include "genAnalysisLogic.h"
 #include "abs.h"
 #include "fft.h"
-#include "genAnalysisLogic_data.h"
 #include "genAnalysisLogic_emxutil.h"
-#include "genAnalysisLogic_initialize.h"
 #include "genAnalysisLogic_types.h"
 #include "rt_nonfinite.h"
 #include "spectrogram.h"
-#include "omp.h"
 #include <emmintrin.h>
 
 /* Function Definitions */
@@ -47,20 +44,13 @@ void genAnalysisLogic(const emxArray_real_T *x, double Fs, emxArray_real_T *t,
   emxArray_real_T *r2;
   creal_T *r6;
   double dv[2];
-  double ai;
-  double im;
-  double re;
   double *fftMagnitude_data;
   double *freq_data;
   double *r1;
   double *t_data;
   int i;
   int i1;
-  int i2;
   int *r5;
-  if (!isInitialized_genAnalysisLogic) {
-    genAnalysisLogic_initialize();
-  }
   emxInit_real_T(&r, 1);
   i = r->size[0];
   r->size[0] = 472587;
@@ -105,9 +95,10 @@ void genAnalysisLogic(const emxArray_real_T *x, double Fs, emxArray_real_T *t,
   /*  Single-sided magnitude spectrum */
   fft(x, r3);
   r6 = r3->data;
-#pragma omp parallel for num_threads(omp_get_max_threads()) private(im, ai, re)
-
   for (i1 = 0; i1 < 945176; i1++) {
+    double ai;
+    double im;
+    double re;
     t_data[i1] = (double)i1 / Fs;
     im = r6[i1].re;
     ai = r6[i1].im;
@@ -127,21 +118,21 @@ void genAnalysisLogic(const emxArray_real_T *x, double Fs, emxArray_real_T *t,
   b_abs(r3, r2);
   t_data = r2->data;
   emxFree_creal_T(&r3);
-  for (i2 = 0; i2 < 472589; i2++) {
-    fftMagnitude_data[i2] = t_data[i2];
+  for (i1 = 0; i1 < 472589; i1++) {
+    fftMagnitude_data[i1] = t_data[i1];
   }
   emxFree_real_T(&r2);
   /*  Double the magnitude except DC and Nyquist components */
   r7 = _mm_set1_pd(2.0);
-  for (i2 = 0; i2 <= 472580; i2 += 4) {
+  for (i1 = 0; i1 <= 472580; i1 += 4) {
     _mm_storeu_si128(
-        (__m128i *)&r5[i2],
-        _mm_add_epi32(_mm_set1_epi32(i2 + 2),
+        (__m128i *)&r5[i1],
+        _mm_add_epi32(_mm_set1_epi32(i1 + 2),
                       _mm_loadu_si128((const __m128i *)&offsets[0])));
-    _mm_storeu_pd(&r1[i2],
-                  _mm_mul_pd(r7, _mm_loadu_pd(&fftMagnitude_data[i2 + 1])));
-    _mm_storeu_pd(&r1[i2 + 2],
-                  _mm_mul_pd(r7, _mm_loadu_pd(&fftMagnitude_data[i2 + 3])));
+    _mm_storeu_pd(&r1[i1],
+                  _mm_mul_pd(r7, _mm_loadu_pd(&fftMagnitude_data[i1 + 1])));
+    _mm_storeu_pd(&r1[i1 + 2],
+                  _mm_mul_pd(r7, _mm_loadu_pd(&fftMagnitude_data[i1 + 3])));
   }
   r5[472584] = 472586;
   r1[472584] = 2.0 * fftMagnitude_data[472585];
@@ -149,17 +140,17 @@ void genAnalysisLogic(const emxArray_real_T *x, double Fs, emxArray_real_T *t,
   r1[472585] = 2.0 * fftMagnitude_data[472586];
   r5[472586] = 472588;
   r1[472586] = 2.0 * fftMagnitude_data[472587];
-  for (i2 = 0; i2 < 472587; i2++) {
-    fftMagnitude_data[r5[i2] - 1] = r1[i2];
+  for (i1 = 0; i1 < 472587; i1++) {
+    fftMagnitude_data[r5[i1] - 1] = r1[i1];
   }
   emxFree_real_T(&r);
   emxFree_int32_T(&r4);
   /*  Frequency axis */
-  for (i2 = 0; i2 <= 472586; i2 += 2) {
-    dv[0] = i2;
-    dv[1] = (double)i2 + 1.0;
+  for (i1 = 0; i1 <= 472586; i1 += 2) {
+    dv[0] = i1;
+    dv[1] = (double)i1 + 1.0;
     r7 = _mm_loadu_pd(&dv[0]);
-    _mm_storeu_pd(&freq_data[i2], _mm_div_pd(_mm_mul_pd(_mm_set1_pd(Fs), r7),
+    _mm_storeu_pd(&freq_data[i1], _mm_div_pd(_mm_mul_pd(_mm_set1_pd(Fs), r7),
                                              _mm_set1_pd(945176.0)));
   }
   freq_data[472588] = Fs * 472588.0 / 945176.0;

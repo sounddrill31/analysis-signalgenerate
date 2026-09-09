@@ -2,7 +2,7 @@
  * File: FFTImplementationCallback.c
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 09-Sep-2026 14:22:23
+ * C/C++ source code generated on  : 09-Sep-2026 14:34:56
  */
 
 /* Include Files */
@@ -10,7 +10,6 @@
 #include "genAnalysisLogic_emxutil.h"
 #include "genAnalysisLogic_types.h"
 #include "rt_nonfinite.h"
-#include "omp.h"
 #include <math.h>
 
 /* Function Declarations */
@@ -27,9 +26,6 @@ static void c_FFTImplementationCallback_r2b(const emxArray_creal_T *x,
                                             const emxArray_real_T *costab,
                                             const emxArray_real_T *sintab,
                                             emxArray_creal_T *y);
-
-static void d_FFTImplementationCallback_doH(const emxArray_real_T *x,
-                                            int xoffInit, creal_T y[1024]);
 
 static void d_FFTImplementationCallback_r2b(const emxArray_creal_T *x,
                                             const emxArray_real_T *costab,
@@ -81,22 +77,10 @@ static void c_FFTImplementationCallback_doH(
   const double *sintab_data;
   const double *sintabinv_data;
   const double *x_data;
+  double b_im;
+  double b_re;
   double b_re_tmp;
-  double b_ytmp_re_tmp;
-  double c_re_tmp;
-  double c_ytmp_re_tmp;
-  double d2;
-  double d3;
-  double d4;
-  double d5;
-  double d_re_tmp;
-  double d_ytmp_re_tmp;
-  double e_ytmp_re_tmp;
-  double f_ytmp_re_tmp;
   double re_tmp;
-  double ytmp_im;
-  double ytmp_re;
-  double ytmp_re_tmp;
   double *costable_data;
   double *hcostab_data;
   double *hcostabinv_data;
@@ -104,12 +88,7 @@ static void c_FFTImplementationCallback_doH(
   double *hsintabinv_data;
   double *sintable_data;
   int b_i;
-  int c_i;
-  int d_i;
   int i;
-  int i1;
-  int i2;
-  int k;
   int *wrapIndex_data;
   sintabinv_data = sintabinv->data;
   costabinv_data = costabinv->data;
@@ -182,38 +161,32 @@ static void c_FFTImplementationCallback_doH(
   sintable_data = sintable->data;
   costable_data = costable->data;
   emxFree_real_T(&a__1);
-#pragma omp parallel for num_threads(omp_get_max_threads()) private(i1)
-
   for (b_i = 0; b_i < 524288; b_i++) {
-    i1 = ((b_i + 1) << 1) - 2;
-    hcostab_data[b_i] = costab_data[i1];
-    hsintab_data[b_i] = sintab_data[i1];
-    hcostabinv_data[b_i] = costabinv_data[i1];
-    hsintabinv_data[b_i] = sintabinv_data[i1];
+    i = ((b_i + 1) << 1) - 2;
+    hcostab_data[b_i] = costab_data[i];
+    hsintab_data[b_i] = sintab_data[i];
+    hcostabinv_data[b_i] = costabinv_data[i];
+    hsintabinv_data[b_i] = sintabinv_data[i];
   }
-  for (c_i = 0; c_i < 472588; c_i++) {
-    double b_im;
-    double b_re;
-    double d;
-    double d1;
-    i = c_i << 1;
+  for (b_i = 0; b_i < 472588; b_i++) {
+    i = b_i << 1;
     b_re = sintable_data[i];
     b_im = costable_data[i];
-    reconVar1_data[c_i].re = b_re + 1.0;
-    reconVar1_data[c_i].im = -b_im;
-    reconVar2_data[c_i].re = 1.0 - b_re;
-    reconVar2_data[c_i].im = b_im;
-    if (c_i != 0) {
-      wrapIndex_data[c_i] = 472589 - c_i;
+    reconVar1_data[b_i].re = b_re + 1.0;
+    reconVar1_data[b_i].im = -b_im;
+    reconVar2_data[b_i].re = 1.0 - b_re;
+    reconVar2_data[b_i].im = b_im;
+    if (b_i != 0) {
+      wrapIndex_data[b_i] = 472589 - b_i;
     } else {
       wrapIndex_data[0] = 1;
     }
     b_re = x_data[i];
     b_im = x_data[i + 1];
-    d = wwc_data[c_i + 472587].re;
-    d1 = wwc_data[c_i + 472587].im;
-    ytmp_data[c_i].re = d * b_re + d1 * b_im;
-    ytmp_data[c_i].im = d * b_im - d1 * b_re;
+    re_tmp = wwc_data[b_i + 472587].re;
+    b_re_tmp = wwc_data[b_i + 472587].im;
+    ytmp_data[b_i].re = re_tmp * b_re + b_re_tmp * b_im;
+    ytmp_data[b_i].im = re_tmp * b_im - b_re_tmp * b_re;
   }
   emxFree_real_T(&sintable);
   emxFree_real_T(&costable);
@@ -223,59 +196,51 @@ static void c_FFTImplementationCallback_doH(
   b_fv_data = y->data;
   emxFree_real_T(&hsintab);
   emxFree_real_T(&hcostab);
-#pragma omp parallel for num_threads(omp_get_max_threads()) private(           \
-        re_tmp, b_re_tmp, c_re_tmp, d_re_tmp)
-
-  for (i2 = 0; i2 < 1048576; i2++) {
-    re_tmp = fv_data[i2].re;
-    b_re_tmp = b_fv_data[i2].im;
-    c_re_tmp = fv_data[i2].im;
-    d_re_tmp = b_fv_data[i2].re;
-    b_fv_data[i2].re = re_tmp * d_re_tmp - c_re_tmp * b_re_tmp;
-    b_fv_data[i2].im = re_tmp * b_re_tmp + c_re_tmp * d_re_tmp;
+  for (b_i = 0; b_i < 1048576; b_i++) {
+    b_re = fv_data[b_i].re;
+    b_im = b_fv_data[b_i].im;
+    re_tmp = fv_data[b_i].im;
+    b_re_tmp = b_fv_data[b_i].re;
+    b_fv_data[b_i].re = b_re * b_re_tmp - re_tmp * b_im;
+    b_fv_data[b_i].im = b_re * b_im + re_tmp * b_re_tmp;
   }
   e_FFTImplementationCallback_r2b(y, hcostabinv, hsintabinv, fv);
   fv_data = fv->data;
   emxFree_creal_T(&y);
   emxFree_real_T(&hsintabinv);
   emxFree_real_T(&hcostabinv);
-#pragma omp parallel for num_threads(omp_get_max_threads()) private(           \
-        d2, d3, d4, d5)
-
-  for (k = 0; k < 472588; k++) {
-    d2 = wwc_data[k + 472587].re;
-    d3 = fv_data[k + 472587].im;
-    d4 = wwc_data[k + 472587].im;
-    d5 = fv_data[k + 472587].re;
-    ytmp_data[k].re = d2 * d5 + d4 * d3;
-    ytmp_data[k].im = d2 * d3 - d4 * d5;
+  for (b_i = 0; b_i < 472588; b_i++) {
+    b_re = wwc_data[b_i + 472587].re;
+    b_im = fv_data[b_i + 472587].im;
+    re_tmp = wwc_data[b_i + 472587].im;
+    b_re_tmp = fv_data[b_i + 472587].re;
+    ytmp_data[b_i].re = b_re * b_re_tmp + re_tmp * b_im;
+    ytmp_data[b_i].im = b_re * b_im - re_tmp * b_re_tmp;
   }
   emxFree_creal_T(&fv);
-#pragma omp parallel for num_threads(omp_get_max_threads()) private(           \
-        ytmp_re_tmp, b_ytmp_re_tmp, c_ytmp_re_tmp, d_ytmp_re_tmp, ytmp_re,     \
-            ytmp_im, e_ytmp_re_tmp, f_ytmp_re_tmp)
-
-  for (d_i = 0; d_i < 472588; d_i++) {
-    ytmp_re_tmp = ytmp_data[d_i].re;
-    b_ytmp_re_tmp = reconVar1_data[d_i].im;
-    c_ytmp_re_tmp = ytmp_data[d_i].im;
-    d_ytmp_re_tmp = reconVar1_data[d_i].re;
-    ytmp_re = ytmp_data[wrapIndex_data[d_i] - 1].re;
-    ytmp_im = -ytmp_data[wrapIndex_data[d_i] - 1].im;
-    e_ytmp_re_tmp = reconVar2_data[d_i].im;
-    f_ytmp_re_tmp = reconVar2_data[d_i].re;
-    y_data[d_i].re =
-        0.5 * ((ytmp_re_tmp * d_ytmp_re_tmp - c_ytmp_re_tmp * b_ytmp_re_tmp) +
-               (ytmp_re * f_ytmp_re_tmp - ytmp_im * e_ytmp_re_tmp));
-    y_data[d_i].im =
-        0.5 * ((ytmp_re_tmp * b_ytmp_re_tmp + c_ytmp_re_tmp * d_ytmp_re_tmp) +
-               (ytmp_re * e_ytmp_re_tmp + ytmp_im * f_ytmp_re_tmp));
-    y_data[d_i + 472588].re =
-        0.5 * ((ytmp_re_tmp * f_ytmp_re_tmp - c_ytmp_re_tmp * e_ytmp_re_tmp) +
-               (ytmp_re * d_ytmp_re_tmp - ytmp_im * b_ytmp_re_tmp));
-    y_data[d_i + 472588].im =
-        0.5 * ((ytmp_re_tmp * e_ytmp_re_tmp + c_ytmp_re_tmp * f_ytmp_re_tmp) +
-               (ytmp_re * b_ytmp_re_tmp + ytmp_im * d_ytmp_re_tmp));
+  for (b_i = 0; b_i < 472588; b_i++) {
+    double b_ytmp_re_tmp;
+    double ytmp_im;
+    double ytmp_re;
+    double ytmp_re_tmp;
+    b_re = ytmp_data[b_i].re;
+    b_im = reconVar1_data[b_i].im;
+    re_tmp = ytmp_data[b_i].im;
+    b_re_tmp = reconVar1_data[b_i].re;
+    ytmp_re = ytmp_data[wrapIndex_data[b_i] - 1].re;
+    ytmp_im = -ytmp_data[wrapIndex_data[b_i] - 1].im;
+    ytmp_re_tmp = reconVar2_data[b_i].im;
+    b_ytmp_re_tmp = reconVar2_data[b_i].re;
+    y_data[b_i].re = 0.5 * ((b_re * b_re_tmp - re_tmp * b_im) +
+                            (ytmp_re * b_ytmp_re_tmp - ytmp_im * ytmp_re_tmp));
+    y_data[b_i].im = 0.5 * ((b_re * b_im + re_tmp * b_re_tmp) +
+                            (ytmp_re * ytmp_re_tmp + ytmp_im * b_ytmp_re_tmp));
+    y_data[b_i + 472588].re =
+        0.5 * ((b_re * b_ytmp_re_tmp - re_tmp * ytmp_re_tmp) +
+               (ytmp_re * b_re_tmp - ytmp_im * b_im));
+    y_data[b_i + 472588].im =
+        0.5 * ((b_re * ytmp_re_tmp + re_tmp * b_ytmp_re_tmp) +
+               (ytmp_re * b_im + ytmp_im * b_re_tmp));
   }
   emxFree_creal_T(&reconVar2);
   emxFree_creal_T(&reconVar1);
@@ -294,14 +259,10 @@ static void c_FFTImplementationCallback_gen(emxArray_real_T *costab,
                                             emxArray_real_T *sintabinv)
 {
   emxArray_real_T *costab1q;
-  double b_sintabinv_tmp;
-  double sintabinv_tmp;
   double *costab1q_data;
   double *costab_data;
   double *sintab_data;
   double *sintabinv_data;
-  int b_k;
-  int c_k;
   int i;
   int k;
   emxInit_real_T(&costab1q, 1);
@@ -322,32 +283,27 @@ static void c_FFTImplementationCallback_gen(emxArray_real_T *costab,
   emxEnsureCapacity_real_T(costab, i);
   costab_data = costab->data;
   costab1q_data[0] = 1.0;
-#pragma omp parallel for num_threads(omp_get_max_threads())
-
   for (k = 0; k < 236294; k++) {
     costab1q_data[k + 1] = cos(3.3238176314144595E-6 * ((double)k + 1.0));
   }
-#pragma omp parallel for num_threads(omp_get_max_threads())
-
-  for (b_k = 0; b_k < 236293; b_k++) {
-    costab1q_data[b_k + 236295] =
-        sin(3.3238176314144595E-6 * (472588.0 - ((double)b_k + 236295.0)));
+  for (k = 0; k < 236293; k++) {
+    costab1q_data[k + 236295] =
+        sin(3.3238176314144595E-6 * (472588.0 - ((double)k + 236295.0)));
   }
   costab1q_data[472588] = 0.0;
   costab_data[0] = 1.0;
   sintab_data[0] = 0.0;
-#pragma omp parallel for num_threads(omp_get_max_threads()) private(           \
-        sintabinv_tmp, b_sintabinv_tmp)
-
-  for (c_k = 0; c_k < 472588; c_k++) {
-    sintabinv_tmp = costab1q_data[472587 - c_k];
-    sintabinv_data[c_k + 1] = sintabinv_tmp;
-    b_sintabinv_tmp = costab1q_data[c_k + 1];
-    sintabinv_data[c_k + 472589] = b_sintabinv_tmp;
-    costab_data[c_k + 1] = b_sintabinv_tmp;
-    sintab_data[c_k + 1] = -sintabinv_tmp;
-    costab_data[c_k + 472589] = -sintabinv_tmp;
-    sintab_data[c_k + 472589] = -b_sintabinv_tmp;
+  for (k = 0; k < 472588; k++) {
+    double b_sintabinv_tmp;
+    double sintabinv_tmp;
+    sintabinv_tmp = costab1q_data[472587 - k];
+    sintabinv_data[k + 1] = sintabinv_tmp;
+    b_sintabinv_tmp = costab1q_data[k + 1];
+    sintabinv_data[k + 472589] = b_sintabinv_tmp;
+    costab_data[k + 1] = b_sintabinv_tmp;
+    sintab_data[k + 1] = -sintabinv_tmp;
+    costab_data[k + 472589] = -sintabinv_tmp;
+    sintab_data[k + 472589] = -b_sintabinv_tmp;
   }
   emxFree_real_T(&costab1q);
 }
@@ -464,13 +420,286 @@ static void c_FFTImplementationCallback_r2b(const emxArray_creal_T *x,
 }
 
 /*
- * Arguments    : const emxArray_real_T *x
- *                int xoffInit
- *                creal_T y[1024]
+ * Arguments    : const emxArray_creal_T *x
+ *                const emxArray_real_T *costab
+ *                const emxArray_real_T *sintab
+ *                emxArray_creal_T *y
  * Return Type  : void
  */
-static void d_FFTImplementationCallback_doH(const emxArray_real_T *x,
-                                            int xoffInit, creal_T y[1024])
+static void d_FFTImplementationCallback_r2b(const emxArray_creal_T *x,
+                                            const emxArray_real_T *costab,
+                                            const emxArray_real_T *sintab,
+                                            emxArray_creal_T *y)
+{
+  const creal_T *x_data;
+  creal_T *y_data;
+  const double *costab_data;
+  const double *sintab_data;
+  double im;
+  double re;
+  double temp_im;
+  double temp_re;
+  int b_i;
+  int i;
+  int iDelta;
+  int iDelta2;
+  int iheight;
+  int iy;
+  int ju;
+  int k;
+  sintab_data = sintab->data;
+  costab_data = costab->data;
+  x_data = x->data;
+  iy = y->size[0];
+  y->size[0] = 1048576;
+  emxEnsureCapacity_creal_T(y, iy);
+  y_data = y->data;
+  for (i = 0; i < 1048576; i++) {
+    y_data[i].re = 0.0;
+    y_data[i].im = 0.0;
+  }
+  iy = 0;
+  ju = 0;
+  for (i = 0; i < 945174; i++) {
+    boolean_T tst;
+    y_data[iy] = x_data[i];
+    iy = 1048576;
+    tst = true;
+    while (tst) {
+      iy >>= 1;
+      ju ^= iy;
+      tst = ((ju & iy) == 0);
+    }
+    iy = ju;
+  }
+  y_data[iy] = x_data[945174];
+  for (i = 0; i <= 1048574; i += 2) {
+    temp_re = y_data[i + 1].re;
+    temp_im = y_data[i + 1].im;
+    re = y_data[i].re;
+    im = y_data[i].im;
+    y_data[i + 1].re = re - temp_re;
+    y_data[i + 1].im = y_data[i].im - y_data[i + 1].im;
+    re += temp_re;
+    im += temp_im;
+    y_data[i].re = re;
+    y_data[i].im = im;
+  }
+  iDelta = 2;
+  iDelta2 = 4;
+  k = 262144;
+  iheight = 1048573;
+  while (k > 0) {
+    for (b_i = 0; b_i < iheight; b_i += iDelta2) {
+      iy = b_i + iDelta;
+      temp_re = y_data[iy].re;
+      temp_im = y_data[iy].im;
+      y_data[iy].re = y_data[b_i].re - temp_re;
+      y_data[iy].im = y_data[b_i].im - temp_im;
+      y_data[b_i].re += temp_re;
+      y_data[b_i].im += temp_im;
+    }
+    iy = 1;
+    for (ju = k; ju < 524288; ju += k) {
+      double twid_im;
+      double twid_re;
+      int ihi;
+      twid_re = costab_data[ju];
+      twid_im = sintab_data[ju];
+      b_i = iy;
+      ihi = iy + iheight;
+      while (b_i < ihi) {
+        int temp_re_tmp;
+        temp_re_tmp = b_i + iDelta;
+        re = y_data[temp_re_tmp].im;
+        im = y_data[temp_re_tmp].re;
+        temp_re = twid_re * im - twid_im * re;
+        temp_im = twid_re * re + twid_im * im;
+        y_data[temp_re_tmp].re = y_data[b_i].re - temp_re;
+        y_data[temp_re_tmp].im = y_data[b_i].im - temp_im;
+        y_data[b_i].re += temp_re;
+        y_data[b_i].im += temp_im;
+        b_i += iDelta2;
+      }
+      iy++;
+    }
+    k = (int)((unsigned int)k >> 1);
+    iDelta = iDelta2;
+    iDelta2 += iDelta2;
+    iheight -= iDelta;
+  }
+}
+
+/*
+ * Arguments    : const emxArray_creal_T *x
+ *                const emxArray_real_T *costab
+ *                const emxArray_real_T *sintab
+ *                emxArray_creal_T *y
+ * Return Type  : void
+ */
+static void e_FFTImplementationCallback_r2b(const emxArray_creal_T *x,
+                                            const emxArray_real_T *costab,
+                                            const emxArray_real_T *sintab,
+                                            emxArray_creal_T *y)
+{
+  const creal_T *x_data;
+  creal_T *y_data;
+  const double *costab_data;
+  const double *sintab_data;
+  double im;
+  double re;
+  double temp_im;
+  double temp_re;
+  int b_i;
+  int i;
+  int iDelta;
+  int iDelta2;
+  int iheight;
+  int iy;
+  int ju;
+  int k;
+  sintab_data = sintab->data;
+  costab_data = costab->data;
+  x_data = x->data;
+  iy = y->size[0];
+  y->size[0] = 1048576;
+  emxEnsureCapacity_creal_T(y, iy);
+  y_data = y->data;
+  iy = 0;
+  ju = 0;
+  for (i = 0; i < 1048575; i++) {
+    boolean_T tst;
+    y_data[iy] = x_data[i];
+    iy = 1048576;
+    tst = true;
+    while (tst) {
+      iy >>= 1;
+      ju ^= iy;
+      tst = ((ju & iy) == 0);
+    }
+    iy = ju;
+  }
+  y_data[iy] = x_data[1048575];
+  for (i = 0; i <= 1048574; i += 2) {
+    temp_re = y_data[i + 1].re;
+    temp_im = y_data[i + 1].im;
+    re = y_data[i].re;
+    im = y_data[i].im;
+    y_data[i + 1].re = re - temp_re;
+    y_data[i + 1].im = y_data[i].im - y_data[i + 1].im;
+    re += temp_re;
+    im += temp_im;
+    y_data[i].re = re;
+    y_data[i].im = im;
+  }
+  iDelta = 2;
+  iDelta2 = 4;
+  k = 262144;
+  iheight = 1048573;
+  while (k > 0) {
+    for (b_i = 0; b_i < iheight; b_i += iDelta2) {
+      iy = b_i + iDelta;
+      temp_re = y_data[iy].re;
+      temp_im = y_data[iy].im;
+      y_data[iy].re = y_data[b_i].re - temp_re;
+      y_data[iy].im = y_data[b_i].im - temp_im;
+      y_data[b_i].re += temp_re;
+      y_data[b_i].im += temp_im;
+    }
+    iy = 1;
+    for (ju = k; ju < 524288; ju += k) {
+      double twid_im;
+      double twid_re;
+      int ihi;
+      twid_re = costab_data[ju];
+      twid_im = sintab_data[ju];
+      b_i = iy;
+      ihi = iy + iheight;
+      while (b_i < ihi) {
+        int temp_re_tmp;
+        temp_re_tmp = b_i + iDelta;
+        re = y_data[temp_re_tmp].im;
+        im = y_data[temp_re_tmp].re;
+        temp_re = twid_re * im - twid_im * re;
+        temp_im = twid_re * re + twid_im * im;
+        y_data[temp_re_tmp].re = y_data[b_i].re - temp_re;
+        y_data[temp_re_tmp].im = y_data[b_i].im - temp_im;
+        y_data[b_i].re += temp_re;
+        y_data[b_i].im += temp_im;
+        b_i += iDelta2;
+      }
+      iy++;
+    }
+    k = (int)((unsigned int)k >> 1);
+    iDelta = iDelta2;
+    iDelta2 += iDelta2;
+    iheight -= iDelta;
+  }
+  for (i = 0; i < 1048576; i++) {
+    y_data[i].re *= 9.5367431640625E-7;
+    y_data[i].im *= 9.5367431640625E-7;
+  }
+}
+
+/*
+ * Arguments    : const emxArray_real_T *x
+ *                const emxArray_real_T *costab
+ *                const emxArray_real_T *sintab
+ *                const emxArray_real_T *sintabinv
+ *                emxArray_creal_T *y
+ * Return Type  : void
+ */
+void c_FFTImplementationCallback_dob(const emxArray_real_T *x,
+                                     const emxArray_real_T *costab,
+                                     const emxArray_real_T *sintab,
+                                     const emxArray_real_T *sintabinv,
+                                     emxArray_creal_T *y)
+{
+  emxArray_creal_T *wwc;
+  creal_T *wwc_data;
+  int k;
+  int rt;
+  emxInit_creal_T(&wwc);
+  rt = wwc->size[0];
+  wwc->size[0] = 945175;
+  emxEnsureCapacity_creal_T(wwc, rt);
+  wwc_data = wwc->data;
+  rt = y->size[0];
+  y->size[0] = 945176;
+  emxEnsureCapacity_creal_T(y, rt);
+  rt = 0;
+  wwc_data[472587].re = 1.0;
+  wwc_data[472587].im = 0.0;
+  for (k = 0; k < 472587; k++) {
+    double nt_im;
+    double nt_re;
+    int b_y;
+    b_y = ((k + 1) << 1) - 1;
+    if (945176 - rt <= b_y) {
+      rt = (b_y + rt) - 945176;
+    } else {
+      rt += b_y;
+    }
+    nt_im = -3.141592653589793 * (double)rt / 472588.0;
+    nt_re = cos(nt_im);
+    nt_im = sin(nt_im);
+    wwc_data[472586 - k].re = nt_re;
+    wwc_data[472586 - k].im = -nt_im;
+  }
+  for (k = 472586; k >= 0; k--) {
+    wwc_data[k + 472588] = wwc_data[472586 - k];
+  }
+  c_FFTImplementationCallback_doH(x, y, wwc, costab, sintab, costab, sintabinv);
+  emxFree_creal_T(&wwc);
+}
+
+/*
+ * Arguments    : const emxArray_real_T *x
+ *                emxArray_creal_T *y
+ * Return Type  : void
+ */
+void d_FFTImplementationCallback_doH(const emxArray_real_T *x,
+                                     emxArray_creal_T *y)
 {
   static const creal_T reconVar1[512] = {{
                                              1.0, /* re */
@@ -5080,42 +5309,6 @@ static void d_FFTImplementationCallback_doH(const emxArray_real_T *x,
                                   -0.03680722294135883,
                                   -0.024541228522912288,
                                   -0.012271538285719925};
-  static const short bitrevIndex[512] = {
-      1,   257, 129, 385, 65,  321, 193, 449, 33,  289, 161, 417, 97,  353, 225,
-      481, 17,  273, 145, 401, 81,  337, 209, 465, 49,  305, 177, 433, 113, 369,
-      241, 497, 9,   265, 137, 393, 73,  329, 201, 457, 41,  297, 169, 425, 105,
-      361, 233, 489, 25,  281, 153, 409, 89,  345, 217, 473, 57,  313, 185, 441,
-      121, 377, 249, 505, 5,   261, 133, 389, 69,  325, 197, 453, 37,  293, 165,
-      421, 101, 357, 229, 485, 21,  277, 149, 405, 85,  341, 213, 469, 53,  309,
-      181, 437, 117, 373, 245, 501, 13,  269, 141, 397, 77,  333, 205, 461, 45,
-      301, 173, 429, 109, 365, 237, 493, 29,  285, 157, 413, 93,  349, 221, 477,
-      61,  317, 189, 445, 125, 381, 253, 509, 3,   259, 131, 387, 67,  323, 195,
-      451, 35,  291, 163, 419, 99,  355, 227, 483, 19,  275, 147, 403, 83,  339,
-      211, 467, 51,  307, 179, 435, 115, 371, 243, 499, 11,  267, 139, 395, 75,
-      331, 203, 459, 43,  299, 171, 427, 107, 363, 235, 491, 27,  283, 155, 411,
-      91,  347, 219, 475, 59,  315, 187, 443, 123, 379, 251, 507, 7,   263, 135,
-      391, 71,  327, 199, 455, 39,  295, 167, 423, 103, 359, 231, 487, 23,  279,
-      151, 407, 87,  343, 215, 471, 55,  311, 183, 439, 119, 375, 247, 503, 15,
-      271, 143, 399, 79,  335, 207, 463, 47,  303, 175, 431, 111, 367, 239, 495,
-      31,  287, 159, 415, 95,  351, 223, 479, 63,  319, 191, 447, 127, 383, 255,
-      511, 2,   258, 130, 386, 66,  322, 194, 450, 34,  290, 162, 418, 98,  354,
-      226, 482, 18,  274, 146, 402, 82,  338, 210, 466, 50,  306, 178, 434, 114,
-      370, 242, 498, 10,  266, 138, 394, 74,  330, 202, 458, 42,  298, 170, 426,
-      106, 362, 234, 490, 26,  282, 154, 410, 90,  346, 218, 474, 58,  314, 186,
-      442, 122, 378, 250, 506, 6,   262, 134, 390, 70,  326, 198, 454, 38,  294,
-      166, 422, 102, 358, 230, 486, 22,  278, 150, 406, 86,  342, 214, 470, 54,
-      310, 182, 438, 118, 374, 246, 502, 14,  270, 142, 398, 78,  334, 206, 462,
-      46,  302, 174, 430, 110, 366, 238, 494, 30,  286, 158, 414, 94,  350, 222,
-      478, 62,  318, 190, 446, 126, 382, 254, 510, 4,   260, 132, 388, 68,  324,
-      196, 452, 36,  292, 164, 420, 100, 356, 228, 484, 20,  276, 148, 404, 84,
-      340, 212, 468, 52,  308, 180, 436, 116, 372, 244, 500, 12,  268, 140, 396,
-      76,  332, 204, 460, 44,  300, 172, 428, 108, 364, 236, 492, 28,  284, 156,
-      412, 92,  348, 220, 476, 60,  316, 188, 444, 124, 380, 252, 508, 8,   264,
-      136, 392, 72,  328, 200, 456, 40,  296, 168, 424, 104, 360, 232, 488, 24,
-      280, 152, 408, 88,  344, 216, 472, 56,  312, 184, 440, 120, 376, 248, 504,
-      16,  272, 144, 400, 80,  336, 208, 464, 48,  304, 176, 432, 112, 368, 240,
-      496, 32,  288, 160, 416, 96,  352, 224, 480, 64,  320, 192, 448, 128, 384,
-      256, 512};
   static const short iv[512] = {
       1,   512, 511, 510, 509, 508, 507, 506, 505, 504, 503, 502, 501, 500, 499,
       498, 497, 496, 495, 494, 493, 492, 491, 490, 489, 488, 487, 486, 485, 484,
@@ -5152,437 +5345,167 @@ static void d_FFTImplementationCallback_doH(const emxArray_real_T *x,
       33,  32,  31,  30,  29,  28,  27,  26,  25,  24,  23,  22,  21,  20,  19,
       18,  17,  16,  15,  14,  13,  12,  11,  10,  9,   8,   7,   6,   5,   4,
       3,   2};
+  creal_T *y_data;
   const double *x_data;
-  double b_im;
-  double b_re;
-  double im;
-  double re;
-  double temp2_im;
-  double temp2_re;
-  double temp_im;
-  double temp_re;
-  int b_i;
-  int i;
-  int iDelta;
-  int iDelta2;
-  int iheight;
-  int istart;
-  int j;
-  int k;
-  x_data = x->data;
-  for (i = 0; i < 512; i++) {
-    j = xoffInit + (i << 1);
-    istart = bitrevIndex[i] - 1;
-    y[istart].re = x_data[j];
-    y[istart].im = x_data[j + 1];
-  }
-  for (i = 0; i <= 510; i += 2) {
-    re = y[i + 1].re;
-    im = y[i + 1].im;
-    temp_re = re;
-    temp_im = im;
-    b_re = y[i].re;
-    b_im = y[i].im;
-    re = b_re - re;
-    im = b_im - im;
-    y[i + 1].re = re;
-    y[i + 1].im = im;
-    b_re += temp_re;
-    b_im += temp_im;
-    y[i].re = b_re;
-    y[i].im = b_im;
-  }
-  iDelta = 2;
-  iDelta2 = 4;
-  k = 128;
-  iheight = 509;
-  while (k > 0) {
-    for (b_i = 0; b_i < iheight; b_i += iDelta2) {
-      j = b_i + iDelta;
-      temp_re = y[j].re;
-      temp_im = y[j].im;
-      y[j].re = y[b_i].re - temp_re;
-      y[j].im = y[b_i].im - temp_im;
-      y[b_i].re += temp_re;
-      y[b_i].im += temp_im;
-    }
-    istart = 1;
-    for (j = k; j < 256; j += k) {
-      int ihi;
-      temp2_re = dv[j];
-      temp2_im = dv1[j];
-      b_i = istart;
-      ihi = istart + iheight;
-      while (b_i < ihi) {
-        int temp_re_tmp;
-        temp_re_tmp = b_i + iDelta;
-        re = y[temp_re_tmp].im;
-        im = y[temp_re_tmp].re;
-        temp_re = temp2_re * im - temp2_im * re;
-        temp_im = temp2_re * re + temp2_im * im;
-        y[temp_re_tmp].re = y[b_i].re - temp_re;
-        y[temp_re_tmp].im = y[b_i].im - temp_im;
-        y[b_i].re += temp_re;
-        y[b_i].im += temp_im;
-        b_i += iDelta2;
-      }
-      istart++;
-    }
-    k >>= 1;
-    iDelta = iDelta2;
-    iDelta2 += iDelta2;
-    iheight -= iDelta;
-  }
-  temp_re = y[0].re;
-  temp_im = y[0].im;
-  re = y[0].re - (-y[0].im);
-  im = -y[0].re + y[0].im;
-  y[0].re = 0.5 * (re + re);
-  re = temp_re - y[0].im;
-  y[0].im = 0.5 * (im + re);
-  y[512].re = 0.5 * (re + re);
-  y[512].im = 0.5 * ((temp_re + temp_im) + (-temp_re - temp_im));
-  for (i = 0; i < 255; i++) {
-    temp_re = y[i + 1].re;
-    temp_im = y[i + 1].im;
-    j = iv[i + 1];
-    temp2_re = y[j - 1].re;
-    temp2_im = y[j - 1].im;
-    re = reconVar1[i + 1].im;
-    im = reconVar1[i + 1].re;
-    b_re = reconVar2[i + 1].im;
-    b_im = reconVar2[i + 1].re;
-    y[i + 1].re = 0.5 * ((temp_re * im - temp_im * re) +
-                         (temp2_re * b_im - -temp2_im * b_re));
-    y[i + 1].im = 0.5 * ((temp_re * re + temp_im * im) +
-                         (temp2_re * b_re + -temp2_im * b_im));
-    y[i + 513].re = 0.5 * ((temp_re * b_im - temp_im * b_re) +
-                           (temp2_re * im - -temp2_im * re));
-    y[i + 513].im = 0.5 * ((temp_re * b_re + temp_im * b_im) +
-                           (temp2_re * re + -temp2_im * im));
-    re = reconVar1[j - 1].im;
-    im = reconVar1[j - 1].re;
-    b_re = reconVar2[j - 1].im;
-    b_im = reconVar2[j - 1].re;
-    y[j - 1].re = 0.5 * ((temp2_re * im - temp2_im * re) +
-                         (temp_re * b_im - -temp_im * b_re));
-    y[j - 1].im = 0.5 * ((temp2_re * re + temp2_im * im) +
-                         (temp_re * b_re + -temp_im * b_im));
-    y[j + 511].re = 0.5 * ((temp2_re * b_im - temp2_im * b_re) +
-                           (temp_re * im - -temp_im * re));
-    y[j + 511].im = 0.5 * ((temp2_re * b_re + temp2_im * b_im) +
-                           (temp_re * re + -temp_im * im));
-  }
-  temp_im = y[256].im;
-  re = y[256].re * 0.0;
-  im = y[256].im * 0.0;
-  b_re = -y[256].im;
-  b_im = y[256].re * 2.0;
-  temp2_re = b_re * 0.0;
-  y[256].re = 0.5 * ((re - im) + (b_im - temp2_re));
-  y[256].im = 0.5 * ((re + im) + (re + b_re * 2.0));
-  y[768].re = 0.5 * ((b_im - im) + (re - temp2_re));
-  y[768].im = 0.5 * ((re + temp_im * 2.0) + (re + temp2_re));
-}
-
-/*
- * Arguments    : const emxArray_creal_T *x
- *                const emxArray_real_T *costab
- *                const emxArray_real_T *sintab
- *                emxArray_creal_T *y
- * Return Type  : void
- */
-static void d_FFTImplementationCallback_r2b(const emxArray_creal_T *x,
-                                            const emxArray_real_T *costab,
-                                            const emxArray_real_T *sintab,
-                                            emxArray_creal_T *y)
-{
-  const creal_T *x_data;
-  creal_T *y_data;
-  const double *costab_data;
-  const double *sintab_data;
-  double im;
-  double re;
-  double temp_im;
-  double temp_re;
-  int b_i;
-  int i;
-  int iDelta;
-  int iDelta2;
-  int iheight;
-  int iy;
-  int ju;
-  int k;
-  sintab_data = sintab->data;
-  costab_data = costab->data;
-  x_data = x->data;
-  iy = y->size[0];
-  y->size[0] = 1048576;
-  emxEnsureCapacity_creal_T(y, iy);
-  y_data = y->data;
-  for (i = 0; i < 1048576; i++) {
-    y_data[i].re = 0.0;
-    y_data[i].im = 0.0;
-  }
-  iy = 0;
-  ju = 0;
-  for (i = 0; i < 945174; i++) {
-    boolean_T tst;
-    y_data[iy] = x_data[i];
-    iy = 1048576;
-    tst = true;
-    while (tst) {
-      iy >>= 1;
-      ju ^= iy;
-      tst = ((ju & iy) == 0);
-    }
-    iy = ju;
-  }
-  y_data[iy] = x_data[945174];
-  for (i = 0; i <= 1048574; i += 2) {
-    temp_re = y_data[i + 1].re;
-    temp_im = y_data[i + 1].im;
-    re = y_data[i].re;
-    im = y_data[i].im;
-    y_data[i + 1].re = re - temp_re;
-    y_data[i + 1].im = y_data[i].im - y_data[i + 1].im;
-    re += temp_re;
-    im += temp_im;
-    y_data[i].re = re;
-    y_data[i].im = im;
-  }
-  iDelta = 2;
-  iDelta2 = 4;
-  k = 262144;
-  iheight = 1048573;
-  while (k > 0) {
-    for (b_i = 0; b_i < iheight; b_i += iDelta2) {
-      iy = b_i + iDelta;
-      temp_re = y_data[iy].re;
-      temp_im = y_data[iy].im;
-      y_data[iy].re = y_data[b_i].re - temp_re;
-      y_data[iy].im = y_data[b_i].im - temp_im;
-      y_data[b_i].re += temp_re;
-      y_data[b_i].im += temp_im;
-    }
-    iy = 1;
-    for (ju = k; ju < 524288; ju += k) {
-      double twid_im;
-      double twid_re;
-      int ihi;
-      twid_re = costab_data[ju];
-      twid_im = sintab_data[ju];
-      b_i = iy;
-      ihi = iy + iheight;
-      while (b_i < ihi) {
-        int temp_re_tmp;
-        temp_re_tmp = b_i + iDelta;
-        re = y_data[temp_re_tmp].im;
-        im = y_data[temp_re_tmp].re;
-        temp_re = twid_re * im - twid_im * re;
-        temp_im = twid_re * re + twid_im * im;
-        y_data[temp_re_tmp].re = y_data[b_i].re - temp_re;
-        y_data[temp_re_tmp].im = y_data[b_i].im - temp_im;
-        y_data[b_i].re += temp_re;
-        y_data[b_i].im += temp_im;
-        b_i += iDelta2;
-      }
-      iy++;
-    }
-    k = (int)((unsigned int)k >> 1);
-    iDelta = iDelta2;
-    iDelta2 += iDelta2;
-    iheight -= iDelta;
-  }
-}
-
-/*
- * Arguments    : const emxArray_creal_T *x
- *                const emxArray_real_T *costab
- *                const emxArray_real_T *sintab
- *                emxArray_creal_T *y
- * Return Type  : void
- */
-static void e_FFTImplementationCallback_r2b(const emxArray_creal_T *x,
-                                            const emxArray_real_T *costab,
-                                            const emxArray_real_T *sintab,
-                                            emxArray_creal_T *y)
-{
-  const creal_T *x_data;
-  creal_T *y_data;
-  const double *costab_data;
-  const double *sintab_data;
-  double im;
-  double re;
-  double temp_im;
-  double temp_re;
-  int b_i;
-  int c_i;
-  int i;
-  int iDelta;
-  int iDelta2;
-  int iheight;
-  int iy;
-  int ju;
-  int k;
-  sintab_data = sintab->data;
-  costab_data = costab->data;
-  x_data = x->data;
-  iy = y->size[0];
-  y->size[0] = 1048576;
-  emxEnsureCapacity_creal_T(y, iy);
-  y_data = y->data;
-  iy = 0;
-  ju = 0;
-  for (i = 0; i < 1048575; i++) {
-    boolean_T tst;
-    y_data[iy] = x_data[i];
-    iy = 1048576;
-    tst = true;
-    while (tst) {
-      iy >>= 1;
-      ju ^= iy;
-      tst = ((ju & iy) == 0);
-    }
-    iy = ju;
-  }
-  y_data[iy] = x_data[1048575];
-  for (i = 0; i <= 1048574; i += 2) {
-    temp_re = y_data[i + 1].re;
-    temp_im = y_data[i + 1].im;
-    re = y_data[i].re;
-    im = y_data[i].im;
-    y_data[i + 1].re = re - temp_re;
-    y_data[i + 1].im = y_data[i].im - y_data[i + 1].im;
-    re += temp_re;
-    im += temp_im;
-    y_data[i].re = re;
-    y_data[i].im = im;
-  }
-  iDelta = 2;
-  iDelta2 = 4;
-  k = 262144;
-  iheight = 1048573;
-  while (k > 0) {
-    for (c_i = 0; c_i < iheight; c_i += iDelta2) {
-      iy = c_i + iDelta;
-      temp_re = y_data[iy].re;
-      temp_im = y_data[iy].im;
-      y_data[iy].re = y_data[c_i].re - temp_re;
-      y_data[iy].im = y_data[c_i].im - temp_im;
-      y_data[c_i].re += temp_re;
-      y_data[c_i].im += temp_im;
-    }
-    iy = 1;
-    for (ju = k; ju < 524288; ju += k) {
-      double twid_im;
-      double twid_re;
-      int ihi;
-      twid_re = costab_data[ju];
-      twid_im = sintab_data[ju];
-      c_i = iy;
-      ihi = iy + iheight;
-      while (c_i < ihi) {
-        int temp_re_tmp;
-        temp_re_tmp = c_i + iDelta;
-        re = y_data[temp_re_tmp].im;
-        im = y_data[temp_re_tmp].re;
-        temp_re = twid_re * im - twid_im * re;
-        temp_im = twid_re * re + twid_im * im;
-        y_data[temp_re_tmp].re = y_data[c_i].re - temp_re;
-        y_data[temp_re_tmp].im = y_data[c_i].im - temp_im;
-        y_data[c_i].re += temp_re;
-        y_data[c_i].im += temp_im;
-        c_i += iDelta2;
-      }
-      iy++;
-    }
-    k = (int)((unsigned int)k >> 1);
-    iDelta = iDelta2;
-    iDelta2 += iDelta2;
-    iheight -= iDelta;
-  }
-#pragma omp parallel for num_threads(omp_get_max_threads())
-
-  for (b_i = 0; b_i < 1048576; b_i++) {
-    y_data[b_i].re *= 9.5367431640625E-7;
-    y_data[b_i].im *= 9.5367431640625E-7;
-  }
-}
-
-/*
- * Arguments    : const emxArray_real_T *x
- *                const emxArray_real_T *costab
- *                const emxArray_real_T *sintab
- *                const emxArray_real_T *sintabinv
- *                emxArray_creal_T *y
- * Return Type  : void
- */
-void c_FFTImplementationCallback_dob(const emxArray_real_T *x,
-                                     const emxArray_real_T *costab,
-                                     const emxArray_real_T *sintab,
-                                     const emxArray_real_T *sintabinv,
-                                     emxArray_creal_T *y)
-{
-  emxArray_creal_T *wwc;
-  creal_T *wwc_data;
-  int k;
-  int rt;
-  emxInit_creal_T(&wwc);
-  rt = wwc->size[0];
-  wwc->size[0] = 945175;
-  emxEnsureCapacity_creal_T(wwc, rt);
-  wwc_data = wwc->data;
-  rt = y->size[0];
-  y->size[0] = 945176;
-  emxEnsureCapacity_creal_T(y, rt);
-  rt = 0;
-  wwc_data[472587].re = 1.0;
-  wwc_data[472587].im = 0.0;
-  for (k = 0; k < 472587; k++) {
-    double nt_im;
-    double nt_re;
-    int b_y;
-    b_y = ((k + 1) << 1) - 1;
-    if (945176 - rt <= b_y) {
-      rt = (b_y + rt) - 945176;
-    } else {
-      rt += b_y;
-    }
-    nt_im = -3.141592653589793 * (double)rt / 472588.0;
-    nt_re = cos(nt_im);
-    nt_im = sin(nt_im);
-    wwc_data[472586 - k].re = nt_re;
-    wwc_data[472586 - k].im = -nt_im;
-  }
-  for (k = 472586; k >= 0; k--) {
-    wwc_data[k + 472588] = wwc_data[472586 - k];
-  }
-  c_FFTImplementationCallback_doH(x, y, wwc, costab, sintab, costab, sintabinv);
-  emxFree_creal_T(&wwc);
-}
-
-/*
- * Arguments    : const emxArray_real_T *x
- *                emxArray_creal_T *y
- * Return Type  : void
- */
-void f_FFTImplementationCallback_r2b(const emxArray_real_T *x,
-                                     emxArray_creal_T *y)
-{
-  creal_T *y_data;
+  int bitrevIndex[512];
+  int b_j1;
   int chan;
-  int i;
-  int xoff;
-  i = y->size[0];
-  y->size[0] = 1889280;
-  emxEnsureCapacity_creal_T(y, i);
+  int iy;
+  int ju;
   y_data = y->data;
-#pragma omp parallel for num_threads(omp_get_max_threads()) private(xoff)
-
+  x_data = x->data;
+  ju = 0;
+  iy = 1;
+  for (b_j1 = 0; b_j1 < 511; b_j1++) {
+    boolean_T tst;
+    bitrevIndex[b_j1] = iy;
+    iy = 512;
+    tst = true;
+    while (tst) {
+      iy >>= 1;
+      ju ^= iy;
+      tst = ((ju & iy) == 0);
+    }
+    iy = ju + 1;
+  }
+  bitrevIndex[511] = iy;
   for (chan = 0; chan < 1845; chan++) {
-    xoff = chan << 10;
-    d_FFTImplementationCallback_doH(x, xoff, &y_data[xoff]);
+    double b_temp2_re_tmp;
+    double c_temp_re_tmp;
+    double temp2_im;
+    double temp2_re;
+    double temp2_re_tmp;
+    double temp_im;
+    double temp_re;
+    double temp_re_tmp;
+    int b_temp_re_tmp;
+    int iDelta;
+    int iDelta2;
+    int iheight;
+    int ix;
+    int k;
+    ix = chan << 10;
+    for (b_j1 = 0; b_j1 < 512; b_j1++) {
+      iy = ix + (b_j1 << 1);
+      ju = (ix + bitrevIndex[b_j1]) - 1;
+      y_data[ju].re = x_data[iy];
+      y_data[ju].im = x_data[iy + 1];
+    }
+    for (b_j1 = ix; b_j1 <= ix + 510; b_j1 += 2) {
+      temp_re = y_data[b_j1 + 1].re;
+      temp_im = y_data[b_j1 + 1].im;
+      y_data[b_j1 + 1].re = y_data[b_j1].re - temp_re;
+      y_data[b_j1 + 1].im = y_data[b_j1].im - y_data[b_j1 + 1].im;
+      y_data[b_j1].re += temp_re;
+      y_data[b_j1].im += temp_im;
+    }
+    iDelta = 2;
+    iDelta2 = 4;
+    k = 128;
+    iheight = 509;
+    while (k > 0) {
+      int i;
+      int ihi;
+      i = ix;
+      ihi = ix + iheight;
+      while (i < ihi) {
+        iy = i + iDelta;
+        temp_re = y_data[iy].re;
+        temp_im = y_data[iy].im;
+        y_data[iy].re = y_data[i].re - temp_re;
+        y_data[iy].im = y_data[i].im - temp_im;
+        y_data[i].re += temp_re;
+        y_data[i].im += temp_im;
+        i += iDelta2;
+      }
+      iy = ix + 1;
+      for (ju = k; ju < 256; ju += k) {
+        temp2_re = dv[ju];
+        temp2_im = dv1[ju];
+        i = iy;
+        ihi = iy + iheight;
+        while (i < ihi) {
+          b_temp_re_tmp = i + iDelta;
+          temp_re_tmp = y_data[b_temp_re_tmp].im;
+          c_temp_re_tmp = y_data[b_temp_re_tmp].re;
+          temp_re = temp2_re * c_temp_re_tmp - temp2_im * temp_re_tmp;
+          temp_im = temp2_re * temp_re_tmp + temp2_im * c_temp_re_tmp;
+          y_data[b_temp_re_tmp].re = y_data[i].re - temp_re;
+          y_data[b_temp_re_tmp].im = y_data[i].im - temp_im;
+          y_data[i].re += temp_re;
+          y_data[i].im += temp_im;
+          i += iDelta2;
+        }
+        iy++;
+      }
+      k >>= 1;
+      iDelta = iDelta2;
+      iDelta2 += iDelta2;
+      iheight -= iDelta;
+    }
+    temp_re = y_data[ix].re;
+    temp_im = y_data[ix].im;
+    temp_re_tmp = temp_re - (-temp_im);
+    y_data[ix].re = 0.5 * (temp_re_tmp + temp_re_tmp);
+    temp_re_tmp = temp_re - temp_im;
+    y_data[ix].im = 0.5 * ((-temp_re + temp_im) + temp_re_tmp);
+    y_data[ix + 512].re = 0.5 * (temp_re_tmp + temp_re_tmp);
+    y_data[ix + 512].im = 0.5 * ((temp_re + temp_im) + (-temp_re - temp_im));
+    for (b_j1 = 0; b_j1 < 255; b_j1++) {
+      iy = ix + b_j1;
+      temp_re = y_data[iy + 1].re;
+      temp_im = y_data[iy + 1].im;
+      ju = iv[b_j1 + 1];
+      b_temp_re_tmp = ix + ju;
+      temp2_re = y_data[b_temp_re_tmp - 1].re;
+      temp2_im = y_data[b_temp_re_tmp - 1].im;
+      temp_re_tmp = reconVar1[b_j1 + 1].im;
+      c_temp_re_tmp = reconVar1[b_j1 + 1].re;
+      temp2_re_tmp = reconVar2[b_j1 + 1].im;
+      b_temp2_re_tmp = reconVar2[b_j1 + 1].re;
+      y_data[iy + 1].re =
+          0.5 * ((temp_re * c_temp_re_tmp - temp_im * temp_re_tmp) +
+                 (temp2_re * b_temp2_re_tmp - -temp2_im * temp2_re_tmp));
+      y_data[iy + 1].im =
+          0.5 * ((temp_re * temp_re_tmp + temp_im * c_temp_re_tmp) +
+                 (temp2_re * temp2_re_tmp + -temp2_im * b_temp2_re_tmp));
+      y_data[iy + 513].re =
+          0.5 * ((temp_re * b_temp2_re_tmp - temp_im * temp2_re_tmp) +
+                 (temp2_re * c_temp_re_tmp - -temp2_im * temp_re_tmp));
+      y_data[iy + 513].im =
+          0.5 * ((temp_re * temp2_re_tmp + temp_im * b_temp2_re_tmp) +
+                 (temp2_re * temp_re_tmp + -temp2_im * c_temp_re_tmp));
+      temp_re_tmp = reconVar1[ju - 1].im;
+      c_temp_re_tmp = reconVar1[ju - 1].re;
+      temp2_re_tmp = reconVar2[ju - 1].im;
+      b_temp2_re_tmp = reconVar2[ju - 1].re;
+      y_data[b_temp_re_tmp - 1].re =
+          0.5 * ((temp2_re * c_temp_re_tmp - temp2_im * temp_re_tmp) +
+                 (temp_re * b_temp2_re_tmp - -temp_im * temp2_re_tmp));
+      y_data[b_temp_re_tmp - 1].im =
+          0.5 * ((temp2_re * temp_re_tmp + temp2_im * c_temp_re_tmp) +
+                 (temp_re * temp2_re_tmp + -temp_im * b_temp2_re_tmp));
+      y_data[b_temp_re_tmp + 511].re =
+          0.5 * ((temp2_re * b_temp2_re_tmp - temp2_im * temp2_re_tmp) +
+                 (temp_re * c_temp_re_tmp - -temp_im * temp_re_tmp));
+      y_data[b_temp_re_tmp + 511].im =
+          0.5 * ((temp2_re * temp2_re_tmp + temp2_im * b_temp2_re_tmp) +
+                 (temp_re * temp_re_tmp + -temp_im * c_temp_re_tmp));
+    }
+    temp_re = y_data[ix + 256].re;
+    temp_im = y_data[ix + 256].im;
+    temp2_re_tmp = temp_re * 0.0;
+    b_temp2_re_tmp = temp_im * 0.0;
+    temp_re_tmp = temp_re * 2.0;
+    c_temp_re_tmp = -temp_im * 0.0;
+    y_data[ix + 256].re =
+        0.5 * ((temp2_re_tmp - b_temp2_re_tmp) + (temp_re_tmp - c_temp_re_tmp));
+    y_data[ix + 256].im = 0.5 * ((temp2_re_tmp + b_temp2_re_tmp) +
+                                 (temp2_re_tmp + -temp_im * 2.0));
+    y_data[ix + 768].re =
+        0.5 * ((temp_re_tmp - b_temp2_re_tmp) + (temp2_re_tmp - c_temp_re_tmp));
+    y_data[ix + 768].im =
+        0.5 * ((temp2_re_tmp + temp_im * 2.0) + (temp2_re_tmp + c_temp_re_tmp));
   }
 }
 
