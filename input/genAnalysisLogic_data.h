@@ -2,7 +2,7 @@
  * File: genAnalysisLogic_data.h
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 10-Sep-2026 03:03:38
+ * C/C++ source code generated on  : 10-Sep-2026 03:30:33
  */
 
 #ifndef GENANALYSISLOGIC_DATA_H
@@ -12,9 +12,6 @@
 #include "rtwtypes.h"
 #include <stddef.h>
 #include <stdlib.h>
-
-/* Variable Declarations */
-extern boolean_T isInitialized_genAnalysisLogic;
 
 #endif
 /*

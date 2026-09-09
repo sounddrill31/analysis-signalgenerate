@@ -2,7 +2,7 @@
  * File: main.c
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 10-Sep-2026 03:03:38
+ * C/C++ source code generated on  : 10-Sep-2026 03:30:33
  */
 
 /*************************************************************************/
@@ -103,28 +103,24 @@ You do not need to do this more than one time. */
  */
 void main_genAnalysisLogic(void)
 {
-  emxArray_real_T *fftMagnitude;
-  emxArray_real_T *freq;
   emxArray_real_T *stftMagnitude;
   emxArray_real_T *stftTime;
   emxArray_real_T *t;
   emxArray_real_T *x;
+  double fftMagnitude[513];
+  double freq[513];
   double stftFreq[513];
   /* Initialize function 'genAnalysisLogic' input arguments. */
   /* Initialize function input argument 'x'. */
   x = argInit_1xUnbounded_real_T();
   /* Call the entry-point 'genAnalysisLogic'. */
   emxInitArray_real_T(&t, 2);
-  emxInitArray_real_T(&freq, 2);
-  emxInitArray_real_T(&fftMagnitude, 2);
   emxInitArray_real_T(&stftTime, 2);
   emxInitArray_real_T(&stftMagnitude, 2);
   genAnalysisLogic(x, argInit_real_T(), t, freq, fftMagnitude, stftTime,
                    stftFreq, stftMagnitude);
   emxDestroyArray_real_T(x);
   emxDestroyArray_real_T(t);
-  emxDestroyArray_real_T(freq);
-  emxDestroyArray_real_T(fftMagnitude);
   emxDestroyArray_real_T(stftTime);
   emxDestroyArray_real_T(stftMagnitude);
 }

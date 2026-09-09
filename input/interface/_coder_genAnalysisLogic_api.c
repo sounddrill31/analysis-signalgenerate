@@ -2,7 +2,7 @@
  * File: _coder_genAnalysisLogic_api.c
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 10-Sep-2026 03:03:38
+ * C/C++ source code generated on  : 10-Sep-2026 03:30:33
  */
 
 /* Include Files */
@@ -328,15 +328,17 @@ void genAnalysisLogic_api(const mxArray *const prhs[2], int32_T nlhs,
       NULL, /* tls */
       NULL  /* prev */
   };
-  emxArray_real_T *fftMagnitude;
-  emxArray_real_T *freq;
   emxArray_real_T *stftMagnitude;
   emxArray_real_T *stftTime;
   emxArray_real_T *t;
   emxArray_real_T *x;
+  real_T(*fftMagnitude)[513];
+  real_T(*freq)[513];
   real_T(*stftFreq)[513];
   real_T Fs;
   st.tls = emlrtRootTLSGlobal;
+  freq = (real_T(*)[513])mxMalloc(sizeof(real_T[513]));
+  fftMagnitude = (real_T(*)[513])mxMalloc(sizeof(real_T[513]));
   stftFreq = (real_T(*)[513])mxMalloc(sizeof(real_T[513]));
   emlrtHeapReferenceStackEnterFcnR2012b(&st);
   /* Marshall function inputs */
@@ -346,24 +348,20 @@ void genAnalysisLogic_api(const mxArray *const prhs[2], int32_T nlhs,
   Fs = c_emlrt_marshallIn(&st, emlrtAliasP(prhs[1]), "Fs");
   /* Invoke the target function */
   emxInit_real_T(&st, &t);
-  emxInit_real_T(&st, &freq);
-  emxInit_real_T(&st, &fftMagnitude);
   emxInit_real_T(&st, &stftTime);
   emxInit_real_T(&st, &stftMagnitude);
-  genAnalysisLogic(x, Fs, t, freq, fftMagnitude, stftTime, *stftFreq,
+  genAnalysisLogic(x, Fs, t, *freq, *fftMagnitude, stftTime, *stftFreq,
                    stftMagnitude);
   emxFree_real_T(&st, &x);
   /* Marshall function outputs */
   plhs[0] = emlrt_marshallOut(t);
   emxFree_real_T(&st, &t);
   if (nlhs > 1) {
-    plhs[1] = emlrt_marshallOut(freq);
+    plhs[1] = b_emlrt_marshallOut(*freq);
   }
-  emxFree_real_T(&st, &freq);
   if (nlhs > 2) {
-    plhs[2] = emlrt_marshallOut(fftMagnitude);
+    plhs[2] = b_emlrt_marshallOut(*fftMagnitude);
   }
-  emxFree_real_T(&st, &fftMagnitude);
   if (nlhs > 3) {
     plhs[3] = emlrt_marshallOut(stftTime);
   }

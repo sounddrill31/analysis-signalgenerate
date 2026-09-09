@@ -1,15 +1,14 @@
 /*
- * File: STFT.h
+ * File: mean.h
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 10-Sep-2026 03:03:38
+ * C/C++ source code generated on  : 10-Sep-2026 03:30:33
  */
 
-#ifndef STFT_H
-#define STFT_H
+#ifndef MEAN_H
+#define MEAN_H
 
 /* Include Files */
-#include "genAnalysisLogic_internal_types.h"
 #include "genAnalysisLogic_types.h"
 #include "rtwtypes.h"
 #include <stddef.h>
@@ -20,9 +19,7 @@ extern "C" {
 #endif
 
 /* Function Declarations */
-void STFT_STFT(dsp_STFT *obj);
-
-void STFT_step(dsp_STFT *obj, const emxArray_real_T *u, emxArray_creal_T *y);
+void mean(const emxArray_real_T *x, double y[513]);
 
 #ifdef __cplusplus
 }
@@ -30,7 +27,7 @@ void STFT_step(dsp_STFT *obj, const emxArray_real_T *u, emxArray_creal_T *y);
 
 #endif
 /*
- * File trailer for STFT.h
+ * File trailer for mean.h
  *
  * [EOF]
  */
