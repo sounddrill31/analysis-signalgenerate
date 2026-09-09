@@ -2,7 +2,7 @@
  * File: abs.c
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 09-Sep-2026 16:05:27
+ * C/C++ source code generated on  : 09-Sep-2026 17:33:27
  */
 
 /* Include Files */
@@ -25,15 +25,12 @@ void b_abs(const emxArray_creal_T *x, emxArray_real_T *y)
   double *y_data;
   int i;
   int k;
-  int nx;
   x_data = x->data;
-  nx = x->size[1];
-  i = y->size[0] * y->size[1];
-  y->size[0] = 1;
-  y->size[1] = x->size[1];
+  i = y->size[0];
+  y->size[0] = 16384;
   emxEnsureCapacity_real_T(y, i);
   y_data = y->data;
-  for (k = 0; k < nx; k++) {
+  for (k = 0; k < 16384; k++) {
     double a;
     double b;
     a = fabs(x_data[k].re);
@@ -53,25 +50,21 @@ void b_abs(const emxArray_creal_T *x, emxArray_real_T *y)
 }
 
 /*
- * Arguments    : const emxArray_creal_T *x
- *                emxArray_real_T *y
+ * Arguments    : const creal_T x_data[]
+ *                const int x_size[2]
+ *                double y_data[]
+ *                int y_size[2]
  * Return Type  : void
  */
-void c_abs(const emxArray_creal_T *x, emxArray_real_T *y)
+void c_abs(const creal_T x_data[], const int x_size[2], double y_data[],
+           int y_size[2])
 {
-  const creal_T *x_data;
-  double *y_data;
   int i;
   int k;
-  int nx;
-  x_data = x->data;
-  nx = 513 * x->size[1];
-  i = y->size[0] * y->size[1];
-  y->size[0] = 513;
-  y->size[1] = x->size[1];
-  emxEnsureCapacity_real_T(y, i);
-  y_data = y->data;
-  for (k = 0; k < nx; k++) {
+  i = 513 * x_size[1];
+  y_size[0] = 513;
+  y_size[1] = x_size[1];
+  for (k = 0; k < i; k++) {
     double a;
     double b;
     a = fabs(x_data[k].re);

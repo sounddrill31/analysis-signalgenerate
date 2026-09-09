@@ -1,15 +1,15 @@
 /*
- * File: abs.h
+ * File: AsyncBufferSysObj.h
  *
  * MATLAB Coder version            : 26.1
  * C/C++ source code generated on  : 09-Sep-2026 17:33:27
  */
 
-#ifndef ABS_H
-#define ABS_H
+#ifndef ASYNCBUFFERSYSOBJ_H
+#define ASYNCBUFFERSYSOBJ_H
 
 /* Include Files */
-#include "genAnalysisLogic_types.h"
+#include "genAnalysisLogic_internal_types.h"
 #include "rtwtypes.h"
 #include <stddef.h>
 #include <stdlib.h>
@@ -19,10 +19,7 @@ extern "C" {
 #endif
 
 /* Function Declarations */
-void b_abs(const emxArray_creal_T *x, emxArray_real_T *y);
-
-void c_abs(const creal_T x_data[], const int x_size[2], double y_data[],
-           int y_size[2]);
+void b_handle_matlabCodegenDestructo(c_dsp_internal_codegen_AsyncBuf *obj);
 
 #ifdef __cplusplus
 }
@@ -30,7 +27,7 @@ void c_abs(const creal_T x_data[], const int x_size[2], double y_data[],
 
 #endif
 /*
- * File trailer for abs.h
+ * File trailer for AsyncBufferSysObj.h
  *
  * [EOF]
  */

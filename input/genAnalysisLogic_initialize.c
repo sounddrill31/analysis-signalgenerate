@@ -2,11 +2,13 @@
  * File: genAnalysisLogic_initialize.c
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 09-Sep-2026 16:05:27
+ * C/C++ source code generated on  : 09-Sep-2026 17:33:27
  */
 
 /* Include Files */
 #include "genAnalysisLogic_initialize.h"
+#include "genAnalysisLogic.h"
+#include "genAnalysisLogic_data.h"
 #include "rt_nonfinite.h"
 
 /* Function Definitions */
@@ -16,6 +18,9 @@
  */
 void genAnalysisLogic_initialize(void)
 {
+  genAnalysisLogic_new();
+  genAnalysisLogic_init();
+  isInitialized_genAnalysisLogic = true;
 }
 
 /*

@@ -2,7 +2,7 @@
  * File: _coder_genAnalysisLogic_mex.c
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 09-Sep-2026 16:05:27
+ * C/C++ source code generated on  : 09-Sep-2026 17:33:27
  */
 
 /* Include Files */
@@ -56,6 +56,11 @@ void unsafe_genAnalysisLogic_mexFunction(int32_T nlhs, mxArray *plhs[6],
   int32_T i;
   st.tls = emlrtRootTLSGlobal;
   /* Check for proper number of arguments. */
+  if (nrhs < 2) {
+    emlrtErrMsgIdAndTxt(&st, "EMLRT:runTime:TooFewInputsConstants", 9, 4, 16,
+                        "genAnalysisLogic", 4, 16, "genAnalysisLogic", 4, 16,
+                        "genAnalysisLogic");
+  }
   if (nrhs != 2) {
     emlrtErrMsgIdAndTxt(&st, "EMLRT:runTime:WrongNumberOfInputs", 5, 12, 2, 4,
                         16, "genAnalysisLogic");

@@ -1,14 +1,15 @@
 /*
- * File: abs.h
+ * File: STFT.h
  *
  * MATLAB Coder version            : 26.1
  * C/C++ source code generated on  : 09-Sep-2026 17:33:27
  */
 
-#ifndef ABS_H
-#define ABS_H
+#ifndef STFT_H
+#define STFT_H
 
 /* Include Files */
+#include "genAnalysisLogic_internal_types.h"
 #include "genAnalysisLogic_types.h"
 #include "rtwtypes.h"
 #include <stddef.h>
@@ -19,10 +20,10 @@ extern "C" {
 #endif
 
 /* Function Declarations */
-void b_abs(const emxArray_creal_T *x, emxArray_real_T *y);
+void STFT_STFT(dsp_STFT *obj);
 
-void c_abs(const creal_T x_data[], const int x_size[2], double y_data[],
-           int y_size[2]);
+void STFT_step(dsp_STFT *obj, const emxArray_real_T *u, creal_T y_data[],
+               int y_size[2]);
 
 #ifdef __cplusplus
 }
@@ -30,7 +31,7 @@ void c_abs(const creal_T x_data[], const int x_size[2], double y_data[],
 
 #endif
 /*
- * File trailer for abs.h
+ * File trailer for STFT.h
  *
  * [EOF]
  */

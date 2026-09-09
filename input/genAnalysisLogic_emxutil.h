@@ -2,7 +2,7 @@
  * File: genAnalysisLogic_emxutil.h
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 09-Sep-2026 16:05:27
+ * C/C++ source code generated on  : 09-Sep-2026 17:33:27
  */
 
 #ifndef GENANALYSISLOGIC_EMXUTIL_H
@@ -31,9 +31,9 @@ extern void emxFree_int32_T(emxArray_int32_T **pEmxArray);
 
 extern void emxFree_real_T(emxArray_real_T **pEmxArray);
 
-extern void emxInit_creal_T(emxArray_creal_T **pEmxArray, int numDimensions);
+extern void emxInit_creal_T(emxArray_creal_T **pEmxArray);
 
-extern void emxInit_int32_T(emxArray_int32_T **pEmxArray, int numDimensions);
+extern void emxInit_int32_T(emxArray_int32_T **pEmxArray);
 
 extern void emxInit_real_T(emxArray_real_T **pEmxArray, int numDimensions);
 

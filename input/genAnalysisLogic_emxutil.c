@@ -2,7 +2,7 @@
  * File: genAnalysisLogic_emxutil.c
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 09-Sep-2026 16:05:27
+ * C/C++ source code generated on  : 09-Sep-2026 17:33:27
  */
 
 /* Include Files */
@@ -192,42 +192,37 @@ void emxFree_real_T(emxArray_real_T **pEmxArray)
 
 /*
  * Arguments    : emxArray_creal_T **pEmxArray
- *                int numDimensions
  * Return Type  : void
  */
-void emxInit_creal_T(emxArray_creal_T **pEmxArray, int numDimensions)
+void emxInit_creal_T(emxArray_creal_T **pEmxArray)
 {
   emxArray_creal_T *emxArray;
-  int i;
   *pEmxArray = (emxArray_creal_T *)malloc(sizeof(emxArray_creal_T));
   emxArray = *pEmxArray;
   emxArray->data = (creal_T *)NULL;
-  emxArray->numDimensions = numDimensions;
-  emxArray->size = (int *)malloc(sizeof(int) * (unsigned int)numDimensions);
+  emxArray->numDimensions = 1;
+  emxArray->size = (int *)malloc(sizeof(int));
   emxArray->allocatedSize = 0;
   emxArray->canFreeData = true;
-  for (i = 0; i < numDimensions; i++) {
-    emxArray->size[i] = 0;
-  }
+  emxArray->size[0] = 0;
 }
 
 /*
  * Arguments    : emxArray_int32_T **pEmxArray
- *                int numDimensions
  * Return Type  : void
  */
-void emxInit_int32_T(emxArray_int32_T **pEmxArray, int numDimensions)
+void emxInit_int32_T(emxArray_int32_T **pEmxArray)
 {
   emxArray_int32_T *emxArray;
   int i;
   *pEmxArray = (emxArray_int32_T *)malloc(sizeof(emxArray_int32_T));
   emxArray = *pEmxArray;
   emxArray->data = (int *)NULL;
-  emxArray->numDimensions = numDimensions;
-  emxArray->size = (int *)malloc(sizeof(int) * (unsigned int)numDimensions);
+  emxArray->numDimensions = 2;
+  emxArray->size = (int *)malloc(sizeof(int) * 2U);
   emxArray->allocatedSize = 0;
   emxArray->canFreeData = true;
-  for (i = 0; i < numDimensions; i++) {
+  for (i = 0; i < 2; i++) {
     emxArray->size[i] = 0;
   }
 }
