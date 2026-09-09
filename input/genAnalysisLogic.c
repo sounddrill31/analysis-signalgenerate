@@ -2,7 +2,7 @@
  * File: genAnalysisLogic.c
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 10-Sep-2026 03:30:33
+ * C/C++ source code generated on  : 10-Sep-2026 04:14:33
  */
 
 /* Include Files */
@@ -19,9 +19,6 @@
 
 /* Function Definitions */
 /*
- * Time domain operations
- *  Create time vector corresponding to the input samples
- *
  * Arguments    : const emxArray_real_T *x
  *                double Fs
  *                emxArray_real_T *t
@@ -1061,53 +1058,51 @@ void genAnalysisLogic(const emxArray_real_T *x, double Fs, emxArray_real_T *t,
                                    0.08003470490305986,
                                    0.08000867630758929,
                                    0.08000000000000002};
+  __m128d r;
   double b_x[1024];
   double dv[2];
   const double *x_data;
   double *stftTime_data;
   double *t_data;
+  int b_i;
   int i;
-  int k;
   int loop_ub;
   int numFrames;
   int startIdx;
   x_data = x->data;
   /*  Simple matlab function for Audio Signal Analysis */
-  if (x->size[1] - 1 < 0) {
-    t->size[1] = 0;
-  } else {
-    startIdx = t->size[0] * t->size[1];
-    t->size[0] = 1;
-    t->size[1] = x->size[1];
-    emxEnsureCapacity_real_T(t, startIdx);
-    t_data = t->data;
-    startIdx = x->size[1] - 1;
-    for (k = 0; k <= startIdx; k++) {
-      t_data[k] = k;
-    }
-  }
-  loop_ub = t->size[1];
+  /*  Time domain */
   startIdx = t->size[0] * t->size[1];
   t->size[0] = 1;
+  loop_ub = x->size[1];
+  t->size[1] = x->size[1];
   emxEnsureCapacity_real_T(t, startIdx);
   t_data = t->data;
-  startIdx = (t->size[1] / 2) << 1;
-  numFrames = startIdx - 2;
-  for (k = 0; k <= numFrames; k += 2) {
-    _mm_storeu_pd(&t_data[k],
-                  _mm_div_pd(_mm_loadu_pd(&t_data[k]), _mm_set1_pd(Fs)));
+  for (i = 0; i < loop_ub; i++) {
+    t_data[i] = 0.0;
   }
-  for (k = startIdx; k < loop_ub; k++) {
-    t_data[k] /= Fs;
+  if (x->size[1] > 0) {
+    startIdx = (x->size[1] / 2) << 1;
+    numFrames = startIdx - 2;
+    for (i = 0; i <= numFrames; i += 2) {
+      dv[0] = i;
+      dv[1] = i + 1;
+      r = _mm_loadu_pd(&dv[0]);
+      _mm_storeu_pd(&t_data[i], _mm_div_pd(r, _mm_set1_pd(Fs)));
+    }
+    for (i = startIdx; i < loop_ub; i++) {
+      t_data[i] = (double)i / Fs;
+    }
+    /*  Mutate in-place */
   }
-  /*  Frequency domain operations */
+  /*  Stateless STFT */
   /*  Calculate exact output dimensions upfront */
   if (x->size[1] >= 1024) {
     numFrames = (int)floor(((double)x->size[1] - 1024.0) / 512.0) + 1;
   } else {
     numFrames = 0;
   }
-  /*  Preallocate explicitly so emscripten doesn't guess or overflows */
+  /*  Pre-allocate ALL outputs so MATLAB locks the pointers */
   startIdx = stftMagnitude->size[0] * stftMagnitude->size[1];
   stftMagnitude->size[0] = 513;
   stftMagnitude->size[1] = numFrames;
@@ -1118,36 +1113,37 @@ void genAnalysisLogic(const emxArray_real_T *x, double Fs, emxArray_real_T *t,
   stftTime->size[1] = numFrames;
   emxEnsureCapacity_real_T(stftTime, startIdx);
   stftTime_data = stftTime->data;
-  for (k = 0; k <= 510; k += 2) {
-    __m128d r;
-    dv[0] = k;
-    dv[1] = (double)k + 1.0;
+  for (i = 0; i < numFrames; i++) {
+    stftTime_data[i] = 0.0;
+  }
+  /*  Write data into the locked memory */
+  for (i = 0; i <= 510; i += 2) {
+    _mm_storeu_pd(&fftMagnitude[i], _mm_set1_pd(0.0));
+    dv[0] = i;
+    dv[1] = (double)i + 1.0;
     r = _mm_loadu_pd(&dv[0]);
-    _mm_storeu_pd(&stftFreq[k], _mm_div_pd(_mm_mul_pd(_mm_set1_pd(Fs), r),
+    _mm_storeu_pd(&stftFreq[i], _mm_div_pd(_mm_mul_pd(_mm_set1_pd(Fs), r),
                                            _mm_set1_pd(1024.0)));
   }
+  fftMagnitude[512] = 0.0;
   stftFreq[512] = Fs * 512.0 / 1024.0;
-  for (k = 0; k < numFrames; k++) {
+  for (i = 0; i < numFrames; i++) {
     creal_T X_seg[1024];
-    startIdx = (k << 9) + 1;
+    startIdx = (i << 9) + 1;
     /*  Force column vector and apply window */
-    /*  Tiny 1024-point FFT (Uses 0% extra memory) */
-    for (i = 0; i <= 1022; i += 2) {
-      _mm_storeu_pd(&b_x[i],
-                    _mm_mul_pd(_mm_loadu_pd(&x_data[(startIdx + i) - 1]),
-                               _mm_loadu_pd(&win[i])));
+    for (b_i = 0; b_i <= 1022; b_i += 2) {
+      _mm_storeu_pd(&b_x[b_i],
+                    _mm_mul_pd(_mm_loadu_pd(&x_data[(startIdx + b_i) - 1]),
+                               _mm_loadu_pd(&win[b_i])));
     }
     c_FFTImplementationCallback_doH(b_x, X_seg);
-    b_abs(&X_seg[0], &t_data[513 * k]);
-    stftTime_data[k] = ((double)startIdx + 512.0) / Fs;
+    b_abs(&X_seg[0], &t_data[513 * i]);
+    stftTime_data[i] = ((double)startIdx + 512.0) / Fs;
   }
-  /*  Frequency domain: Average of the STFT frames */
-  /*  This hopefully replaces the old memory-crashing FFT */
+  /*  3. FREQUENCY DOMAIN */
   memcpy(&freq[0], &stftFreq[0], 513U * sizeof(double));
   if (numFrames > 0) {
     mean(stftMagnitude, fftMagnitude);
-  } else {
-    memset(&fftMagnitude[0], 0, 513U * sizeof(double));
   }
 }
 
