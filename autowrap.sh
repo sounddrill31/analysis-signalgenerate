@@ -11,12 +11,12 @@ echo "Generating C++ wrapper for ${FUNC_NAME}..."
 rm -rf output
 mkdir -p output
 
-# python autowrap.py "$FUNC_NAME"
-# 
-# if [ $? -ne 0 ]; then
-#     echo "❌ Wrapper generation failed!"
-#     exit 1
-# fi
+python autowrap.py "$FUNC_NAME"
+
+if [ $? -ne 0 ]; then
+    echo "❌ Wrapper generation failed!"
+    exit 1
+fi
 
 echo "Compiling to WebAssembly using emcc..."
 emcc input/*.c wrapper.cpp \
