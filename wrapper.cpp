@@ -43,33 +43,39 @@ val run_genAnalysisLogic(const val &x_js, double Fs) {
     emxArray_real_T *x = emxCreateND_real_T(2, in_sz);
     for(size_t i = 0; i < x_len; i++) x->data[i] = x_buf[i];
 
-    // 4. Allocate blank MATLAB output arrays
+    // 4. Allocate output variables
     int out_sz[2] = { 0, 0 };
     emxArray_real_T *t = emxCreateND_real_T(2, out_sz);
     emxArray_real_T *freq = emxCreateND_real_T(2, out_sz);
     emxArray_real_T *fftMagnitude = emxCreateND_real_T(2, out_sz);
     emxArray_real_T *stftTime = emxCreateND_real_T(2, out_sz);
-    emxArray_real_T *stftFreq = emxCreateND_real_T(2, out_sz);
     emxArray_real_T *stftMagnitude = emxCreateND_real_T(2, out_sz);
+    
+    // MATLAB hardcoded stftFreq to 513 because window length is 1024!
+    std::vector<double> stftFreq_buf(513); 
 
     // 5. Run the Analyzer
-    genAnalysisLogic(x, Fs, t, freq, fftMagnitude, stftTime, stftFreq, stftMagnitude);
+    genAnalysisLogic(x, Fs, t, freq, fftMagnitude, stftTime, stftFreq_buf.data(), stftMagnitude);
 
     // 6. Bundle results to send back to JavaScript
     val result = val::object();
-    auto to_js = [](emxArray_real_T* arr) {
+    
+    auto emx_to_js = [](emxArray_real_T* arr) {
         int numels = 1;
         for (int i = 0; i < arr->numDimensions; ++i) numels *= arr->size[i];
         val view = val(typed_memory_view(numels, arr->data));
         return val::global("Float64Array").new_(view);
     };
 
-    result.set("t", to_js(t));
-    result.set("freq", to_js(freq));
-    result.set("fftMagnitude", to_js(fftMagnitude));
-    result.set("stftTime", to_js(stftTime));
-    result.set("stftFreq", to_js(stftFreq));
-    result.set("stftMagnitude", to_js(stftMagnitude));
+    result.set("t", emx_to_js(t));
+    result.set("freq", emx_to_js(freq));
+    result.set("fftMagnitude", emx_to_js(fftMagnitude));
+    result.set("stftTime", emx_to_js(stftTime));
+    result.set("stftMagnitude", emx_to_js(stftMagnitude));
+
+    // Safely send the fixed 513-length array to JS
+    val stftFreq_view = val(typed_memory_view(513, stftFreq_buf.data()));
+    result.set("stftFreq", val::global("Float64Array").new_(stftFreq_view));
 
     // 7. Vaporize the memory to guarantee 0 leaks
     emxDestroyArray_real_T(x);
@@ -77,7 +83,6 @@ val run_genAnalysisLogic(const val &x_js, double Fs) {
     emxDestroyArray_real_T(freq);
     emxDestroyArray_real_T(fftMagnitude);
     emxDestroyArray_real_T(stftTime);
-    emxDestroyArray_real_T(stftFreq);
     emxDestroyArray_real_T(stftMagnitude);
 
     return result;
