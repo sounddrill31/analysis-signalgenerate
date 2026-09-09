@@ -85,6 +85,16 @@ def generate_wrapper(func_name):
     cpp += f"""
 using namespace emscripten;
 
+extern "C" {{
+    void omp_init_nest_lock(void*) {{}}
+    void omp_destroy_nest_lock(void*) {{}}
+    void omp_set_nest_lock(void*) {{}}
+    void omp_unset_nest_lock(void*) {{}}
+    int omp_get_num_threads() {{ return 1; }}
+    int omp_get_max_threads() {{ return 1; }}
+    int omp_get_thread_num() {{ return 0; }}
+}}
+
 val run_{func_name}({', '.join(cpp_params)}) {{
 """
     call_args = []
@@ -111,8 +121,8 @@ val run_{func_name}({', '.join(cpp_params)}) {{
 
         elif p_type == 'array_in_emx':
             cpp += f"    size_t {name}_len = {name}_js[\"length\"].as<size_t>();\n"
-            cpp += f"    int {name}_sz = (int){name}_len;\n"
-            cpp += f"    emxArray_real_T *{name} = emxCreateND_real_T(1, &{name}_sz);\n"
+            cpp += f"    int {name}_sz[2] = {{ 1, (int){name}_len }};\n" # SAFE: Explicit 2D size
+            cpp += f"    emxArray_real_T *{name} = emxCreateND_real_T(2, {name}_sz);\n"
             cpp += f"    if ({name}_len > 0) {{\n"
             cpp += f"        val {name}_view = val(typed_memory_view({name}_len, {name}->data));\n"
             cpp += f"        {name}_view.call<void>(\"set\", {name}_js);\n"
@@ -130,7 +140,8 @@ val run_{func_name}({', '.join(cpp_params)}) {{
             call_args.append(f"{name}_buf.data()")
 
         elif p_type == 'array_out_emx':
-            cpp += f"    emxArray_real_T *{name} = emxCreateND_real_T(1, 0);\n"
+            cpp += f"    int {name}_sz[2] = {{ 0, 0 }};\n" # SAFE: Explicit zero allocation
+            cpp += f"    emxArray_real_T *{name} = emxCreateND_real_T(2, {name}_sz);\n"
             call_args.append(name)
             emx_destroys.append(f"    emxDestroyArray_real_T({name});\n")
 
@@ -153,7 +164,12 @@ val run_{func_name}({', '.join(cpp_params)}) {{
             cpp += f"    result.set(\"{name}\", {name}_js);\n"
 
         elif p_type == 'array_out_emx':
-            cpp += f"    val {name}_view = val(typed_memory_view({name}->size[0] * {name}->size[1], {name}->data));\n"
+            # SAFE: Dynamically calculate total elements regardless of 1D, 2D, or 3D
+            cpp += f"    int {name}_numels = 1;\n"
+            cpp += f"    for (int i = 0; i < {name}->numDimensions; ++i) {{\n"
+            cpp += f"        {name}_numels *= {name}->size[i];\n"
+            cpp += f"    }}\n"
+            cpp += f"    val {name}_view = val(typed_memory_view({name}_numels, {name}->data));\n"
             cpp += f"    val {name}_js = val::global(\"Float64Array\").new_({name}_view);\n"
             cpp += f"    result.set(\"{name}\", {name}_js);\n"
 
