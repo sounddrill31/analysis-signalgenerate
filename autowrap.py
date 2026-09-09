@@ -34,7 +34,6 @@ def generate_wrapper(func_name):
 #include <emscripten/bind.h>
 #include <emscripten/val.h>
 #include "input/{func_name}.h"
-#include "input/{func_name}_emxAPI.h"
 
 using namespace emscripten;
 
