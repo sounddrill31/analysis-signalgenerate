@@ -2,7 +2,7 @@
  * File: abs.h
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 09-Sep-2026 14:34:56
+ * C/C++ source code generated on  : 09-Sep-2026 15:36:09
  */
 
 #ifndef ABS_H
@@ -20,8 +20,6 @@ extern "C" {
 
 /* Function Declarations */
 void b_abs(const emxArray_creal_T *x, emxArray_real_T *y);
-
-void c_abs(const emxArray_creal_T *x, emxArray_real_T *y);
 
 #ifdef __cplusplus
 }

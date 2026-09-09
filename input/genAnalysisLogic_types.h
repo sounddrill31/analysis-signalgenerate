@@ -2,7 +2,7 @@
  * File: genAnalysisLogic_types.h
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 09-Sep-2026 14:34:56
+ * C/C++ source code generated on  : 09-Sep-2026 15:36:09
  */
 
 #ifndef GENANALYSISLOGIC_TYPES_H
@@ -37,21 +37,6 @@ typedef struct {
   boolean_T canFreeData;
 } emxArray_creal_T;
 #endif /* typedef_emxArray_creal_T */
-
-#ifndef struct_emxArray_int32_T
-#define struct_emxArray_int32_T
-struct emxArray_int32_T {
-  int *data;
-  int *size;
-  int allocatedSize;
-  int numDimensions;
-  boolean_T canFreeData;
-};
-#endif /* struct_emxArray_int32_T */
-#ifndef typedef_emxArray_int32_T
-#define typedef_emxArray_int32_T
-typedef struct emxArray_int32_T emxArray_int32_T;
-#endif /* typedef_emxArray_int32_T */
 
 #endif
 /*

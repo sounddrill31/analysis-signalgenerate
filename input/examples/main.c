@@ -2,7 +2,7 @@
  * File: main.c
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 09-Sep-2026 14:34:56
+ * C/C++ source code generated on  : 09-Sep-2026 15:36:09
  */
 
 /*************************************************************************/
@@ -34,42 +34,15 @@
 #include "main.h"
 #include "genAnalysisLogic.h"
 #include "genAnalysisLogic_emxAPI.h"
-#include "genAnalysisLogic_emxutil.h"
 #include "genAnalysisLogic_initialize.h"
 #include "genAnalysisLogic_terminate.h"
 #include "genAnalysisLogic_types.h"
 #include "rt_nonfinite.h"
 
 /* Function Declarations */
-static emxArray_real_T *argInit_1x945176_real_T(void);
-
 static double argInit_real_T(void);
 
 /* Function Definitions */
-/*
- * Arguments    : void
- * Return Type  : emxArray_real_T *
- */
-static emxArray_real_T *argInit_1x945176_real_T(void)
-{
-  emxArray_real_T *result;
-  double *result_data;
-  int i;
-  int idx1;
-  emxInitArray_real_T(&result, 1);
-  i = result->size[0];
-  result->size[0] = 945176;
-  emxEnsureCapacity_real_T(result, i);
-  result_data = result->data;
-  /* Loop over the array to initialize each element. */
-  for (idx1 = 0; idx1 < 945176; idx1++) {
-    /* Set the value of the array element.
-Change this value to the value that the application requires. */
-    result_data[idx1] = argInit_real_T();
-  }
-  return result;
-}
-
 /*
  * Arguments    : void
  * Return Type  : double
@@ -108,22 +81,18 @@ void main_genAnalysisLogic(void)
 {
   emxArray_real_T *fftMagnitude;
   emxArray_real_T *freq;
-  emxArray_real_T *r;
   emxArray_real_T *stftMagnitude;
   emxArray_real_T *t;
-  double stftTime[1845];
   double stftFreq[513];
+  double stftTime[31];
   /* Initialize function 'genAnalysisLogic' input arguments. */
-  /* Initialize function input argument 'x'. */
   /* Call the entry-point 'genAnalysisLogic'. */
-  r = argInit_1x945176_real_T();
   emxInitArray_real_T(&t, 1);
   emxInitArray_real_T(&freq, 1);
   emxInitArray_real_T(&fftMagnitude, 1);
   emxInitArray_real_T(&stftMagnitude, 1);
-  genAnalysisLogic(r, argInit_real_T(), t, freq, fftMagnitude, stftTime,
-                   stftFreq, stftMagnitude);
-  emxDestroyArray_real_T(r);
+  genAnalysisLogic(argInit_real_T(), t, freq, fftMagnitude, stftTime, stftFreq,
+                   stftMagnitude);
   emxDestroyArray_real_T(t);
   emxDestroyArray_real_T(freq);
   emxDestroyArray_real_T(fftMagnitude);

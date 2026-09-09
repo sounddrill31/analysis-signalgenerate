@@ -2,7 +2,7 @@
  * File: pspectrogram.c
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 09-Sep-2026 14:34:56
+ * C/C++ source code generated on  : 09-Sep-2026 15:36:09
  */
 
 /* Include Files */
@@ -36,7 +36,7 @@ void formatSpectrogram(const emxArray_creal_T *y, double Fs,
   int i2;
   y_data = y->data;
   i = yout->size[0];
-  yout->size[0] = 946485;
+  yout->size[0] = 15903;
   emxEnsureCapacity_creal_T(yout, i);
   yout_data = yout->data;
   if (rtIsNaN(Fs)) {
@@ -55,7 +55,7 @@ void formatSpectrogram(const emxArray_creal_T *y, double Fs,
   w1[512] = Fs1 / 2.0;
   w1[1023] = Fs1 - freq_res;
   memcpy(&fout[0], &w1[0], 513U * sizeof(double));
-  for (i1 = 0; i1 < 1845; i1++) {
+  for (i1 = 0; i1 < 31; i1++) {
     for (i2 = 0; i2 < 513; i2++) {
       yout_data[i2 + 513 * i1] = y_data[i2 + (i1 << 10)];
     }

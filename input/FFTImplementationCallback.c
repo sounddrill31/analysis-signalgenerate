@@ -2,7 +2,7 @@
  * File: FFTImplementationCallback.c
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 09-Sep-2026 14:34:56
+ * C/C++ source code generated on  : 09-Sep-2026 15:36:09
  */
 
 /* Include Files */
@@ -10,696 +10,183 @@
 #include "genAnalysisLogic_emxutil.h"
 #include "genAnalysisLogic_types.h"
 #include "rt_nonfinite.h"
-#include <math.h>
-
-/* Function Declarations */
-static void c_FFTImplementationCallback_doH(
-    const emxArray_real_T *x, emxArray_creal_T *y, const emxArray_creal_T *wwc,
-    const emxArray_real_T *costab, const emxArray_real_T *sintab,
-    const emxArray_real_T *costabinv, const emxArray_real_T *sintabinv);
-
-static void c_FFTImplementationCallback_gen(emxArray_real_T *costab,
-                                            emxArray_real_T *sintab,
-                                            emxArray_real_T *sintabinv);
-
-static void c_FFTImplementationCallback_r2b(const emxArray_creal_T *x,
-                                            const emxArray_real_T *costab,
-                                            const emxArray_real_T *sintab,
-                                            emxArray_creal_T *y);
-
-static void d_FFTImplementationCallback_r2b(const emxArray_creal_T *x,
-                                            const emxArray_real_T *costab,
-                                            const emxArray_real_T *sintab,
-                                            emxArray_creal_T *y);
-
-static void e_FFTImplementationCallback_r2b(const emxArray_creal_T *x,
-                                            const emxArray_real_T *costab,
-                                            const emxArray_real_T *sintab,
-                                            emxArray_creal_T *y);
 
 /* Function Definitions */
 /*
- * Arguments    : const emxArray_real_T *x
- *                emxArray_creal_T *y
- *                const emxArray_creal_T *wwc
+ * Arguments    : emxArray_creal_T *y
  *                const emxArray_real_T *costab
  *                const emxArray_real_T *sintab
- *                const emxArray_real_T *costabinv
- *                const emxArray_real_T *sintabinv
  * Return Type  : void
  */
-static void c_FFTImplementationCallback_doH(
-    const emxArray_real_T *x, emxArray_creal_T *y, const emxArray_creal_T *wwc,
-    const emxArray_real_T *costab, const emxArray_real_T *sintab,
-    const emxArray_real_T *costabinv, const emxArray_real_T *sintabinv)
+void c_FFTImplementationCallback_doH(emxArray_creal_T *y,
+                                     const emxArray_real_T *costab,
+                                     const emxArray_real_T *sintab)
 {
-  emxArray_creal_T *fv;
   emxArray_creal_T *reconVar1;
-  emxArray_creal_T *reconVar2;
-  emxArray_creal_T *ytmp;
-  emxArray_int32_T *wrapIndex;
-  emxArray_real_T *a__1;
-  emxArray_real_T *costable;
-  emxArray_real_T *hcostab;
-  emxArray_real_T *hcostabinv;
-  emxArray_real_T *hsintab;
-  emxArray_real_T *hsintabinv;
-  emxArray_real_T *sintable;
-  const creal_T *wwc_data;
-  creal_T *b_fv_data;
-  creal_T *fv_data;
   creal_T *reconVar1_data;
   creal_T *reconVar2_data;
   creal_T *y_data;
-  creal_T *ytmp_data;
+  double hcostab[4096];
+  double hsintab[4096];
   const double *costab_data;
-  const double *costabinv_data;
   const double *sintab_data;
-  const double *sintabinv_data;
-  const double *x_data;
-  double b_im;
-  double b_re;
-  double b_re_tmp;
-  double re_tmp;
-  double *costable_data;
-  double *hcostab_data;
-  double *hcostabinv_data;
-  double *hsintab_data;
-  double *hsintabinv_data;
-  double *sintable_data;
-  int b_i;
+  double c_temp1_re_tmp;
+  double temp1_im;
+  double temp1_re;
+  double temp1_re_tmp;
+  int bitrevIndex[8192];
+  int wrapIndex[8192];
   int i;
-  int *wrapIndex_data;
-  sintabinv_data = sintabinv->data;
-  costabinv_data = costabinv->data;
+  int iheight;
+  int iy;
+  int j;
+  int ju;
+  int k;
   sintab_data = sintab->data;
   costab_data = costab->data;
-  wwc_data = wwc->data;
   y_data = y->data;
-  x_data = x->data;
   emxInit_creal_T(&y);
-  i = y->size[0];
-  y->size[0] = 1048576;
-  emxEnsureCapacity_creal_T(y, i);
-  emxInit_creal_T(&fv);
-  i = fv->size[0];
-  fv->size[0] = 1048576;
-  emxEnsureCapacity_creal_T(fv, i);
-  emxInit_creal_T(&reconVar2);
-  i = reconVar2->size[0];
-  reconVar2->size[0] = 472588;
-  emxEnsureCapacity_creal_T(reconVar2, i);
-  reconVar2_data = reconVar2->data;
+  iy = y->size[0];
+  y->size[0] = 8192;
+  emxEnsureCapacity_creal_T(y, iy);
+  reconVar2_data = y->data;
   emxInit_creal_T(&reconVar1);
-  i = reconVar1->size[0];
-  reconVar1->size[0] = 472588;
-  emxEnsureCapacity_creal_T(reconVar1, i);
+  iy = reconVar1->size[0];
+  reconVar1->size[0] = 8192;
+  emxEnsureCapacity_creal_T(reconVar1, iy);
   reconVar1_data = reconVar1->data;
-  emxInit_real_T(&hsintabinv, 1);
-  i = hsintabinv->size[0];
-  hsintabinv->size[0] = 524288;
-  emxEnsureCapacity_real_T(hsintabinv, i);
-  hsintabinv_data = hsintabinv->data;
-  emxInit_real_T(&hcostabinv, 1);
-  i = hcostabinv->size[0];
-  hcostabinv->size[0] = 524288;
-  emxEnsureCapacity_real_T(hcostabinv, i);
-  hcostabinv_data = hcostabinv->data;
-  emxInit_real_T(&hsintab, 1);
-  i = hsintab->size[0];
-  hsintab->size[0] = 524288;
-  emxEnsureCapacity_real_T(hsintab, i);
-  hsintab_data = hsintab->data;
-  emxInit_real_T(&hcostab, 1);
-  i = hcostab->size[0];
-  hcostab->size[0] = 524288;
-  emxEnsureCapacity_real_T(hcostab, i);
-  hcostab_data = hcostab->data;
-  emxInit_real_T(&sintable, 1);
-  i = sintable->size[0];
-  sintable->size[0] = 945177;
-  emxEnsureCapacity_real_T(sintable, i);
-  emxInit_real_T(&costable, 1);
-  i = costable->size[0];
-  costable->size[0] = 945177;
-  emxEnsureCapacity_real_T(costable, i);
-  emxInit_int32_T(&wrapIndex);
-  i = wrapIndex->size[0];
-  wrapIndex->size[0] = 472588;
-  emxEnsureCapacity_int32_T(wrapIndex, i);
-  wrapIndex_data = wrapIndex->data;
-  emxInit_real_T(&a__1, 1);
-  i = a__1->size[0];
-  a__1->size[0] = 945177;
-  emxEnsureCapacity_real_T(a__1, i);
-  emxInit_creal_T(&ytmp);
-  i = ytmp->size[0];
-  ytmp->size[0] = 472588;
-  emxEnsureCapacity_creal_T(ytmp, i);
-  ytmp_data = ytmp->data;
-  c_FFTImplementationCallback_gen(costable, sintable, a__1);
-  sintable_data = sintable->data;
-  costable_data = costable->data;
-  emxFree_real_T(&a__1);
-  for (b_i = 0; b_i < 524288; b_i++) {
-    i = ((b_i + 1) << 1) - 2;
-    hcostab_data[b_i] = costab_data[i];
-    hsintab_data[b_i] = sintab_data[i];
-    hcostabinv_data[b_i] = costabinv_data[i];
-    hsintabinv_data[b_i] = sintabinv_data[i];
+  for (i = 0; i < 4096; i++) {
+    iy = ((i + 1) << 1) - 2;
+    hcostab[i] = costab_data[iy];
+    hsintab[i] = sintab_data[iy];
   }
-  for (b_i = 0; b_i < 472588; b_i++) {
-    i = b_i << 1;
-    b_re = sintable_data[i];
-    b_im = costable_data[i];
-    reconVar1_data[b_i].re = b_re + 1.0;
-    reconVar1_data[b_i].im = -b_im;
-    reconVar2_data[b_i].re = 1.0 - b_re;
-    reconVar2_data[b_i].im = b_im;
-    if (b_i != 0) {
-      wrapIndex_data[b_i] = 472589 - b_i;
+  for (i = 0; i < 8192; i++) {
+    reconVar1_data[i].re = sintab_data[i] + 1.0;
+    reconVar1_data[i].im = -costab_data[i];
+    reconVar2_data[i].re = 1.0 - sintab_data[i];
+    reconVar2_data[i].im = costab_data[i];
+    if (i != 0) {
+      wrapIndex[i] = 8193 - i;
     } else {
-      wrapIndex_data[0] = 1;
+      wrapIndex[0] = 1;
     }
-    b_re = x_data[i];
-    b_im = x_data[i + 1];
-    re_tmp = wwc_data[b_i + 472587].re;
-    b_re_tmp = wwc_data[b_i + 472587].im;
-    ytmp_data[b_i].re = re_tmp * b_re + b_re_tmp * b_im;
-    ytmp_data[b_i].im = re_tmp * b_im - b_re_tmp * b_re;
   }
-  emxFree_real_T(&sintable);
-  emxFree_real_T(&costable);
-  c_FFTImplementationCallback_r2b(ytmp, hcostab, hsintab, fv);
-  fv_data = fv->data;
-  d_FFTImplementationCallback_r2b(wwc, hcostab, hsintab, y);
-  b_fv_data = y->data;
-  emxFree_real_T(&hsintab);
-  emxFree_real_T(&hcostab);
-  for (b_i = 0; b_i < 1048576; b_i++) {
-    b_re = fv_data[b_i].re;
-    b_im = b_fv_data[b_i].im;
-    re_tmp = fv_data[b_i].im;
-    b_re_tmp = b_fv_data[b_i].re;
-    b_fv_data[b_i].re = b_re * b_re_tmp - re_tmp * b_im;
-    b_fv_data[b_i].im = b_re * b_im + re_tmp * b_re_tmp;
+  ju = 0;
+  iy = 1;
+  for (i = 0; i < 8191; i++) {
+    boolean_T tst;
+    bitrevIndex[i] = iy;
+    iy = 8192;
+    tst = true;
+    while (tst) {
+      iy >>= 1;
+      ju ^= iy;
+      tst = ((ju & iy) == 0);
+    }
+    iy = ju + 1;
   }
-  e_FFTImplementationCallback_r2b(y, hcostabinv, hsintabinv, fv);
-  fv_data = fv->data;
-  emxFree_creal_T(&y);
-  emxFree_real_T(&hsintabinv);
-  emxFree_real_T(&hcostabinv);
-  for (b_i = 0; b_i < 472588; b_i++) {
-    b_re = wwc_data[b_i + 472587].re;
-    b_im = fv_data[b_i + 472587].im;
-    re_tmp = wwc_data[b_i + 472587].im;
-    b_re_tmp = fv_data[b_i + 472587].re;
-    ytmp_data[b_i].re = b_re * b_re_tmp + re_tmp * b_im;
-    ytmp_data[b_i].im = b_re * b_im - re_tmp * b_re_tmp;
+  bitrevIndex[8191] = iy;
+  for (i = 0; i < 8192; i++) {
+    iy = bitrevIndex[i];
+    y_data[iy - 1].re = 0.0;
+    y_data[iy - 1].im = 0.0;
   }
-  emxFree_creal_T(&fv);
-  for (b_i = 0; b_i < 472588; b_i++) {
-    double b_ytmp_re_tmp;
-    double ytmp_im;
-    double ytmp_re;
-    double ytmp_re_tmp;
-    b_re = ytmp_data[b_i].re;
-    b_im = reconVar1_data[b_i].im;
-    re_tmp = ytmp_data[b_i].im;
-    b_re_tmp = reconVar1_data[b_i].re;
-    ytmp_re = ytmp_data[wrapIndex_data[b_i] - 1].re;
-    ytmp_im = -ytmp_data[wrapIndex_data[b_i] - 1].im;
-    ytmp_re_tmp = reconVar2_data[b_i].im;
-    b_ytmp_re_tmp = reconVar2_data[b_i].re;
-    y_data[b_i].re = 0.5 * ((b_re * b_re_tmp - re_tmp * b_im) +
-                            (ytmp_re * b_ytmp_re_tmp - ytmp_im * ytmp_re_tmp));
-    y_data[b_i].im = 0.5 * ((b_re * b_im + re_tmp * b_re_tmp) +
-                            (ytmp_re * ytmp_re_tmp + ytmp_im * b_ytmp_re_tmp));
-    y_data[b_i + 472588].re =
-        0.5 * ((b_re * b_ytmp_re_tmp - re_tmp * ytmp_re_tmp) +
-               (ytmp_re * b_re_tmp - ytmp_im * b_im));
-    y_data[b_i + 472588].im =
-        0.5 * ((b_re * ytmp_re_tmp + re_tmp * b_ytmp_re_tmp) +
-               (ytmp_re * b_im + ytmp_im * b_re_tmp));
+  iy = 2;
+  ju = 4;
+  k = 2048;
+  iheight = 8189;
+  while (k > 0) {
+    int istart;
+    istart = 1;
+    for (j = k; j < 4096; j += k) {
+      int b_i;
+      int ihi;
+      temp1_re = hcostab[j];
+      temp1_im = hsintab[j];
+      b_i = istart;
+      ihi = istart + iheight;
+      while (b_i < ihi) {
+        int b_temp1_re_tmp;
+        b_temp1_re_tmp = b_i + iy;
+        temp1_re_tmp = y_data[b_temp1_re_tmp].im;
+        c_temp1_re_tmp = y_data[b_temp1_re_tmp].re;
+        y_data[b_temp1_re_tmp].re =
+            -(temp1_re * c_temp1_re_tmp - temp1_im * temp1_re_tmp);
+        y_data[b_temp1_re_tmp].im =
+            -(temp1_re * temp1_re_tmp + temp1_im * c_temp1_re_tmp);
+        b_i += ju;
+      }
+      istart++;
+    }
+    k >>= 1;
+    iy = ju;
+    ju += ju;
+    iheight -= iy;
   }
-  emxFree_creal_T(&reconVar2);
+  temp1_re = y_data[0].re;
+  temp1_im = y_data[0].im;
+  temp1_re_tmp =
+      y_data[0].re * reconVar1_data[0].im + y_data[0].im * reconVar1_data[0].re;
+  y_data[0].re = 0.5 * (y_data[0].re * reconVar1_data[0].re -
+                        y_data[0].im * reconVar1_data[0].im);
+  y_data[0].im = 0.5 * temp1_re_tmp;
+  y_data[8192].re =
+      0.5 * (temp1_re * reconVar2_data[0].re - temp1_im * reconVar2_data[0].im);
+  y_data[8192].im =
+      0.5 * (temp1_re * reconVar2_data[0].im + temp1_im * reconVar2_data[0].re);
+  for (i = 0; i < 4095; i++) {
+    double temp2_im;
+    double temp2_re;
+    temp1_re = y_data[i + 1].re;
+    temp1_im = y_data[i + 1].im;
+    iy = wrapIndex[i + 1];
+    temp2_re = y_data[iy - 1].re;
+    temp2_im = y_data[iy - 1].im;
+    temp1_re_tmp = reconVar1_data[i + 1].im;
+    c_temp1_re_tmp = reconVar1_data[i + 1].re;
+    y_data[i + 1].re =
+        0.5 * (temp1_re * c_temp1_re_tmp - temp1_im * temp1_re_tmp);
+    y_data[i + 1].im =
+        0.5 * (temp1_re * temp1_re_tmp + temp1_im * c_temp1_re_tmp);
+    temp1_re_tmp = reconVar2_data[i + 1].im;
+    c_temp1_re_tmp = reconVar2_data[i + 1].re;
+    y_data[i + 8193].re =
+        0.5 * (temp1_re * c_temp1_re_tmp - temp1_im * temp1_re_tmp);
+    y_data[i + 8193].im =
+        0.5 * (temp1_re * temp1_re_tmp + temp1_im * c_temp1_re_tmp);
+    temp1_re_tmp = reconVar1_data[iy - 1].im;
+    c_temp1_re_tmp = reconVar1_data[iy - 1].re;
+    y_data[iy - 1].re =
+        0.5 * (temp2_re * c_temp1_re_tmp - temp2_im * temp1_re_tmp);
+    y_data[iy - 1].im =
+        0.5 * (temp2_re * temp1_re_tmp + temp2_im * c_temp1_re_tmp);
+    temp1_re_tmp = reconVar2_data[iy - 1].im;
+    c_temp1_re_tmp = reconVar2_data[iy - 1].re;
+    y_data[iy + 8191].re =
+        0.5 * (temp2_re * c_temp1_re_tmp - temp2_im * temp1_re_tmp);
+    y_data[iy + 8191].im =
+        0.5 * (temp2_re * temp1_re_tmp + temp2_im * c_temp1_re_tmp);
+  }
+  temp1_re = y_data[4096].re;
+  temp1_im = y_data[4096].im;
+  temp1_re_tmp = y_data[4096].re * reconVar1_data[4096].im +
+                 y_data[4096].im * reconVar1_data[4096].re;
+  y_data[4096].re = 0.5 * (y_data[4096].re * reconVar1_data[4096].re -
+                           y_data[4096].im * reconVar1_data[4096].im);
   emxFree_creal_T(&reconVar1);
-  emxFree_int32_T(&wrapIndex);
-  emxFree_creal_T(&ytmp);
+  y_data[4096].im = 0.5 * temp1_re_tmp;
+  y_data[12288].re = 0.5 * (temp1_re * reconVar2_data[4096].re -
+                            temp1_im * reconVar2_data[4096].im);
+  y_data[12288].im = 0.5 * (temp1_re * reconVar2_data[4096].im +
+                            temp1_im * reconVar2_data[4096].re);
+  emxFree_creal_T(&y);
 }
 
 /*
- * Arguments    : emxArray_real_T *costab
- *                emxArray_real_T *sintab
- *                emxArray_real_T *sintabinv
+ * Arguments    : emxArray_creal_T *y
  * Return Type  : void
  */
-static void c_FFTImplementationCallback_gen(emxArray_real_T *costab,
-                                            emxArray_real_T *sintab,
-                                            emxArray_real_T *sintabinv)
-{
-  emxArray_real_T *costab1q;
-  double *costab1q_data;
-  double *costab_data;
-  double *sintab_data;
-  double *sintabinv_data;
-  int i;
-  int k;
-  emxInit_real_T(&costab1q, 1);
-  i = costab1q->size[0];
-  costab1q->size[0] = 472589;
-  emxEnsureCapacity_real_T(costab1q, i);
-  costab1q_data = costab1q->data;
-  i = sintabinv->size[0];
-  sintabinv->size[0] = 945177;
-  emxEnsureCapacity_real_T(sintabinv, i);
-  sintabinv_data = sintabinv->data;
-  i = sintab->size[0];
-  sintab->size[0] = 945177;
-  emxEnsureCapacity_real_T(sintab, i);
-  sintab_data = sintab->data;
-  i = costab->size[0];
-  costab->size[0] = 945177;
-  emxEnsureCapacity_real_T(costab, i);
-  costab_data = costab->data;
-  costab1q_data[0] = 1.0;
-  for (k = 0; k < 236294; k++) {
-    costab1q_data[k + 1] = cos(3.3238176314144595E-6 * ((double)k + 1.0));
-  }
-  for (k = 0; k < 236293; k++) {
-    costab1q_data[k + 236295] =
-        sin(3.3238176314144595E-6 * (472588.0 - ((double)k + 236295.0)));
-  }
-  costab1q_data[472588] = 0.0;
-  costab_data[0] = 1.0;
-  sintab_data[0] = 0.0;
-  for (k = 0; k < 472588; k++) {
-    double b_sintabinv_tmp;
-    double sintabinv_tmp;
-    sintabinv_tmp = costab1q_data[472587 - k];
-    sintabinv_data[k + 1] = sintabinv_tmp;
-    b_sintabinv_tmp = costab1q_data[k + 1];
-    sintabinv_data[k + 472589] = b_sintabinv_tmp;
-    costab_data[k + 1] = b_sintabinv_tmp;
-    sintab_data[k + 1] = -sintabinv_tmp;
-    costab_data[k + 472589] = -sintabinv_tmp;
-    sintab_data[k + 472589] = -b_sintabinv_tmp;
-  }
-  emxFree_real_T(&costab1q);
-}
-
-/*
- * Arguments    : const emxArray_creal_T *x
- *                const emxArray_real_T *costab
- *                const emxArray_real_T *sintab
- *                emxArray_creal_T *y
- * Return Type  : void
- */
-static void c_FFTImplementationCallback_r2b(const emxArray_creal_T *x,
-                                            const emxArray_real_T *costab,
-                                            const emxArray_real_T *sintab,
-                                            emxArray_creal_T *y)
-{
-  const creal_T *x_data;
-  creal_T *y_data;
-  const double *costab_data;
-  const double *sintab_data;
-  double im;
-  double re;
-  double temp_im;
-  double temp_re;
-  int b_i;
-  int i;
-  int iDelta;
-  int iDelta2;
-  int iheight;
-  int iy;
-  int ju;
-  int k;
-  sintab_data = sintab->data;
-  costab_data = costab->data;
-  x_data = x->data;
-  iy = y->size[0];
-  y->size[0] = 1048576;
-  emxEnsureCapacity_creal_T(y, iy);
-  y_data = y->data;
-  for (i = 0; i < 1048576; i++) {
-    y_data[i].re = 0.0;
-    y_data[i].im = 0.0;
-  }
-  iy = 0;
-  ju = 0;
-  for (i = 0; i < 472587; i++) {
-    boolean_T tst;
-    y_data[iy] = x_data[i];
-    iy = 1048576;
-    tst = true;
-    while (tst) {
-      iy >>= 1;
-      ju ^= iy;
-      tst = ((ju & iy) == 0);
-    }
-    iy = ju;
-  }
-  y_data[iy] = x_data[472587];
-  for (i = 0; i <= 1048574; i += 2) {
-    temp_re = y_data[i + 1].re;
-    temp_im = y_data[i + 1].im;
-    re = y_data[i].re;
-    im = y_data[i].im;
-    y_data[i + 1].re = re - temp_re;
-    y_data[i + 1].im = y_data[i].im - y_data[i + 1].im;
-    re += temp_re;
-    im += temp_im;
-    y_data[i].re = re;
-    y_data[i].im = im;
-  }
-  iDelta = 2;
-  iDelta2 = 4;
-  k = 262144;
-  iheight = 1048573;
-  while (k > 0) {
-    for (b_i = 0; b_i < iheight; b_i += iDelta2) {
-      iy = b_i + iDelta;
-      temp_re = y_data[iy].re;
-      temp_im = y_data[iy].im;
-      y_data[iy].re = y_data[b_i].re - temp_re;
-      y_data[iy].im = y_data[b_i].im - temp_im;
-      y_data[b_i].re += temp_re;
-      y_data[b_i].im += temp_im;
-    }
-    iy = 1;
-    for (ju = k; ju < 524288; ju += k) {
-      double twid_im;
-      double twid_re;
-      int ihi;
-      twid_re = costab_data[ju];
-      twid_im = sintab_data[ju];
-      b_i = iy;
-      ihi = iy + iheight;
-      while (b_i < ihi) {
-        int temp_re_tmp;
-        temp_re_tmp = b_i + iDelta;
-        re = y_data[temp_re_tmp].im;
-        im = y_data[temp_re_tmp].re;
-        temp_re = twid_re * im - twid_im * re;
-        temp_im = twid_re * re + twid_im * im;
-        y_data[temp_re_tmp].re = y_data[b_i].re - temp_re;
-        y_data[temp_re_tmp].im = y_data[b_i].im - temp_im;
-        y_data[b_i].re += temp_re;
-        y_data[b_i].im += temp_im;
-        b_i += iDelta2;
-      }
-      iy++;
-    }
-    k = (int)((unsigned int)k >> 1);
-    iDelta = iDelta2;
-    iDelta2 += iDelta2;
-    iheight -= iDelta;
-  }
-}
-
-/*
- * Arguments    : const emxArray_creal_T *x
- *                const emxArray_real_T *costab
- *                const emxArray_real_T *sintab
- *                emxArray_creal_T *y
- * Return Type  : void
- */
-static void d_FFTImplementationCallback_r2b(const emxArray_creal_T *x,
-                                            const emxArray_real_T *costab,
-                                            const emxArray_real_T *sintab,
-                                            emxArray_creal_T *y)
-{
-  const creal_T *x_data;
-  creal_T *y_data;
-  const double *costab_data;
-  const double *sintab_data;
-  double im;
-  double re;
-  double temp_im;
-  double temp_re;
-  int b_i;
-  int i;
-  int iDelta;
-  int iDelta2;
-  int iheight;
-  int iy;
-  int ju;
-  int k;
-  sintab_data = sintab->data;
-  costab_data = costab->data;
-  x_data = x->data;
-  iy = y->size[0];
-  y->size[0] = 1048576;
-  emxEnsureCapacity_creal_T(y, iy);
-  y_data = y->data;
-  for (i = 0; i < 1048576; i++) {
-    y_data[i].re = 0.0;
-    y_data[i].im = 0.0;
-  }
-  iy = 0;
-  ju = 0;
-  for (i = 0; i < 945174; i++) {
-    boolean_T tst;
-    y_data[iy] = x_data[i];
-    iy = 1048576;
-    tst = true;
-    while (tst) {
-      iy >>= 1;
-      ju ^= iy;
-      tst = ((ju & iy) == 0);
-    }
-    iy = ju;
-  }
-  y_data[iy] = x_data[945174];
-  for (i = 0; i <= 1048574; i += 2) {
-    temp_re = y_data[i + 1].re;
-    temp_im = y_data[i + 1].im;
-    re = y_data[i].re;
-    im = y_data[i].im;
-    y_data[i + 1].re = re - temp_re;
-    y_data[i + 1].im = y_data[i].im - y_data[i + 1].im;
-    re += temp_re;
-    im += temp_im;
-    y_data[i].re = re;
-    y_data[i].im = im;
-  }
-  iDelta = 2;
-  iDelta2 = 4;
-  k = 262144;
-  iheight = 1048573;
-  while (k > 0) {
-    for (b_i = 0; b_i < iheight; b_i += iDelta2) {
-      iy = b_i + iDelta;
-      temp_re = y_data[iy].re;
-      temp_im = y_data[iy].im;
-      y_data[iy].re = y_data[b_i].re - temp_re;
-      y_data[iy].im = y_data[b_i].im - temp_im;
-      y_data[b_i].re += temp_re;
-      y_data[b_i].im += temp_im;
-    }
-    iy = 1;
-    for (ju = k; ju < 524288; ju += k) {
-      double twid_im;
-      double twid_re;
-      int ihi;
-      twid_re = costab_data[ju];
-      twid_im = sintab_data[ju];
-      b_i = iy;
-      ihi = iy + iheight;
-      while (b_i < ihi) {
-        int temp_re_tmp;
-        temp_re_tmp = b_i + iDelta;
-        re = y_data[temp_re_tmp].im;
-        im = y_data[temp_re_tmp].re;
-        temp_re = twid_re * im - twid_im * re;
-        temp_im = twid_re * re + twid_im * im;
-        y_data[temp_re_tmp].re = y_data[b_i].re - temp_re;
-        y_data[temp_re_tmp].im = y_data[b_i].im - temp_im;
-        y_data[b_i].re += temp_re;
-        y_data[b_i].im += temp_im;
-        b_i += iDelta2;
-      }
-      iy++;
-    }
-    k = (int)((unsigned int)k >> 1);
-    iDelta = iDelta2;
-    iDelta2 += iDelta2;
-    iheight -= iDelta;
-  }
-}
-
-/*
- * Arguments    : const emxArray_creal_T *x
- *                const emxArray_real_T *costab
- *                const emxArray_real_T *sintab
- *                emxArray_creal_T *y
- * Return Type  : void
- */
-static void e_FFTImplementationCallback_r2b(const emxArray_creal_T *x,
-                                            const emxArray_real_T *costab,
-                                            const emxArray_real_T *sintab,
-                                            emxArray_creal_T *y)
-{
-  const creal_T *x_data;
-  creal_T *y_data;
-  const double *costab_data;
-  const double *sintab_data;
-  double im;
-  double re;
-  double temp_im;
-  double temp_re;
-  int b_i;
-  int i;
-  int iDelta;
-  int iDelta2;
-  int iheight;
-  int iy;
-  int ju;
-  int k;
-  sintab_data = sintab->data;
-  costab_data = costab->data;
-  x_data = x->data;
-  iy = y->size[0];
-  y->size[0] = 1048576;
-  emxEnsureCapacity_creal_T(y, iy);
-  y_data = y->data;
-  iy = 0;
-  ju = 0;
-  for (i = 0; i < 1048575; i++) {
-    boolean_T tst;
-    y_data[iy] = x_data[i];
-    iy = 1048576;
-    tst = true;
-    while (tst) {
-      iy >>= 1;
-      ju ^= iy;
-      tst = ((ju & iy) == 0);
-    }
-    iy = ju;
-  }
-  y_data[iy] = x_data[1048575];
-  for (i = 0; i <= 1048574; i += 2) {
-    temp_re = y_data[i + 1].re;
-    temp_im = y_data[i + 1].im;
-    re = y_data[i].re;
-    im = y_data[i].im;
-    y_data[i + 1].re = re - temp_re;
-    y_data[i + 1].im = y_data[i].im - y_data[i + 1].im;
-    re += temp_re;
-    im += temp_im;
-    y_data[i].re = re;
-    y_data[i].im = im;
-  }
-  iDelta = 2;
-  iDelta2 = 4;
-  k = 262144;
-  iheight = 1048573;
-  while (k > 0) {
-    for (b_i = 0; b_i < iheight; b_i += iDelta2) {
-      iy = b_i + iDelta;
-      temp_re = y_data[iy].re;
-      temp_im = y_data[iy].im;
-      y_data[iy].re = y_data[b_i].re - temp_re;
-      y_data[iy].im = y_data[b_i].im - temp_im;
-      y_data[b_i].re += temp_re;
-      y_data[b_i].im += temp_im;
-    }
-    iy = 1;
-    for (ju = k; ju < 524288; ju += k) {
-      double twid_im;
-      double twid_re;
-      int ihi;
-      twid_re = costab_data[ju];
-      twid_im = sintab_data[ju];
-      b_i = iy;
-      ihi = iy + iheight;
-      while (b_i < ihi) {
-        int temp_re_tmp;
-        temp_re_tmp = b_i + iDelta;
-        re = y_data[temp_re_tmp].im;
-        im = y_data[temp_re_tmp].re;
-        temp_re = twid_re * im - twid_im * re;
-        temp_im = twid_re * re + twid_im * im;
-        y_data[temp_re_tmp].re = y_data[b_i].re - temp_re;
-        y_data[temp_re_tmp].im = y_data[b_i].im - temp_im;
-        y_data[b_i].re += temp_re;
-        y_data[b_i].im += temp_im;
-        b_i += iDelta2;
-      }
-      iy++;
-    }
-    k = (int)((unsigned int)k >> 1);
-    iDelta = iDelta2;
-    iDelta2 += iDelta2;
-    iheight -= iDelta;
-  }
-  for (i = 0; i < 1048576; i++) {
-    y_data[i].re *= 9.5367431640625E-7;
-    y_data[i].im *= 9.5367431640625E-7;
-  }
-}
-
-/*
- * Arguments    : const emxArray_real_T *x
- *                const emxArray_real_T *costab
- *                const emxArray_real_T *sintab
- *                const emxArray_real_T *sintabinv
- *                emxArray_creal_T *y
- * Return Type  : void
- */
-void c_FFTImplementationCallback_dob(const emxArray_real_T *x,
-                                     const emxArray_real_T *costab,
-                                     const emxArray_real_T *sintab,
-                                     const emxArray_real_T *sintabinv,
-                                     emxArray_creal_T *y)
-{
-  emxArray_creal_T *wwc;
-  creal_T *wwc_data;
-  int k;
-  int rt;
-  emxInit_creal_T(&wwc);
-  rt = wwc->size[0];
-  wwc->size[0] = 945175;
-  emxEnsureCapacity_creal_T(wwc, rt);
-  wwc_data = wwc->data;
-  rt = y->size[0];
-  y->size[0] = 945176;
-  emxEnsureCapacity_creal_T(y, rt);
-  rt = 0;
-  wwc_data[472587].re = 1.0;
-  wwc_data[472587].im = 0.0;
-  for (k = 0; k < 472587; k++) {
-    double nt_im;
-    double nt_re;
-    int b_y;
-    b_y = ((k + 1) << 1) - 1;
-    if (945176 - rt <= b_y) {
-      rt = (b_y + rt) - 945176;
-    } else {
-      rt += b_y;
-    }
-    nt_im = -3.141592653589793 * (double)rt / 472588.0;
-    nt_re = cos(nt_im);
-    nt_im = sin(nt_im);
-    wwc_data[472586 - k].re = nt_re;
-    wwc_data[472586 - k].im = -nt_im;
-  }
-  for (k = 472586; k >= 0; k--) {
-    wwc_data[k + 472588] = wwc_data[472586 - k];
-  }
-  c_FFTImplementationCallback_doH(x, y, wwc, costab, sintab, costab, sintabinv);
-  emxFree_creal_T(&wwc);
-}
-
-/*
- * Arguments    : const emxArray_real_T *x
- *                emxArray_creal_T *y
- * Return Type  : void
- */
-void d_FFTImplementationCallback_doH(const emxArray_real_T *x,
-                                     emxArray_creal_T *y)
+void d_FFTImplementationCallback_doH(emxArray_creal_T *y)
 {
   static const creal_T reconVar1[512] = {{
                                              1.0, /* re */
@@ -4797,518 +4284,6 @@ void d_FFTImplementationCallback_doH(const emxArray_real_T *x,
                                              1.0061358846491544, /* re */
                                              -0.9999811752826011 /* im */
                                          }};
-  static const double dv[256] = {1.0,
-                                 0.9999247018391445,
-                                 0.9996988186962042,
-                                 0.9993223845883495,
-                                 0.9987954562051724,
-                                 0.9981181129001492,
-                                 0.9972904566786902,
-                                 0.996312612182778,
-                                 0.9951847266721969,
-                                 0.9939069700023561,
-                                 0.99247953459871,
-                                 0.99090263542778,
-                                 0.989176509964781,
-                                 0.9873014181578584,
-                                 0.9852776423889412,
-                                 0.9831054874312163,
-                                 0.9807852804032304,
-                                 0.9783173707196277,
-                                 0.9757021300385286,
-                                 0.9729399522055602,
-                                 0.970031253194544,
-                                 0.9669764710448521,
-                                 0.9637760657954398,
-                                 0.9604305194155658,
-                                 0.9569403357322088,
-                                 0.9533060403541939,
-                                 0.9495281805930367,
-                                 0.9456073253805213,
-                                 0.9415440651830208,
-                                 0.937339011912575,
-                                 0.932992798834739,
-                                 0.9285060804732156,
-                                 0.9238795325112867,
-                                 0.9191138516900578,
-                                 0.9142097557035307,
-                                 0.9091679830905224,
-                                 0.9039892931234433,
-                                 0.8986744656939538,
-                                 0.8932243011955153,
-                                 0.8876396204028539,
-                                 0.881921264348355,
-                                 0.8760700941954066,
-                                 0.8700869911087115,
-                                 0.8639728561215867,
-                                 0.8577286100002721,
-                                 0.8513551931052652,
-                                 0.8448535652497071,
-                                 0.8382247055548381,
-                                 0.8314696123025452,
-                                 0.8245893027850253,
-                                 0.8175848131515837,
-                                 0.8104571982525948,
-                                 0.8032075314806449,
-                                 0.7958369046088836,
-                                 0.7883464276266063,
-                                 0.7807372285720945,
-                                 0.773010453362737,
-                                 0.765167265622459,
-                                 0.7572088465064846,
-                                 0.7491363945234594,
-                                 0.7409511253549592,
-                                 0.7326542716724128,
-                                 0.724247082951467,
-                                 0.7157308252838186,
-                                 0.7071067811865476,
-                                 0.6983762494089729,
-                                 0.6895405447370668,
-                                 0.680600997795453,
-                                 0.6715589548470183,
-                                 0.6624157775901718,
-                                 0.6531728429537768,
-                                 0.6438315428897914,
-                                 0.6343932841636455,
-                                 0.6248594881423863,
-                                 0.6152315905806268,
-                                 0.6055110414043255,
-                                 0.5956993044924334,
-                                 0.5857978574564389,
-                                 0.5758081914178453,
-                                 0.5657318107836131,
-                                 0.5555702330196022,
-                                 0.5453249884220465,
-                                 0.5349976198870972,
-                                 0.524589682678469,
-                                 0.5141027441932217,
-                                 0.5035383837257176,
-                                 0.49289819222978404,
-                                 0.4821837720791227,
-                                 0.47139673682599764,
-                                 0.46053871095824,
-                                 0.44961132965460654,
-                                 0.43861623853852766,
-                                 0.4275550934302821,
-                                 0.41642956009763715,
-                                 0.40524131400498986,
-                                 0.3939920400610481,
-                                 0.3826834323650898,
-                                 0.3713171939518375,
-                                 0.3598950365349881,
-                                 0.34841868024943456,
-                                 0.33688985339222005,
-                                 0.3253102921622629,
-                                 0.3136817403988915,
-                                 0.3020059493192281,
-                                 0.29028467725446233,
-                                 0.27851968938505306,
-                                 0.26671275747489837,
-                                 0.25486565960451457,
-                                 0.24298017990326387,
-                                 0.2310581082806711,
-                                 0.2191012401568698,
-                                 0.20711137619221856,
-                                 0.19509032201612825,
-                                 0.18303988795514095,
-                                 0.17096188876030122,
-                                 0.15885814333386145,
-                                 0.14673047445536175,
-                                 0.13458070850712617,
-                                 0.1224106751992162,
-                                 0.11022220729388306,
-                                 0.0980171403295606,
-                                 0.0857973123444399,
-                                 0.07356456359966743,
-                                 0.06132073630220858,
-                                 0.049067674327418015,
-                                 0.03680722294135883,
-                                 0.024541228522912288,
-                                 0.012271538285719925,
-                                 0.0,
-                                 -0.012271538285719925,
-                                 -0.024541228522912288,
-                                 -0.03680722294135883,
-                                 -0.049067674327418015,
-                                 -0.06132073630220858,
-                                 -0.07356456359966743,
-                                 -0.0857973123444399,
-                                 -0.0980171403295606,
-                                 -0.11022220729388306,
-                                 -0.1224106751992162,
-                                 -0.13458070850712617,
-                                 -0.14673047445536175,
-                                 -0.15885814333386145,
-                                 -0.17096188876030122,
-                                 -0.18303988795514095,
-                                 -0.19509032201612825,
-                                 -0.20711137619221856,
-                                 -0.2191012401568698,
-                                 -0.2310581082806711,
-                                 -0.24298017990326387,
-                                 -0.25486565960451457,
-                                 -0.26671275747489837,
-                                 -0.27851968938505306,
-                                 -0.29028467725446233,
-                                 -0.3020059493192281,
-                                 -0.3136817403988915,
-                                 -0.3253102921622629,
-                                 -0.33688985339222005,
-                                 -0.34841868024943456,
-                                 -0.3598950365349881,
-                                 -0.3713171939518375,
-                                 -0.3826834323650898,
-                                 -0.3939920400610481,
-                                 -0.40524131400498986,
-                                 -0.41642956009763715,
-                                 -0.4275550934302821,
-                                 -0.43861623853852766,
-                                 -0.44961132965460654,
-                                 -0.46053871095824,
-                                 -0.47139673682599764,
-                                 -0.4821837720791227,
-                                 -0.49289819222978404,
-                                 -0.5035383837257176,
-                                 -0.5141027441932217,
-                                 -0.524589682678469,
-                                 -0.5349976198870972,
-                                 -0.5453249884220465,
-                                 -0.5555702330196022,
-                                 -0.5657318107836131,
-                                 -0.5758081914178453,
-                                 -0.5857978574564389,
-                                 -0.5956993044924334,
-                                 -0.6055110414043255,
-                                 -0.6152315905806268,
-                                 -0.6248594881423863,
-                                 -0.6343932841636455,
-                                 -0.6438315428897914,
-                                 -0.6531728429537768,
-                                 -0.6624157775901718,
-                                 -0.6715589548470183,
-                                 -0.680600997795453,
-                                 -0.6895405447370668,
-                                 -0.6983762494089729,
-                                 -0.7071067811865476,
-                                 -0.7157308252838186,
-                                 -0.724247082951467,
-                                 -0.7326542716724128,
-                                 -0.7409511253549592,
-                                 -0.7491363945234594,
-                                 -0.7572088465064846,
-                                 -0.765167265622459,
-                                 -0.773010453362737,
-                                 -0.7807372285720945,
-                                 -0.7883464276266063,
-                                 -0.7958369046088836,
-                                 -0.8032075314806449,
-                                 -0.8104571982525948,
-                                 -0.8175848131515837,
-                                 -0.8245893027850253,
-                                 -0.8314696123025452,
-                                 -0.8382247055548381,
-                                 -0.8448535652497071,
-                                 -0.8513551931052652,
-                                 -0.8577286100002721,
-                                 -0.8639728561215867,
-                                 -0.8700869911087115,
-                                 -0.8760700941954066,
-                                 -0.881921264348355,
-                                 -0.8876396204028539,
-                                 -0.8932243011955153,
-                                 -0.8986744656939538,
-                                 -0.9039892931234433,
-                                 -0.9091679830905224,
-                                 -0.9142097557035307,
-                                 -0.9191138516900578,
-                                 -0.9238795325112867,
-                                 -0.9285060804732156,
-                                 -0.932992798834739,
-                                 -0.937339011912575,
-                                 -0.9415440651830208,
-                                 -0.9456073253805213,
-                                 -0.9495281805930367,
-                                 -0.9533060403541939,
-                                 -0.9569403357322088,
-                                 -0.9604305194155658,
-                                 -0.9637760657954398,
-                                 -0.9669764710448521,
-                                 -0.970031253194544,
-                                 -0.9729399522055602,
-                                 -0.9757021300385286,
-                                 -0.9783173707196277,
-                                 -0.9807852804032304,
-                                 -0.9831054874312163,
-                                 -0.9852776423889412,
-                                 -0.9873014181578584,
-                                 -0.989176509964781,
-                                 -0.99090263542778,
-                                 -0.99247953459871,
-                                 -0.9939069700023561,
-                                 -0.9951847266721969,
-                                 -0.996312612182778,
-                                 -0.9972904566786902,
-                                 -0.9981181129001492,
-                                 -0.9987954562051724,
-                                 -0.9993223845883495,
-                                 -0.9996988186962042,
-                                 -0.9999247018391445};
-  static const double dv1[256] = {0.0,
-                                  -0.012271538285719925,
-                                  -0.024541228522912288,
-                                  -0.03680722294135883,
-                                  -0.049067674327418015,
-                                  -0.06132073630220858,
-                                  -0.07356456359966743,
-                                  -0.0857973123444399,
-                                  -0.0980171403295606,
-                                  -0.11022220729388306,
-                                  -0.1224106751992162,
-                                  -0.13458070850712617,
-                                  -0.14673047445536175,
-                                  -0.15885814333386145,
-                                  -0.17096188876030122,
-                                  -0.18303988795514095,
-                                  -0.19509032201612825,
-                                  -0.20711137619221856,
-                                  -0.2191012401568698,
-                                  -0.2310581082806711,
-                                  -0.24298017990326387,
-                                  -0.25486565960451457,
-                                  -0.26671275747489837,
-                                  -0.27851968938505306,
-                                  -0.29028467725446233,
-                                  -0.3020059493192281,
-                                  -0.3136817403988915,
-                                  -0.3253102921622629,
-                                  -0.33688985339222005,
-                                  -0.34841868024943456,
-                                  -0.3598950365349881,
-                                  -0.3713171939518375,
-                                  -0.3826834323650898,
-                                  -0.3939920400610481,
-                                  -0.40524131400498986,
-                                  -0.41642956009763715,
-                                  -0.4275550934302821,
-                                  -0.43861623853852766,
-                                  -0.44961132965460654,
-                                  -0.46053871095824,
-                                  -0.47139673682599764,
-                                  -0.4821837720791227,
-                                  -0.49289819222978404,
-                                  -0.5035383837257176,
-                                  -0.5141027441932217,
-                                  -0.524589682678469,
-                                  -0.5349976198870972,
-                                  -0.5453249884220465,
-                                  -0.5555702330196022,
-                                  -0.5657318107836131,
-                                  -0.5758081914178453,
-                                  -0.5857978574564389,
-                                  -0.5956993044924334,
-                                  -0.6055110414043255,
-                                  -0.6152315905806268,
-                                  -0.6248594881423863,
-                                  -0.6343932841636455,
-                                  -0.6438315428897914,
-                                  -0.6531728429537768,
-                                  -0.6624157775901718,
-                                  -0.6715589548470183,
-                                  -0.680600997795453,
-                                  -0.6895405447370668,
-                                  -0.6983762494089729,
-                                  -0.7071067811865476,
-                                  -0.7157308252838186,
-                                  -0.724247082951467,
-                                  -0.7326542716724128,
-                                  -0.7409511253549592,
-                                  -0.7491363945234594,
-                                  -0.7572088465064846,
-                                  -0.765167265622459,
-                                  -0.773010453362737,
-                                  -0.7807372285720945,
-                                  -0.7883464276266063,
-                                  -0.7958369046088836,
-                                  -0.8032075314806449,
-                                  -0.8104571982525948,
-                                  -0.8175848131515837,
-                                  -0.8245893027850253,
-                                  -0.8314696123025452,
-                                  -0.8382247055548381,
-                                  -0.8448535652497071,
-                                  -0.8513551931052652,
-                                  -0.8577286100002721,
-                                  -0.8639728561215867,
-                                  -0.8700869911087115,
-                                  -0.8760700941954066,
-                                  -0.881921264348355,
-                                  -0.8876396204028539,
-                                  -0.8932243011955153,
-                                  -0.8986744656939538,
-                                  -0.9039892931234433,
-                                  -0.9091679830905224,
-                                  -0.9142097557035307,
-                                  -0.9191138516900578,
-                                  -0.9238795325112867,
-                                  -0.9285060804732156,
-                                  -0.932992798834739,
-                                  -0.937339011912575,
-                                  -0.9415440651830208,
-                                  -0.9456073253805213,
-                                  -0.9495281805930367,
-                                  -0.9533060403541939,
-                                  -0.9569403357322088,
-                                  -0.9604305194155658,
-                                  -0.9637760657954398,
-                                  -0.9669764710448521,
-                                  -0.970031253194544,
-                                  -0.9729399522055602,
-                                  -0.9757021300385286,
-                                  -0.9783173707196277,
-                                  -0.9807852804032304,
-                                  -0.9831054874312163,
-                                  -0.9852776423889412,
-                                  -0.9873014181578584,
-                                  -0.989176509964781,
-                                  -0.99090263542778,
-                                  -0.99247953459871,
-                                  -0.9939069700023561,
-                                  -0.9951847266721969,
-                                  -0.996312612182778,
-                                  -0.9972904566786902,
-                                  -0.9981181129001492,
-                                  -0.9987954562051724,
-                                  -0.9993223845883495,
-                                  -0.9996988186962042,
-                                  -0.9999247018391445,
-                                  -1.0,
-                                  -0.9999247018391445,
-                                  -0.9996988186962042,
-                                  -0.9993223845883495,
-                                  -0.9987954562051724,
-                                  -0.9981181129001492,
-                                  -0.9972904566786902,
-                                  -0.996312612182778,
-                                  -0.9951847266721969,
-                                  -0.9939069700023561,
-                                  -0.99247953459871,
-                                  -0.99090263542778,
-                                  -0.989176509964781,
-                                  -0.9873014181578584,
-                                  -0.9852776423889412,
-                                  -0.9831054874312163,
-                                  -0.9807852804032304,
-                                  -0.9783173707196277,
-                                  -0.9757021300385286,
-                                  -0.9729399522055602,
-                                  -0.970031253194544,
-                                  -0.9669764710448521,
-                                  -0.9637760657954398,
-                                  -0.9604305194155658,
-                                  -0.9569403357322088,
-                                  -0.9533060403541939,
-                                  -0.9495281805930367,
-                                  -0.9456073253805213,
-                                  -0.9415440651830208,
-                                  -0.937339011912575,
-                                  -0.932992798834739,
-                                  -0.9285060804732156,
-                                  -0.9238795325112867,
-                                  -0.9191138516900578,
-                                  -0.9142097557035307,
-                                  -0.9091679830905224,
-                                  -0.9039892931234433,
-                                  -0.8986744656939538,
-                                  -0.8932243011955153,
-                                  -0.8876396204028539,
-                                  -0.881921264348355,
-                                  -0.8760700941954066,
-                                  -0.8700869911087115,
-                                  -0.8639728561215867,
-                                  -0.8577286100002721,
-                                  -0.8513551931052652,
-                                  -0.8448535652497071,
-                                  -0.8382247055548381,
-                                  -0.8314696123025452,
-                                  -0.8245893027850253,
-                                  -0.8175848131515837,
-                                  -0.8104571982525948,
-                                  -0.8032075314806449,
-                                  -0.7958369046088836,
-                                  -0.7883464276266063,
-                                  -0.7807372285720945,
-                                  -0.773010453362737,
-                                  -0.765167265622459,
-                                  -0.7572088465064846,
-                                  -0.7491363945234594,
-                                  -0.7409511253549592,
-                                  -0.7326542716724128,
-                                  -0.724247082951467,
-                                  -0.7157308252838186,
-                                  -0.7071067811865476,
-                                  -0.6983762494089729,
-                                  -0.6895405447370668,
-                                  -0.680600997795453,
-                                  -0.6715589548470183,
-                                  -0.6624157775901718,
-                                  -0.6531728429537768,
-                                  -0.6438315428897914,
-                                  -0.6343932841636455,
-                                  -0.6248594881423863,
-                                  -0.6152315905806268,
-                                  -0.6055110414043255,
-                                  -0.5956993044924334,
-                                  -0.5857978574564389,
-                                  -0.5758081914178453,
-                                  -0.5657318107836131,
-                                  -0.5555702330196022,
-                                  -0.5453249884220465,
-                                  -0.5349976198870972,
-                                  -0.524589682678469,
-                                  -0.5141027441932217,
-                                  -0.5035383837257176,
-                                  -0.49289819222978404,
-                                  -0.4821837720791227,
-                                  -0.47139673682599764,
-                                  -0.46053871095824,
-                                  -0.44961132965460654,
-                                  -0.43861623853852766,
-                                  -0.4275550934302821,
-                                  -0.41642956009763715,
-                                  -0.40524131400498986,
-                                  -0.3939920400610481,
-                                  -0.3826834323650898,
-                                  -0.3713171939518375,
-                                  -0.3598950365349881,
-                                  -0.34841868024943456,
-                                  -0.33688985339222005,
-                                  -0.3253102921622629,
-                                  -0.3136817403988915,
-                                  -0.3020059493192281,
-                                  -0.29028467725446233,
-                                  -0.27851968938505306,
-                                  -0.26671275747489837,
-                                  -0.25486565960451457,
-                                  -0.24298017990326387,
-                                  -0.2310581082806711,
-                                  -0.2191012401568698,
-                                  -0.20711137619221856,
-                                  -0.19509032201612825,
-                                  -0.18303988795514095,
-                                  -0.17096188876030122,
-                                  -0.15885814333386145,
-                                  -0.14673047445536175,
-                                  -0.13458070850712617,
-                                  -0.1224106751992162,
-                                  -0.11022220729388306,
-                                  -0.0980171403295606,
-                                  -0.0857973123444399,
-                                  -0.07356456359966743,
-                                  -0.06132073630220858,
-                                  -0.049067674327418015,
-                                  -0.03680722294135883,
-                                  -0.024541228522912288,
-                                  -0.012271538285719925};
   static const short iv[512] = {
       1,   512, 511, 510, 509, 508, 507, 506, 505, 504, 503, 502, 501, 500, 499,
       498, 497, 496, 495, 494, 493, 492, 491, 490, 489, 488, 487, 486, 485, 484,
@@ -5346,14 +4321,13 @@ void d_FFTImplementationCallback_doH(const emxArray_real_T *x,
       18,  17,  16,  15,  14,  13,  12,  11,  10,  9,   8,   7,   6,   5,   4,
       3,   2};
   creal_T *y_data;
-  const double *x_data;
   int bitrevIndex[512];
   int b_j1;
   int chan;
   int iy;
+  int j;
   int ju;
   y_data = y->data;
-  x_data = x->data;
   ju = 0;
   iy = 1;
   for (b_j1 = 0; b_j1 < 511; b_j1++) {
@@ -5369,143 +4343,101 @@ void d_FFTImplementationCallback_doH(const emxArray_real_T *x,
     iy = ju + 1;
   }
   bitrevIndex[511] = iy;
-  for (chan = 0; chan < 1845; chan++) {
-    double b_temp2_re_tmp;
-    double c_temp_re_tmp;
-    double temp2_im;
-    double temp2_re;
-    double temp2_re_tmp;
-    double temp_im;
-    double temp_re;
-    double temp_re_tmp;
-    int b_temp_re_tmp;
-    int iDelta;
-    int iDelta2;
+  for (chan = 0; chan < 31; chan++) {
+    double b_temp1_re_tmp;
+    double temp1_im;
+    double temp1_re;
+    double temp1_re_tmp;
     int iheight;
-    int ix;
     int k;
-    ix = chan << 10;
+    int yoff;
+    yoff = chan << 10;
     for (b_j1 = 0; b_j1 < 512; b_j1++) {
-      iy = ix + (b_j1 << 1);
-      ju = (ix + bitrevIndex[b_j1]) - 1;
-      y_data[ju].re = x_data[iy];
-      y_data[ju].im = x_data[iy + 1];
+      iy = (yoff + bitrevIndex[b_j1]) - 1;
+      y_data[iy].re = 0.0;
+      y_data[iy].im = 0.0;
     }
-    for (b_j1 = ix; b_j1 <= ix + 510; b_j1 += 2) {
-      temp_re = y_data[b_j1 + 1].re;
-      temp_im = y_data[b_j1 + 1].im;
-      y_data[b_j1 + 1].re = y_data[b_j1].re - temp_re;
-      y_data[b_j1 + 1].im = y_data[b_j1].im - y_data[b_j1 + 1].im;
-      y_data[b_j1].re += temp_re;
-      y_data[b_j1].im += temp_im;
+    for (b_j1 = yoff; b_j1 <= yoff + 510; b_j1 += 2) {
+      y_data[b_j1 + 1] = y_data[b_j1];
     }
-    iDelta = 2;
-    iDelta2 = 4;
+    iy = 2;
+    ju = 4;
     k = 128;
     iheight = 509;
     while (k > 0) {
       int i;
       int ihi;
-      i = ix;
-      ihi = ix + iheight;
+      int istart;
+      i = yoff;
+      ihi = yoff + iheight;
       while (i < ihi) {
-        iy = i + iDelta;
-        temp_re = y_data[iy].re;
-        temp_im = y_data[iy].im;
-        y_data[iy].re = y_data[i].re - temp_re;
-        y_data[iy].im = y_data[i].im - temp_im;
-        y_data[i].re += temp_re;
-        y_data[i].im += temp_im;
-        i += iDelta2;
+        y_data[i + iy] = y_data[i];
+        i += ju;
       }
-      iy = ix + 1;
-      for (ju = k; ju < 256; ju += k) {
-        temp2_re = dv[ju];
-        temp2_im = dv1[ju];
-        i = iy;
-        ihi = iy + iheight;
+      istart = yoff + 1;
+      for (j = k; j < 256; j += k) {
+        i = istart;
+        ihi = istart + iheight;
         while (i < ihi) {
-          b_temp_re_tmp = i + iDelta;
-          temp_re_tmp = y_data[b_temp_re_tmp].im;
-          c_temp_re_tmp = y_data[b_temp_re_tmp].re;
-          temp_re = temp2_re * c_temp_re_tmp - temp2_im * temp_re_tmp;
-          temp_im = temp2_re * temp_re_tmp + temp2_im * c_temp_re_tmp;
-          y_data[b_temp_re_tmp].re = y_data[i].re - temp_re;
-          y_data[b_temp_re_tmp].im = y_data[i].im - temp_im;
-          y_data[i].re += temp_re;
-          y_data[i].im += temp_im;
-          i += iDelta2;
+          y_data[i + iy] = y_data[i];
+          i += ju;
         }
-        iy++;
+        istart++;
       }
       k >>= 1;
-      iDelta = iDelta2;
-      iDelta2 += iDelta2;
-      iheight -= iDelta;
+      iy = ju;
+      ju += ju;
+      iheight -= iy;
     }
-    temp_re = y_data[ix].re;
-    temp_im = y_data[ix].im;
-    temp_re_tmp = temp_re - (-temp_im);
-    y_data[ix].re = 0.5 * (temp_re_tmp + temp_re_tmp);
-    temp_re_tmp = temp_re - temp_im;
-    y_data[ix].im = 0.5 * ((-temp_re + temp_im) + temp_re_tmp);
-    y_data[ix + 512].re = 0.5 * (temp_re_tmp + temp_re_tmp);
-    y_data[ix + 512].im = 0.5 * ((temp_re + temp_im) + (-temp_re - temp_im));
+    temp1_re = y_data[yoff].re;
+    temp1_im = y_data[yoff].im;
+    y_data[yoff].re = 0.5 * (temp1_re - (-temp1_im));
+    y_data[yoff].im = 0.5 * (-temp1_re + temp1_im);
+    y_data[yoff + 512].re = 0.5 * (temp1_re - temp1_im);
+    y_data[yoff + 512].im = 0.5 * (temp1_re + temp1_im);
     for (b_j1 = 0; b_j1 < 255; b_j1++) {
-      iy = ix + b_j1;
-      temp_re = y_data[iy + 1].re;
-      temp_im = y_data[iy + 1].im;
+      double temp2_im;
+      double temp2_re;
+      iy = yoff + b_j1;
+      temp1_re = y_data[iy + 1].re;
+      temp1_im = y_data[iy + 1].im;
       ju = iv[b_j1 + 1];
-      b_temp_re_tmp = ix + ju;
-      temp2_re = y_data[b_temp_re_tmp - 1].re;
-      temp2_im = y_data[b_temp_re_tmp - 1].im;
-      temp_re_tmp = reconVar1[b_j1 + 1].im;
-      c_temp_re_tmp = reconVar1[b_j1 + 1].re;
-      temp2_re_tmp = reconVar2[b_j1 + 1].im;
-      b_temp2_re_tmp = reconVar2[b_j1 + 1].re;
+      k = yoff + ju;
+      temp2_re = y_data[k - 1].re;
+      temp2_im = y_data[k - 1].im;
+      temp1_re_tmp = reconVar1[b_j1 + 1].im;
+      b_temp1_re_tmp = reconVar1[b_j1 + 1].re;
       y_data[iy + 1].re =
-          0.5 * ((temp_re * c_temp_re_tmp - temp_im * temp_re_tmp) +
-                 (temp2_re * b_temp2_re_tmp - -temp2_im * temp2_re_tmp));
+          0.5 * (temp1_re * b_temp1_re_tmp - temp1_im * temp1_re_tmp);
       y_data[iy + 1].im =
-          0.5 * ((temp_re * temp_re_tmp + temp_im * c_temp_re_tmp) +
-                 (temp2_re * temp2_re_tmp + -temp2_im * b_temp2_re_tmp));
+          0.5 * (temp1_re * temp1_re_tmp + temp1_im * b_temp1_re_tmp);
+      temp1_re_tmp = reconVar2[b_j1 + 1].im;
+      b_temp1_re_tmp = reconVar2[b_j1 + 1].re;
       y_data[iy + 513].re =
-          0.5 * ((temp_re * b_temp2_re_tmp - temp_im * temp2_re_tmp) +
-                 (temp2_re * c_temp_re_tmp - -temp2_im * temp_re_tmp));
+          0.5 * (temp1_re * b_temp1_re_tmp - temp1_im * temp1_re_tmp);
       y_data[iy + 513].im =
-          0.5 * ((temp_re * temp2_re_tmp + temp_im * b_temp2_re_tmp) +
-                 (temp2_re * temp_re_tmp + -temp2_im * c_temp_re_tmp));
-      temp_re_tmp = reconVar1[ju - 1].im;
-      c_temp_re_tmp = reconVar1[ju - 1].re;
-      temp2_re_tmp = reconVar2[ju - 1].im;
-      b_temp2_re_tmp = reconVar2[ju - 1].re;
-      y_data[b_temp_re_tmp - 1].re =
-          0.5 * ((temp2_re * c_temp_re_tmp - temp2_im * temp_re_tmp) +
-                 (temp_re * b_temp2_re_tmp - -temp_im * temp2_re_tmp));
-      y_data[b_temp_re_tmp - 1].im =
-          0.5 * ((temp2_re * temp_re_tmp + temp2_im * c_temp_re_tmp) +
-                 (temp_re * temp2_re_tmp + -temp_im * b_temp2_re_tmp));
-      y_data[b_temp_re_tmp + 511].re =
-          0.5 * ((temp2_re * b_temp2_re_tmp - temp2_im * temp2_re_tmp) +
-                 (temp_re * c_temp_re_tmp - -temp_im * temp_re_tmp));
-      y_data[b_temp_re_tmp + 511].im =
-          0.5 * ((temp2_re * temp2_re_tmp + temp2_im * b_temp2_re_tmp) +
-                 (temp_re * temp_re_tmp + -temp_im * c_temp_re_tmp));
+          0.5 * (temp1_re * temp1_re_tmp + temp1_im * b_temp1_re_tmp);
+      temp1_re_tmp = reconVar1[ju - 1].im;
+      b_temp1_re_tmp = reconVar1[ju - 1].re;
+      y_data[k - 1].re =
+          0.5 * (temp2_re * b_temp1_re_tmp - temp2_im * temp1_re_tmp);
+      y_data[k - 1].im =
+          0.5 * (temp2_re * temp1_re_tmp + temp2_im * b_temp1_re_tmp);
+      temp1_re_tmp = reconVar2[ju - 1].im;
+      b_temp1_re_tmp = reconVar2[ju - 1].re;
+      y_data[k + 511].re =
+          0.5 * (temp2_re * b_temp1_re_tmp - temp2_im * temp1_re_tmp);
+      y_data[k + 511].im =
+          0.5 * (temp2_re * temp1_re_tmp + temp2_im * b_temp1_re_tmp);
     }
-    temp_re = y_data[ix + 256].re;
-    temp_im = y_data[ix + 256].im;
-    temp2_re_tmp = temp_re * 0.0;
-    b_temp2_re_tmp = temp_im * 0.0;
-    temp_re_tmp = temp_re * 2.0;
-    c_temp_re_tmp = -temp_im * 0.0;
-    y_data[ix + 256].re =
-        0.5 * ((temp2_re_tmp - b_temp2_re_tmp) + (temp_re_tmp - c_temp_re_tmp));
-    y_data[ix + 256].im = 0.5 * ((temp2_re_tmp + b_temp2_re_tmp) +
-                                 (temp2_re_tmp + -temp_im * 2.0));
-    y_data[ix + 768].re =
-        0.5 * ((temp_re_tmp - b_temp2_re_tmp) + (temp2_re_tmp - c_temp_re_tmp));
-    y_data[ix + 768].im =
-        0.5 * ((temp2_re_tmp + temp_im * 2.0) + (temp2_re_tmp + c_temp_re_tmp));
+    temp1_re = y_data[yoff + 256].re;
+    temp1_im = y_data[yoff + 256].im;
+    temp1_re_tmp = temp1_re * 0.0;
+    b_temp1_re_tmp = temp1_im * 0.0;
+    y_data[yoff + 256].re = 0.5 * (temp1_re_tmp - b_temp1_re_tmp);
+    y_data[yoff + 256].im = 0.5 * (temp1_re_tmp + b_temp1_re_tmp);
+    y_data[yoff + 768].re = 0.5 * (temp1_re * 2.0 - b_temp1_re_tmp);
+    y_data[yoff + 768].im = 0.5 * (temp1_re_tmp + temp1_im * 2.0);
   }
 }
 

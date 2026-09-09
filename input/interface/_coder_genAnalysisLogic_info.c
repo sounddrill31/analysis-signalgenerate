@@ -2,7 +2,7 @@
  * File: _coder_genAnalysisLogic_info.c
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 09-Sep-2026 14:34:56
+ * C/C++ source code generated on  : 09-Sep-2026 15:36:09
  */
 
 /* Include Files */
@@ -87,7 +87,7 @@ mxArray *emlrtMexFcnProperties(void)
   emlrtSetField(xEntryPoints, 0, "QualifiedName",
                 emlrtMxCreateString("genAnalysisLogic"));
   emlrtSetField(xEntryPoints, 0, "NumberOfInputs",
-                emlrtMxCreateDoubleScalar(2.0));
+                emlrtMxCreateDoubleScalar(1.0));
   emlrtSetField(xEntryPoints, 0, "NumberOfOutputs",
                 emlrtMxCreateDoubleScalar(6.0));
   emlrtSetField(xEntryPoints, 0, "ConstantInputs", xInputs);
