@@ -1,12 +1,12 @@
 /*
- * File: _coder_genTriangleLogic_info.h
+ * File: _coder_genAnalysisLogic_info.h
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 30-Aug-2026 22:16:07
+ * C/C++ source code generated on  : 09-Sep-2026 13:49:20
  */
 
-#ifndef _CODER_GENTRIANGLELOGIC_INFO_H
-#define _CODER_GENTRIANGLELOGIC_INFO_H
+#ifndef _CODER_GENANALYSISLOGIC_INFO_H
+#define _CODER_GENANALYSISLOGIC_INFO_H
 
 /* Include Files */
 #include "mex.h"
@@ -24,7 +24,7 @@ MEXFUNCTION_LINKAGE mxArray *emlrtMexFcnProperties(void);
 
 #endif
 /*
- * File trailer for _coder_genTriangleLogic_info.h
+ * File trailer for _coder_genAnalysisLogic_info.h
  *
  * [EOF]
  */

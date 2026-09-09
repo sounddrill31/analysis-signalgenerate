@@ -1,12 +1,12 @@
 /*
- * File: _coder_genTriangleLogic_info.c
+ * File: _coder_genAnalysisLogic_info.c
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 30-Aug-2026 22:16:07
+ * C/C++ source code generated on  : 09-Sep-2026 13:49:20
  */
 
 /* Include Files */
-#include "_coder_genTriangleLogic_info.h"
+#include "_coder_genAnalysisLogic_info.h"
 #include "emlrt.h"
 #include "tmwtypes.h"
 
@@ -22,28 +22,28 @@ static const mxArray *c_emlrtMexFcnResolvedFunctionsI(void)
 {
   const mxArray *nameCaptureInfo;
   const char_T *data[6] = {
-      "789ced56cd6ed340101e5b4948251ac2a5e2d81728e1c83534456ad5d04ab10412ea8feb"
-      "6c5db7fe63ed94f629e0c003e4d823478e3c428fbdf45db06b8fe38c"
-      "3cac894440829156b39f67f7fbc6bbeb1d83b63dd400a003994d5b995fcd7137f73acc1b"
-      "8d6b8c476b42636e1ec63fe5de0afc585cc519f04d4f14331d3f9cc4",
-      "c67528a204481105eea5183f444e1d57188e274665f02645deeb52a8006928ed6f9e09eb"
-      "6234f1409e45b30cdd3228d6e39879df86623da8d1f5a0e3502f5c50"
-      "4f6330d5436f0bdf908ee9dbaed80d6cc742fd3b86ff29e1a3fc5a9ee170736f94e1ec20"
-      "45b1747c7bf67e570c3f6260e22da24bf531fe6cf6e85ecfc7951be6",
-      "f195d1a9bbce3b4c1e5d127fbf75d01bf68dddfeabf581742e452f726cdf743742195822"
-      "8a92b549bbe73d2b188b644f366211c5c9c31edd9fe75ec6a73a974f"
-      "6ae6cfade32ab41ffcf0f0cbf932f5d0fe153dee3ba87bfed618bd2e89f78d9d509e3a27"
-      "1f3e6e8d27767f7bef221aec0f6679ec2b745479008397c5ffa25d3d",
-      "7fa526ffeda36a7e9dc461c9757285c411e3fd8a86f974997c7efdde9ee749ebe55b6986"
-      "a190474725bd69b35a4fb5afaa7b1cf9d7b5eaf9aa7dfdaee0d7c9b8"
-      "46feec65d2de41567fa749bb29b5b45698fe7551cb38a37b8ffad87e661ad3af1af7ad84"
-      "3b248ef836f78bde671d82e9f890c47582f11e6b29fc180298c009b8",
-      "206af58b7b85391faaf347f3e4ce1ff71f56f7fb0606e3f7fdb7eb1f33fc8f15faaaf56d"
-      "32f5f0ff7efe5efdf682f729f2dd30fc3a89d33af999e1fd537512ed"
-      "07ad9a8cb7",
+      "789ced56cd6ed340101e5b4948255ac2a5e2d817283e21b886f22b92829ab40521d4067b"
+      "9bbaf84f5e3b4a7ae70c8f00b71c39f6c86370e1ce63e0c41ec71979"
+      "5813a90509465acd7e9eddf9c633eb1d83f6b4ab01c006a4326da47a3dc3ad4cebb02cd4"
+      "ae311aa50eb5a57d68ff9069d3f722318e52e00d5c91efb4bd208efa",
+      "9340c8048442face485873cb89ed88beed8a5e11ecce90fba860cac1cc349bef9c0af35d"
+      "2f76213c958b089d22c8f371ccbc6f4d910f2a341f741df2052bf269"
+      "0ca67ca887c26b7b0367226dd9f187b689fcdf18ff37893fea5fcb22ecee3cefa5383d48"
+      "320a6d6fb878bf31e31f3130f606e1a5fc68bfb578f45dcfd61507c6",
+      "71c1f054cdf31e13478bd85f3f7c6374dbfd4efbfed683d01e0943dac324efdb41e89b42"
+      "ca2437b3e99961fa96486ab21d0919250f8d7971ce8541eb74db4dfd"
+      "aacee78d8aefc1e5731d9a73fd7ef3f3d955f2a1fc2b7cdcf750f51c6e327c2d623f107b"
+      "770ef69f9d8c62ebd5a113773bfb77adf8f1228e170a1e551cc0e0ab",
+      "f2df6c96ef5fabe87f7aaddcbf4eec40fae5f892fbe51ab123c67b1605e3f9512fe7fbfd"
+      "fb7bd9cfac6f1e86832010e1d151816fccf0a9eaaabacfd1ff9656be"
+      "5f55d7af0aff3a5957cb9edd4bc64b48fbf0a7644c0be34b3206de24ef699cd0da233f8e"
+      "5f89c6cccbd65d14f006b1e7ff73995ef53ea3e78fae7f42ec3a831b",
+      "445be0430c6fc101b134cfef0ba6eeaa7345f9b973c5fd6755fd6e81c1f8ddfeedfcc78c"
+      "ffeb0a7e557eeb4c9ffb5fcfcbe56fae784fe6fd8ff1af133bed7f1f"
+      "19bf7faaffa1fc0458e38a7e",
       ""};
   nameCaptureInfo = NULL;
-  emlrtNameCaptureMxArrayR2016a(&data[0], 3832U, &nameCaptureInfo);
+  emlrtNameCaptureMxArrayR2016a(&data[0], 3800U, &nameCaptureInfo);
   return nameCaptureInfo;
 }
 
@@ -83,21 +83,21 @@ mxArray *emlrtMexFcnProperties(void)
       110U, 100U, 108U, 101U, 0U,   0U,   0U,   0U,   0U,   0U,   0U,   0U};
   xEntryPoints =
       emlrtCreateStructMatrix(1, 1, 7, (const char_T **)&epFieldName[0]);
-  xInputs = emlrtCreateLogicalMatrix(1, 4);
+  xInputs = emlrtCreateLogicalMatrix(1, 2);
   emlrtSetField(xEntryPoints, 0, "QualifiedName",
-                emlrtMxCreateString("genTriangleLogic"));
+                emlrtMxCreateString("genAnalysisLogic"));
   emlrtSetField(xEntryPoints, 0, "NumberOfInputs",
-                emlrtMxCreateDoubleScalar(4.0));
+                emlrtMxCreateDoubleScalar(2.0));
   emlrtSetField(xEntryPoints, 0, "NumberOfOutputs",
-                emlrtMxCreateDoubleScalar(4.0));
+                emlrtMxCreateDoubleScalar(6.0));
   emlrtSetField(xEntryPoints, 0, "ConstantInputs", xInputs);
   emlrtSetField(
       xEntryPoints, 0, "ResolvedFilePath",
-      emlrtMxCreateString(
-          "/MATLAB "
-          "Drive/signal-processing-proj/codegen-testing/genTriangleLogic.m"));
+      emlrtMxCreateString("/MATLAB "
+                          "Drive/signal-processing-proj/codegen-testing/"
+                          "Analyze/genAnalysisLogic.m"));
   emlrtSetField(xEntryPoints, 0, "TimeStamp",
-                emlrtMxCreateDoubleScalar(740224.6986689814));
+                emlrtMxCreateDoubleScalar(740234.3467245371));
   emlrtSetField(xEntryPoints, 0, "Visible", emlrtMxCreateLogicalScalar(true));
   xResult =
       emlrtCreateStructMatrix(1, 1, 7, (const char_T **)&propFieldName[0]);
@@ -106,7 +106,7 @@ mxArray *emlrtMexFcnProperties(void)
   emlrtSetField(xResult, 0, "ResolvedFunctions",
                 (mxArray *)c_emlrtMexFcnResolvedFunctionsI());
   emlrtSetField(xResult, 0, "Checksum",
-                emlrtMxCreateString("poqQ2hHg4zZdWoSVjDYvdC"));
+                emlrtMxCreateString("PF4YQk2cxbMY2Gk1N0K5d"));
   emlrtSetField(xResult, 0, "EntryPoints", xEntryPoints);
   emlrtSetField(xResult, 0, "AuxData",
                 emlrtMxCreateRowVectorUINT8((const uint8_T *)&v, 216U));
@@ -114,7 +114,7 @@ mxArray *emlrtMexFcnProperties(void)
 }
 
 /*
- * File trailer for _coder_genTriangleLogic_info.c
+ * File trailer for _coder_genAnalysisLogic_info.c
  *
  * [EOF]
  */

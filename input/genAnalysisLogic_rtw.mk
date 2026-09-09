@@ -1,9 +1,9 @@
 ###########################################################################
-## Makefile generated for component 'genTriangleLogic'. 
+## Makefile generated for component 'genAnalysisLogic'. 
 ## 
-## Makefile     : genTriangleLogic_rtw.mk
-## Generated on : Sun Aug 30 16:12:19 2026
-## Final product: ./genTriangleLogic.a
+## Makefile     : genAnalysisLogic_rtw.mk
+## Generated on : Wed Sep 09 08:19:47 2026
+## Final product: ./genAnalysisLogic.a
 ## Product type : static-library
 ## 
 ###########################################################################
@@ -17,12 +17,12 @@
 # MAKEFILE                Name of this makefile
 # MODELLIB                Static library target
 
-PRODUCT_NAME              = genTriangleLogic
-MAKEFILE                  = genTriangleLogic_rtw.mk
+PRODUCT_NAME              = genAnalysisLogic
+MAKEFILE                  = genAnalysisLogic_rtw.mk
 MATLAB_ROOT               = /MATLAB
 MATLAB_BIN                = /MATLAB/bin
 MATLAB_ARCH_BIN           = $(MATLAB_BIN)/glnxa64
-START_DIR                 = /MATLAB\ Drive/signal-processing-proj/codegen-testing
+START_DIR                 = /MATLAB\ Drive/signal-processing-proj/codegen-testing/Analyze
 TGT_FCN_LIB               = ISO_C
 SOLVER_OBJ                = 
 CLASSIC_INTERFACE         = 0
@@ -30,7 +30,7 @@ MODEL_HAS_DYNAMICALLY_LOADED_SFCNS =
 RELATIVE_PATH_TO_ANCHOR   = ../../..
 C_STANDARD_OPTS           = -fwrapv
 CPP_STANDARD_OPTS         = -fwrapv
-MODELLIB                  = genTriangleLogic.a
+MODELLIB                  = genAnalysisLogic.a
 
 ###########################################################################
 ## TOOLCHAIN SPECIFICATIONS
@@ -167,7 +167,7 @@ SHAREDLIB_LDFLAGS    = -shared -Wl,--no-undefined
 ## OUTPUT INFO
 ###########################################################################
 
-PRODUCT = ./genTriangleLogic.a
+PRODUCT = ./genAnalysisLogic.a
 PRODUCT_TYPE = "static-library"
 BUILD_TYPE = "Static Library"
 
@@ -175,7 +175,7 @@ BUILD_TYPE = "Static Library"
 ## INCLUDE PATHS
 ###########################################################################
 
-INCLUDES_BUILDINFO = -I$(START_DIR)/codegen/lib/genTriangleLogic -I$(START_DIR) -I$(MATLAB_ROOT)/extern/include
+INCLUDES_BUILDINFO = -I$(START_DIR)/codegen/lib/genAnalysisLogic -I$(START_DIR) -I$(MATLAB_ROOT)/extern/include
 
 INCLUDES = $(INCLUDES_BUILDINFO)
 
@@ -184,7 +184,7 @@ INCLUDES = $(INCLUDES_BUILDINFO)
 ###########################################################################
 
 DEFINES_CUSTOM = 
-DEFINES_STANDARD = -DMODEL=genTriangleLogic
+DEFINES_STANDARD = -DMODEL=genAnalysisLogic
 
 DEFINES = $(DEFINES_CUSTOM) $(DEFINES_STANDARD)
 
@@ -192,7 +192,7 @@ DEFINES = $(DEFINES_CUSTOM) $(DEFINES_STANDARD)
 ## SOURCE FILES
 ###########################################################################
 
-SRCS = $(START_DIR)/codegen/lib/genTriangleLogic/rt_nonfinite.c $(START_DIR)/codegen/lib/genTriangleLogic/rtGetNaN.c $(START_DIR)/codegen/lib/genTriangleLogic/rtGetInf.c $(START_DIR)/codegen/lib/genTriangleLogic/genTriangleLogic_initialize.c $(START_DIR)/codegen/lib/genTriangleLogic/genTriangleLogic_terminate.c $(START_DIR)/codegen/lib/genTriangleLogic/genTriangleLogic.c $(START_DIR)/codegen/lib/genTriangleLogic/colon.c $(START_DIR)/codegen/lib/genTriangleLogic/sawtooth.c $(START_DIR)/codegen/lib/genTriangleLogic/abs.c $(START_DIR)/codegen/lib/genTriangleLogic/minOrMax.c $(START_DIR)/codegen/lib/genTriangleLogic/genTriangleLogic_emxutil.c $(START_DIR)/codegen/lib/genTriangleLogic/genTriangleLogic_emxAPI.c
+SRCS = $(START_DIR)/codegen/lib/genAnalysisLogic/genAnalysisLogic_data.c $(START_DIR)/codegen/lib/genAnalysisLogic/rt_nonfinite.c $(START_DIR)/codegen/lib/genAnalysisLogic/rtGetNaN.c $(START_DIR)/codegen/lib/genAnalysisLogic/rtGetInf.c $(START_DIR)/codegen/lib/genAnalysisLogic/genAnalysisLogic_initialize.c $(START_DIR)/codegen/lib/genAnalysisLogic/genAnalysisLogic_terminate.c $(START_DIR)/codegen/lib/genAnalysisLogic/genAnalysisLogic.c $(START_DIR)/codegen/lib/genAnalysisLogic/fft.c $(START_DIR)/codegen/lib/genAnalysisLogic/FFTImplementationCallback.c $(START_DIR)/codegen/lib/genAnalysisLogic/abs.c $(START_DIR)/codegen/lib/genAnalysisLogic/spectrogram.c $(START_DIR)/codegen/lib/genAnalysisLogic/computeDFT.c $(START_DIR)/codegen/lib/genAnalysisLogic/pspectrogram.c
 
 ALL_SRCS = $(SRCS)
 
@@ -200,7 +200,7 @@ ALL_SRCS = $(SRCS)
 ## OBJECTS
 ###########################################################################
 
-OBJS = rt_nonfinite.o rtGetNaN.o rtGetInf.o genTriangleLogic_initialize.o genTriangleLogic_terminate.o genTriangleLogic.o colon.o sawtooth.o abs.o minOrMax.o genTriangleLogic_emxutil.o genTriangleLogic_emxAPI.o
+OBJS = genAnalysisLogic_data.o rt_nonfinite.o rtGetNaN.o rtGetInf.o genAnalysisLogic_initialize.o genAnalysisLogic_terminate.o genAnalysisLogic.o fft.o FFTImplementationCallback.o abs.o spectrogram.o computeDFT.o pspectrogram.o
 
 ALL_OBJS = $(OBJS)
 
@@ -220,7 +220,7 @@ LIBS =
 ## SYSTEM LIBRARIES
 ###########################################################################
 
-SYSTEM_LIBS =  -lm
+SYSTEM_LIBS = -L$(MATLAB_ROOT)/sys/os/glnxa64 -lm -liomp5
 
 ###########################################################################
 ## ADDITIONAL TOOLCHAIN FLAGS
@@ -230,19 +230,21 @@ SYSTEM_LIBS =  -lm
 # C Compiler
 #---------------
 
+CFLAGS_OPTS = -fopenmp
 CFLAGS_TFL = -msse2 -fno-predictive-commoning
 CFLAGS_BASIC = $(DEFINES) $(INCLUDES)
 
-CFLAGS += $(CFLAGS_TFL) $(CFLAGS_BASIC)
+CFLAGS += $(CFLAGS_OPTS) $(CFLAGS_TFL) $(CFLAGS_BASIC)
 
 #-----------------
 # C++ Compiler
 #-----------------
 
+CPPFLAGS_OPTS = -fopenmp
 CPPFLAGS_TFL = -msse2 -fno-predictive-commoning
 CPPFLAGS_BASIC = $(DEFINES) $(INCLUDES)
 
-CPPFLAGS += $(CPPFLAGS_TFL) $(CPPFLAGS_BASIC)
+CPPFLAGS += $(CPPFLAGS_OPTS) $(CPPFLAGS_TFL) $(CPPFLAGS_BASIC)
 
 ###########################################################################
 ## INLINED COMMANDS
@@ -357,35 +359,35 @@ $(PRODUCT) : $(OBJS) $(PREBUILT_OBJS)
 	$(CPP) $(CPPFLAGS) -o "$@" "$<"
 
 
-%.o : $(START_DIR)/codegen/lib/genTriangleLogic/%.c
+%.o : $(START_DIR)/codegen/lib/genAnalysisLogic/%.c
 	$(CC) $(CFLAGS) -o "$@" "$<"
 
 
-%.o : $(START_DIR)/codegen/lib/genTriangleLogic/%.cpp
+%.o : $(START_DIR)/codegen/lib/genAnalysisLogic/%.cpp
 	$(CPP) $(CPPFLAGS) -o "$@" "$<"
 
 
-%.o : $(START_DIR)/codegen/lib/genTriangleLogic/%.cc
+%.o : $(START_DIR)/codegen/lib/genAnalysisLogic/%.cc
 	$(CPP) $(CPPFLAGS) -o "$@" "$<"
 
 
-%.o : $(START_DIR)/codegen/lib/genTriangleLogic/%.cp
+%.o : $(START_DIR)/codegen/lib/genAnalysisLogic/%.cp
 	$(CPP) $(CPPFLAGS) -o "$@" "$<"
 
 
-%.o : $(START_DIR)/codegen/lib/genTriangleLogic/%.cxx
+%.o : $(START_DIR)/codegen/lib/genAnalysisLogic/%.cxx
 	$(CPP) $(CPPFLAGS) -o "$@" "$<"
 
 
-%.o : $(START_DIR)/codegen/lib/genTriangleLogic/%.CPP
+%.o : $(START_DIR)/codegen/lib/genAnalysisLogic/%.CPP
 	$(CPP) $(CPPFLAGS) -o "$@" "$<"
 
 
-%.o : $(START_DIR)/codegen/lib/genTriangleLogic/%.c++
+%.o : $(START_DIR)/codegen/lib/genAnalysisLogic/%.c++
 	$(CPP) $(CPPFLAGS) -o "$@" "$<"
 
 
-%.o : $(START_DIR)/codegen/lib/genTriangleLogic/%.C
+%.o : $(START_DIR)/codegen/lib/genAnalysisLogic/%.C
 	$(CPP) $(CPPFLAGS) -o "$@" "$<"
 
 
@@ -421,51 +423,55 @@ $(PRODUCT) : $(OBJS) $(PREBUILT_OBJS)
 	$(CPP) $(CPPFLAGS) -o "$@" "$<"
 
 
-rt_nonfinite.o : $(START_DIR)/codegen/lib/genTriangleLogic/rt_nonfinite.c
+genAnalysisLogic_data.o : $(START_DIR)/codegen/lib/genAnalysisLogic/genAnalysisLogic_data.c
 	$(CC) $(CFLAGS) -o "$@" "$<"
 
 
-rtGetNaN.o : $(START_DIR)/codegen/lib/genTriangleLogic/rtGetNaN.c
+rt_nonfinite.o : $(START_DIR)/codegen/lib/genAnalysisLogic/rt_nonfinite.c
 	$(CC) $(CFLAGS) -o "$@" "$<"
 
 
-rtGetInf.o : $(START_DIR)/codegen/lib/genTriangleLogic/rtGetInf.c
+rtGetNaN.o : $(START_DIR)/codegen/lib/genAnalysisLogic/rtGetNaN.c
 	$(CC) $(CFLAGS) -o "$@" "$<"
 
 
-genTriangleLogic_initialize.o : $(START_DIR)/codegen/lib/genTriangleLogic/genTriangleLogic_initialize.c
+rtGetInf.o : $(START_DIR)/codegen/lib/genAnalysisLogic/rtGetInf.c
 	$(CC) $(CFLAGS) -o "$@" "$<"
 
 
-genTriangleLogic_terminate.o : $(START_DIR)/codegen/lib/genTriangleLogic/genTriangleLogic_terminate.c
+genAnalysisLogic_initialize.o : $(START_DIR)/codegen/lib/genAnalysisLogic/genAnalysisLogic_initialize.c
 	$(CC) $(CFLAGS) -o "$@" "$<"
 
 
-genTriangleLogic.o : $(START_DIR)/codegen/lib/genTriangleLogic/genTriangleLogic.c
+genAnalysisLogic_terminate.o : $(START_DIR)/codegen/lib/genAnalysisLogic/genAnalysisLogic_terminate.c
 	$(CC) $(CFLAGS) -o "$@" "$<"
 
 
-colon.o : $(START_DIR)/codegen/lib/genTriangleLogic/colon.c
+genAnalysisLogic.o : $(START_DIR)/codegen/lib/genAnalysisLogic/genAnalysisLogic.c
 	$(CC) $(CFLAGS) -o "$@" "$<"
 
 
-sawtooth.o : $(START_DIR)/codegen/lib/genTriangleLogic/sawtooth.c
+fft.o : $(START_DIR)/codegen/lib/genAnalysisLogic/fft.c
 	$(CC) $(CFLAGS) -o "$@" "$<"
 
 
-abs.o : $(START_DIR)/codegen/lib/genTriangleLogic/abs.c
+FFTImplementationCallback.o : $(START_DIR)/codegen/lib/genAnalysisLogic/FFTImplementationCallback.c
 	$(CC) $(CFLAGS) -o "$@" "$<"
 
 
-minOrMax.o : $(START_DIR)/codegen/lib/genTriangleLogic/minOrMax.c
+abs.o : $(START_DIR)/codegen/lib/genAnalysisLogic/abs.c
 	$(CC) $(CFLAGS) -o "$@" "$<"
 
 
-genTriangleLogic_emxutil.o : $(START_DIR)/codegen/lib/genTriangleLogic/genTriangleLogic_emxutil.c
+spectrogram.o : $(START_DIR)/codegen/lib/genAnalysisLogic/spectrogram.c
 	$(CC) $(CFLAGS) -o "$@" "$<"
 
 
-genTriangleLogic_emxAPI.o : $(START_DIR)/codegen/lib/genTriangleLogic/genTriangleLogic_emxAPI.c
+computeDFT.o : $(START_DIR)/codegen/lib/genAnalysisLogic/computeDFT.c
+	$(CC) $(CFLAGS) -o "$@" "$<"
+
+
+pspectrogram.o : $(START_DIR)/codegen/lib/genAnalysisLogic/pspectrogram.c
 	$(CC) $(CFLAGS) -o "$@" "$<"
 
 

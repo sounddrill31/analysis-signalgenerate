@@ -2,7 +2,7 @@
  * File: main.c
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 30-Aug-2026 22:16:07
+ * C/C++ source code generated on  : 09-Sep-2026 13:49:20
  */
 
 /*************************************************************************/
@@ -32,17 +32,32 @@
 
 /* Include Files */
 #include "main.h"
-#include "genTriangleLogic.h"
-#include "genTriangleLogic_emxAPI.h"
-#include "genTriangleLogic_initialize.h"
-#include "genTriangleLogic_terminate.h"
-#include "genTriangleLogic_types.h"
+#include "genAnalysisLogic.h"
+#include "genAnalysisLogic_initialize.h"
+#include "genAnalysisLogic_terminate.h"
 #include "rt_nonfinite.h"
 
 /* Function Declarations */
+static void argInit_1x945176_real_T(double result[945176]);
+
 static double argInit_real_T(void);
 
 /* Function Definitions */
+/*
+ * Arguments    : double result[945176]
+ * Return Type  : void
+ */
+static void argInit_1x945176_real_T(double result[945176])
+{
+  int idx1;
+  /* Loop over the array to initialize each element. */
+  for (idx1 = 0; idx1 < 945176; idx1++) {
+    /* Set the value of the array element.
+Change this value to the value that the application requires. */
+    result[idx1] = argInit_real_T();
+  }
+}
+
 /*
  * Arguments    : void
  * Return Type  : double
@@ -63,13 +78,13 @@ int main(int argc, char **argv)
   (void)argv;
   /* Initialize the application.
 You do not need to do this more than one time. */
-  genTriangleLogic_initialize();
+  genAnalysisLogic_initialize();
   /* Invoke the entry-point functions.
 You can call entry-point functions multiple times. */
-  main_genTriangleLogic();
+  main_genAnalysisLogic();
   /* Terminate the application.
 You do not need to do this more than one time. */
-  genTriangleLogic_terminate();
+  genAnalysisLogic_terminate();
   return 0;
 }
 
@@ -77,21 +92,21 @@ You do not need to do this more than one time. */
  * Arguments    : void
  * Return Type  : void
  */
-void main_genTriangleLogic(void)
+void main_genAnalysisLogic(void)
 {
-  emxArray_real_T *t;
-  emxArray_real_T *x;
-  double A_tmp;
-  double cycles;
-  double samples;
-  /* Initialize function 'genTriangleLogic' input arguments. */
-  A_tmp = argInit_real_T();
-  /* Call the entry-point 'genTriangleLogic'. */
-  emxInitArray_real_T(&t, 2);
-  emxInitArray_real_T(&x, 2);
-  genTriangleLogic(A_tmp, A_tmp, A_tmp, A_tmp, t, x, &samples, &cycles);
-  emxDestroyArray_real_T(t);
-  emxDestroyArray_real_T(x);
+  static double stftMagnitude[946485];
+  static double dv[945176];
+  static double t[945176];
+  static double fftMagnitude[472589];
+  static double freq[472589];
+  double stftTime[1845];
+  double stftFreq[513];
+  /* Initialize function 'genAnalysisLogic' input arguments. */
+  /* Initialize function input argument 'x'. */
+  /* Call the entry-point 'genAnalysisLogic'. */
+  argInit_1x945176_real_T(dv);
+  genAnalysisLogic(dv, argInit_real_T(), t, freq, fftMagnitude, stftTime,
+                   stftFreq, stftMagnitude);
 }
 
 /*

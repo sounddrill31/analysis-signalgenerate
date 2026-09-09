@@ -1,12 +1,12 @@
 /*
- * File: abs.h
+ * File: spectrogram.h
  *
  * MATLAB Coder version            : 26.1
  * C/C++ source code generated on  : 09-Sep-2026 13:49:20
  */
 
-#ifndef ABS_H
-#define ABS_H
+#ifndef SPECTROGRAM_H
+#define SPECTROGRAM_H
 
 /* Include Files */
 #include "rtwtypes.h"
@@ -18,9 +18,9 @@ extern "C" {
 #endif
 
 /* Function Declarations */
-void b_abs(const creal_T x[945176], double y[945176]);
-
-void c_abs(const creal_T x[946485], double y[946485]);
+void spectrogram(const double x[945176], double varargin_4,
+                 creal_T varargout_1[946485], double varargout_2[513],
+                 double varargout_3[1845]);
 
 #ifdef __cplusplus
 }
@@ -28,7 +28,7 @@ void c_abs(const creal_T x[946485], double y[946485]);
 
 #endif
 /*
- * File trailer for abs.h
+ * File trailer for spectrogram.h
  *
  * [EOF]
  */

@@ -10,6 +10,6 @@
 mkdir -p input output
 ```
 
-Now copy over the contents of the codegen/lib/genTriangleLogic/ folder to input/ folder. We assume the project name is genTriangleLogic, please edit pixi.toml and README.md files to change this.
+Now copy over the contents of the codegen/lib/genAnalysisLogic/ folder to input/ folder. We assume the project name is genAnalysisLogic, please edit pixi.toml and README.md files to change this.
 
 After that, install pixi with steps from here and run `pixi run export-web` if you just want to compile or `pixi run server` if you want to start a quick web server.

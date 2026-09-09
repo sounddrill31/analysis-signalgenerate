@@ -1,15 +1,14 @@
 /*
- * File: minOrMax.h
+ * File: fft.h
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 30-Aug-2026 22:16:07
+ * C/C++ source code generated on  : 09-Sep-2026 13:49:20
  */
 
-#ifndef MINORMAX_H
-#define MINORMAX_H
+#ifndef FFT_H
+#define FFT_H
 
 /* Include Files */
-#include "genTriangleLogic_types.h"
 #include "rtwtypes.h"
 #include <stddef.h>
 #include <stdlib.h>
@@ -19,7 +18,7 @@ extern "C" {
 #endif
 
 /* Function Declarations */
-double maximum(const emxArray_real_T *x);
+void fft(const double x[945176], creal_T y[945176]);
 
 #ifdef __cplusplus
 }
@@ -27,7 +26,7 @@ double maximum(const emxArray_real_T *x);
 
 #endif
 /*
- * File trailer for minOrMax.h
+ * File trailer for fft.h
  *
  * [EOF]
  */

@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
+# this script is fully llm generated
 
-#fallback to genTriangleLogic
-FUNC_NAME=${1:-genTriangleLogic}
+#fallback to genAnalysisLogic
+FUNC_NAME=${1:-genAnalysisLogic}
 
 echo "Generating C++ wrapper for ${FUNC_NAME}..."
 

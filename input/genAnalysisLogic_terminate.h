@@ -1,12 +1,12 @@
 /*
- * File: abs.h
+ * File: genAnalysisLogic_terminate.h
  *
  * MATLAB Coder version            : 26.1
  * C/C++ source code generated on  : 09-Sep-2026 13:49:20
  */
 
-#ifndef ABS_H
-#define ABS_H
+#ifndef GENANALYSISLOGIC_TERMINATE_H
+#define GENANALYSISLOGIC_TERMINATE_H
 
 /* Include Files */
 #include "rtwtypes.h"
@@ -18,9 +18,7 @@ extern "C" {
 #endif
 
 /* Function Declarations */
-void b_abs(const creal_T x[945176], double y[945176]);
-
-void c_abs(const creal_T x[946485], double y[946485]);
+extern void genAnalysisLogic_terminate(void);
 
 #ifdef __cplusplus
 }
@@ -28,7 +26,7 @@ void c_abs(const creal_T x[946485], double y[946485]);
 
 #endif
 /*
- * File trailer for abs.h
+ * File trailer for genAnalysisLogic_terminate.h
  *
  * [EOF]
  */

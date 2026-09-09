@@ -2,38 +2,72 @@
  * File: abs.c
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 30-Aug-2026 22:16:07
+ * C/C++ source code generated on  : 09-Sep-2026 13:49:20
  */
 
 /* Include Files */
 #include "abs.h"
-#include "genTriangleLogic_emxutil.h"
-#include "genTriangleLogic_types.h"
+#include "rt_nonfinite.h"
+#include "omp.h"
 #include "rt_nonfinite.h"
 #include <math.h>
 
 /* Function Definitions */
 /*
- * Arguments    : const emxArray_real_T *x
- *                emxArray_real_T *y
+ * Arguments    : const creal_T x[945176]
+ *                double y[945176]
  * Return Type  : void
  */
-void b_abs(const emxArray_real_T *x, emxArray_real_T *y)
+void b_abs(const creal_T x[945176], double y[945176])
 {
-  const double *x_data;
-  double *y_data;
-  int i;
+  double a;
+  double b;
   int k;
-  int nx;
-  x_data = x->data;
-  nx = x->size[1];
-  i = y->size[0] * y->size[1];
-  y->size[0] = 1;
-  y->size[1] = x->size[1];
-  emxEnsureCapacity_real_T(y, i);
-  y_data = y->data;
-  for (k = 0; k < nx; k++) {
-    y_data[k] = fabs(x_data[k]);
+#pragma omp parallel for num_threads(omp_get_max_threads()) private(b, a)
+
+  for (k = 0; k < 945176; k++) {
+    a = fabs(x[k].re);
+    b = fabs(x[k].im);
+    if (a < b) {
+      a /= b;
+      y[k] = b * sqrt(a * a + 1.0);
+    } else if (a > b) {
+      b /= a;
+      y[k] = a * sqrt(b * b + 1.0);
+    } else if (rtIsNaN(b)) {
+      y[k] = rtNaN;
+    } else {
+      y[k] = a * 1.4142135623730951;
+    }
+  }
+}
+
+/*
+ * Arguments    : const creal_T x[946485]
+ *                double y[946485]
+ * Return Type  : void
+ */
+void c_abs(const creal_T x[946485], double y[946485])
+{
+  double a;
+  double b;
+  int k;
+#pragma omp parallel for num_threads(omp_get_max_threads()) private(b, a)
+
+  for (k = 0; k < 946485; k++) {
+    a = fabs(x[k].re);
+    b = fabs(x[k].im);
+    if (a < b) {
+      a /= b;
+      y[k] = b * sqrt(a * a + 1.0);
+    } else if (a > b) {
+      b /= a;
+      y[k] = a * sqrt(b * b + 1.0);
+    } else if (rtIsNaN(b)) {
+      y[k] = rtNaN;
+    } else {
+      y[k] = a * 1.4142135623730951;
+    }
   }
 }
 

@@ -1,0 +1,5414 @@
+/*
+ * File: FFTImplementationCallback.c
+ *
+ * MATLAB Coder version            : 26.1
+ * C/C++ source code generated on  : 09-Sep-2026 13:49:20
+ */
+
+/* Include Files */
+#include "FFTImplementationCallback.h"
+#include "rt_nonfinite.h"
+#include "omp.h"
+#include <math.h>
+#include <string.h>
+
+/* Function Declarations */
+static void c_FFTImplementationCallback_doH(
+    const double x[945176], creal_T y[945176], const creal_T wwc[945175],
+    const double costab[1048577], const double sintab[1048577],
+    const double costabinv[1048577], const double sintabinv[1048577]);
+
+static void c_FFTImplementationCallback_gen(double costab[945177],
+                                            double sintab[945177],
+                                            double sintabinv[945177]);
+
+static void c_FFTImplementationCallback_r2b(const creal_T x[472588],
+                                            const double costab[524288],
+                                            const double sintab[524288],
+                                            creal_T y[1048576]);
+
+static void d_FFTImplementationCallback_doH(const double x[1889280],
+                                            int xoffInit, creal_T y[1024]);
+
+static void d_FFTImplementationCallback_r2b(const creal_T x[945175],
+                                            const double costab[524288],
+                                            const double sintab[524288],
+                                            creal_T y[1048576]);
+
+static void e_FFTImplementationCallback_r2b(const creal_T x[1048576],
+                                            const double costab[524288],
+                                            const double sintab[524288],
+                                            creal_T y[1048576]);
+
+/* Function Definitions */
+/*
+ * Arguments    : const double x[945176]
+ *                creal_T y[945176]
+ *                const creal_T wwc[945175]
+ *                const double costab[1048577]
+ *                const double sintab[1048577]
+ *                const double costabinv[1048577]
+ *                const double sintabinv[1048577]
+ * Return Type  : void
+ */
+static void c_FFTImplementationCallback_doH(
+    const double x[945176], creal_T y[945176], const creal_T wwc[945175],
+    const double costab[1048577], const double sintab[1048577],
+    const double costabinv[1048577], const double sintabinv[1048577])
+{
+  static creal_T b_fv[1048576];
+  static creal_T fv[1048576];
+  static creal_T reconVar1[472588];
+  static creal_T reconVar2[472588];
+  static creal_T ytmp[472588];
+  static double a__1[945177];
+  static double costable[945177];
+  static double sintable[945177];
+  static double hcostab[524288];
+  static double hcostabinv[524288];
+  static double hsintab[524288];
+  static double hsintabinv[524288];
+  static int wrapIndex[472588];
+  double b_re_tmp;
+  double b_ytmp_re_tmp;
+  double c_re_tmp;
+  double c_ytmp_re_tmp;
+  double d2;
+  double d3;
+  double d4;
+  double d5;
+  double d_re_tmp;
+  double d_ytmp_re_tmp;
+  double e_ytmp_re_tmp;
+  double f_ytmp_re_tmp;
+  double re_tmp;
+  double ytmp_im;
+  double ytmp_re;
+  double ytmp_re_tmp;
+  int b_i;
+  int d_i;
+  int i;
+  int i1;
+  int i2;
+  int i3;
+  int k;
+  c_FFTImplementationCallback_gen(costable, sintable, a__1);
+#pragma omp parallel for num_threads(omp_get_max_threads()) private(i1)
+
+  for (i = 0; i < 524288; i++) {
+    i1 = ((i + 1) << 1) - 2;
+    hcostab[i] = costab[i1];
+    hsintab[i] = sintab[i1];
+    hcostabinv[i] = costabinv[i1];
+    hsintabinv[i] = sintabinv[i1];
+  }
+  for (b_i = 0; b_i < 472588; b_i++) {
+    double b_im;
+    double b_re;
+    double d;
+    double d1;
+    int c_i;
+    c_i = b_i << 1;
+    b_re = sintable[c_i];
+    b_im = costable[c_i];
+    reconVar1[b_i].re = b_re + 1.0;
+    reconVar1[b_i].im = -b_im;
+    reconVar2[b_i].re = 1.0 - b_re;
+    reconVar2[b_i].im = b_im;
+    if (b_i != 0) {
+      wrapIndex[b_i] = 472589 - b_i;
+    } else {
+      wrapIndex[0] = 1;
+    }
+    b_re = x[c_i];
+    b_im = x[c_i + 1];
+    d = wwc[b_i + 472587].re;
+    d1 = wwc[b_i + 472587].im;
+    ytmp[b_i].re = d * b_re + d1 * b_im;
+    ytmp[b_i].im = d * b_im - d1 * b_re;
+  }
+  c_FFTImplementationCallback_r2b(ytmp, hcostab, hsintab, fv);
+  d_FFTImplementationCallback_r2b(wwc, hcostab, hsintab, b_fv);
+#pragma omp parallel for num_threads(omp_get_max_threads()) private(           \
+        re_tmp, b_re_tmp, c_re_tmp, d_re_tmp)
+
+  for (i2 = 0; i2 < 1048576; i2++) {
+    re_tmp = fv[i2].re;
+    b_re_tmp = b_fv[i2].im;
+    c_re_tmp = fv[i2].im;
+    d_re_tmp = b_fv[i2].re;
+    b_fv[i2].re = re_tmp * d_re_tmp - c_re_tmp * b_re_tmp;
+    b_fv[i2].im = re_tmp * b_re_tmp + c_re_tmp * d_re_tmp;
+  }
+  e_FFTImplementationCallback_r2b(b_fv, hcostabinv, hsintabinv, fv);
+#pragma omp parallel for num_threads(omp_get_max_threads()) private(           \
+        d2, d3, d4, d5)
+
+  for (k = 0; k < 472588; k++) {
+    d2 = wwc[k + 472587].re;
+    d3 = fv[k + 472587].im;
+    d4 = wwc[k + 472587].im;
+    d5 = fv[k + 472587].re;
+    ytmp[k].re = d2 * d5 + d4 * d3;
+    ytmp[k].im = d2 * d3 - d4 * d5;
+  }
+#pragma omp parallel for num_threads(omp_get_max_threads()) private(           \
+        ytmp_re_tmp, b_ytmp_re_tmp, c_ytmp_re_tmp, d_ytmp_re_tmp, i3, ytmp_re, \
+            ytmp_im, e_ytmp_re_tmp, f_ytmp_re_tmp)
+
+  for (d_i = 0; d_i < 472588; d_i++) {
+    ytmp_re_tmp = ytmp[d_i].re;
+    b_ytmp_re_tmp = reconVar1[d_i].im;
+    c_ytmp_re_tmp = ytmp[d_i].im;
+    d_ytmp_re_tmp = reconVar1[d_i].re;
+    i3 = wrapIndex[d_i];
+    ytmp_re = ytmp[i3 - 1].re;
+    ytmp_im = -ytmp[i3 - 1].im;
+    e_ytmp_re_tmp = reconVar2[d_i].im;
+    f_ytmp_re_tmp = reconVar2[d_i].re;
+    y[d_i].re =
+        0.5 * ((ytmp_re_tmp * d_ytmp_re_tmp - c_ytmp_re_tmp * b_ytmp_re_tmp) +
+               (ytmp_re * f_ytmp_re_tmp - ytmp_im * e_ytmp_re_tmp));
+    y[d_i].im =
+        0.5 * ((ytmp_re_tmp * b_ytmp_re_tmp + c_ytmp_re_tmp * d_ytmp_re_tmp) +
+               (ytmp_re * e_ytmp_re_tmp + ytmp_im * f_ytmp_re_tmp));
+    y[d_i + 472588].re =
+        0.5 * ((ytmp_re_tmp * f_ytmp_re_tmp - c_ytmp_re_tmp * e_ytmp_re_tmp) +
+               (ytmp_re * d_ytmp_re_tmp - ytmp_im * b_ytmp_re_tmp));
+    y[d_i + 472588].im =
+        0.5 * ((ytmp_re_tmp * e_ytmp_re_tmp + c_ytmp_re_tmp * f_ytmp_re_tmp) +
+               (ytmp_re * b_ytmp_re_tmp + ytmp_im * d_ytmp_re_tmp));
+  }
+}
+
+/*
+ * Arguments    : double costab[945177]
+ *                double sintab[945177]
+ *                double sintabinv[945177]
+ * Return Type  : void
+ */
+static void c_FFTImplementationCallback_gen(double costab[945177],
+                                            double sintab[945177],
+                                            double sintabinv[945177])
+{
+  static double costab1q[472589];
+  double b_sintabinv_tmp;
+  double sintabinv_tmp;
+  int b_k;
+  int c_k;
+  int k;
+  costab1q[0] = 1.0;
+#pragma omp parallel for num_threads(omp_get_max_threads())
+
+  for (k = 0; k < 236294; k++) {
+    costab1q[k + 1] = cos(3.3238176314144595E-6 * ((double)k + 1.0));
+  }
+#pragma omp parallel for num_threads(omp_get_max_threads())
+
+  for (b_k = 0; b_k < 236293; b_k++) {
+    costab1q[b_k + 236295] =
+        sin(3.3238176314144595E-6 * (472588.0 - ((double)b_k + 236295.0)));
+  }
+  costab1q[472588] = 0.0;
+  costab[0] = 1.0;
+  sintab[0] = 0.0;
+#pragma omp parallel for num_threads(omp_get_max_threads()) private(           \
+        sintabinv_tmp, b_sintabinv_tmp)
+
+  for (c_k = 0; c_k < 472588; c_k++) {
+    sintabinv_tmp = costab1q[472587 - c_k];
+    sintabinv[c_k + 1] = sintabinv_tmp;
+    b_sintabinv_tmp = costab1q[c_k + 1];
+    sintabinv[c_k + 472589] = b_sintabinv_tmp;
+    costab[c_k + 1] = b_sintabinv_tmp;
+    sintab[c_k + 1] = -sintabinv_tmp;
+    costab[c_k + 472589] = -sintabinv_tmp;
+    sintab[c_k + 472589] = -b_sintabinv_tmp;
+  }
+}
+
+/*
+ * Arguments    : const creal_T x[472588]
+ *                const double costab[524288]
+ *                const double sintab[524288]
+ *                creal_T y[1048576]
+ * Return Type  : void
+ */
+static void c_FFTImplementationCallback_r2b(const creal_T x[472588],
+                                            const double costab[524288],
+                                            const double sintab[524288],
+                                            creal_T y[1048576])
+{
+  double re;
+  double temp_im;
+  double temp_re;
+  double temp_re_tmp;
+  double twid_re;
+  int b_i;
+  int i;
+  int iDelta;
+  int iDelta2;
+  int iheight;
+  int iy;
+  int ju;
+  int k;
+  memset(&y[0], 0, 1048576U * sizeof(creal_T));
+  iy = 0;
+  ju = 0;
+  for (i = 0; i < 472587; i++) {
+    boolean_T tst;
+    y[iy] = x[i];
+    iy = 1048576;
+    tst = true;
+    while (tst) {
+      iy >>= 1;
+      ju ^= iy;
+      tst = ((ju & iy) == 0);
+    }
+    iy = ju;
+  }
+  y[iy] = x[472587];
+  for (i = 0; i <= 1048574; i += 2) {
+    temp_re = y[i + 1].re;
+    temp_re_tmp = y[i + 1].im;
+    temp_im = temp_re_tmp;
+    re = y[i].re;
+    twid_re = y[i].im;
+    y[i + 1].re = re - temp_re;
+    temp_re_tmp = twid_re - temp_re_tmp;
+    y[i + 1].im = temp_re_tmp;
+    re += temp_re;
+    y[i].re = re;
+    y[i].im = twid_re + temp_im;
+  }
+  iDelta = 2;
+  iDelta2 = 4;
+  k = 262144;
+  iheight = 1048573;
+  while (k > 0) {
+    for (b_i = 0; b_i < iheight; b_i += iDelta2) {
+      iy = b_i + iDelta;
+      temp_re = y[iy].re;
+      temp_im = y[iy].im;
+      y[iy].re = y[b_i].re - temp_re;
+      y[iy].im = y[b_i].im - temp_im;
+      y[b_i].re += temp_re;
+      y[b_i].im += temp_im;
+    }
+    iy = 1;
+    for (ju = k; ju < 524288; ju += k) {
+      double twid_im;
+      int ihi;
+      twid_re = costab[ju];
+      twid_im = sintab[ju];
+      b_i = iy;
+      ihi = iy + iheight;
+      while (b_i < ihi) {
+        int b_temp_re_tmp;
+        b_temp_re_tmp = b_i + iDelta;
+        temp_re_tmp = y[b_temp_re_tmp].im;
+        re = y[b_temp_re_tmp].re;
+        temp_re = twid_re * re - twid_im * temp_re_tmp;
+        temp_im = twid_re * temp_re_tmp + twid_im * re;
+        y[b_temp_re_tmp].re = y[b_i].re - temp_re;
+        y[b_temp_re_tmp].im = y[b_i].im - temp_im;
+        y[b_i].re += temp_re;
+        y[b_i].im += temp_im;
+        b_i += iDelta2;
+      }
+      iy++;
+    }
+    k = (int)((unsigned int)k >> 1);
+    iDelta = iDelta2;
+    iDelta2 += iDelta2;
+    iheight -= iDelta;
+  }
+}
+
+/*
+ * Arguments    : const double x[1889280]
+ *                int xoffInit
+ *                creal_T y[1024]
+ * Return Type  : void
+ */
+static void d_FFTImplementationCallback_doH(const double x[1889280],
+                                            int xoffInit, creal_T y[1024])
+{
+  static const creal_T reconVar1[512] = {{
+                                             1.0, /* re */
+                                             -1.0 /* im */
+                                         },
+                                         {
+                                             0.9938641153508455, /* re */
+                                             -0.9999811752826011 /* im */
+                                         },
+                                         {
+                                             0.9877284617142801, /* re */
+                                             -0.9999247018391445 /* im */
+                                         },
+                                         {
+                                             0.9815932700941952, /* re */
+                                             -0.9998305817958234 /* im */
+                                         },
+                                         {
+                                             0.9754587714770877, /* re */
+                                             -0.9996988186962042 /* im */
+                                         },
+                                         {
+                                             0.9693251968233634, /* re */
+                                             -0.9995294175010931 /* im */
+                                         },
+                                         {
+                                             0.9631927770586411, /* re */
+                                             -0.9993223845883495 /* im */
+                                         },
+                                         {
+                                             0.9570617430650592, /* re */
+                                             -0.9990777277526454 /* im */
+                                         },
+                                         {
+                                             0.950932325672582,  /* re */
+                                             -0.9987954562051724 /* im */
+                                         },
+                                         {
+                                             0.9448047556503101, /* re */
+                                             -0.9984755805732948 /* im */
+                                         },
+                                         {
+                                             0.9386792636977914, /* re */
+                                             -0.9981181129001492 /* im */
+                                         },
+                                         {
+                                             0.932556080436336,  /* re */
+                                             -0.9977230666441916 /* im */
+                                         },
+                                         {
+                                             0.9264354364003325, /* re */
+                                             -0.9972904566786902 /* im */
+                                         },
+                                         {
+                                             0.9203175620285698, /* re */
+                                             -0.9968202992911657 /* im */
+                                         },
+                                         {
+                                             0.9142026876555601, /* re */
+                                             -0.996312612182778  /* im */
+                                         },
+                                         {
+                                             0.9080910435028673, /* re */
+                                             -0.9957674144676598 /* im */
+                                         },
+                                         {
+                                             0.9019828596704393, /* re */
+                                             -0.9951847266721969 /* im */
+                                         },
+                                         {
+                                             0.8958783661279455, /* re */
+                                             -0.9945645707342554 /* im */
+                                         },
+                                         {
+                                             0.8897777927061169, /* re */
+                                             -0.9939069700023561 /* im */
+                                         },
+                                         {
+                                             0.8836813690880952, /* re */
+                                             -0.9932119492347945 /* im */
+                                         },
+                                         {
+                                             0.8775893248007838, /* re */
+                                             -0.99247953459871   /* im */
+                                         },
+                                         {
+                                             0.8715018892062069, /* re */
+                                             -0.9917097536690995 /* im */
+                                         },
+                                         {
+                                             0.8654192914928738, /* re */
+                                             -0.99090263542778   /* im */
+                                         },
+                                         {
+                                             0.8593417606671507, /* re */
+                                             -0.9900582102622971 /* im */
+                                         },
+                                         {
+                                             0.8532695255446383, /* re */
+                                             -0.989176509964781  /* im */
+                                         },
+                                         {
+                                             0.8472028147415566, /* re */
+                                             -0.9882575677307495 /* im */
+                                         },
+                                         {
+                                             0.8411418566661386, /* re */
+                                             -0.9873014181578584 /* im */
+                                         },
+                                         {
+                                             0.8350868795100301, /* re */
+                                             -0.9863080972445987 /* im */
+                                         },
+                                         {
+                                             0.8290381112396987, /* re */
+                                             -0.9852776423889412 /* im */
+                                         },
+                                         {
+                                             0.8229957795878513, /* re */
+                                             -0.984210092386929  /* im */
+                                         },
+                                         {
+                                             0.8169601120448591, /* re */
+                                             -0.9831054874312163 /* im */
+                                         },
+                                         {
+                                             0.8109313358501938, /* re */
+                                             -0.9819638691095552 /* im */
+                                         },
+                                         {
+                                             0.8049096779838718, /* re */
+                                             -0.9807852804032304 /* im */
+                                         },
+                                         {
+                                             0.798895365157908,  /* re */
+                                             -0.9795697656854405 /* im */
+                                         },
+                                         {
+                                             0.7928886238077815, /* re */
+                                             -0.9783173707196277 /* im */
+                                         },
+                                         {
+                                             0.7868896800839087, /* re */
+                                             -0.9770281426577544 /* im */
+                                         },
+                                         {
+                                             0.7808987598431302, /* re */
+                                             -0.9757021300385286 /* im */
+                                         },
+                                         {
+                                             0.7749160886402071, /* re */
+                                             -0.9743393827855759 /* im */
+                                         },
+                                         {
+                                             0.7689418917193289, /* re */
+                                             -0.9729399522055602 /* im */
+                                         },
+                                         {
+                                             0.7629763940056328, /* re */
+                                             -0.9715038909862518 /* im */
+                                         },
+                                         {
+                                             0.7570198200967362, /* re */
+                                             -0.970031253194544  /* im */
+                                         },
+                                         {
+                                             0.7510723942542799, /* re */
+                                             -0.9685220942744173 /* im */
+                                         },
+                                         {
+                                             0.7451343403954854, /* re */
+                                             -0.9669764710448521 /* im */
+                                         },
+                                         {
+                                             0.7392058820847245, /* re */
+                                             -0.9653944416976894 /* im */
+                                         },
+                                         {
+                                             0.7332872425251016, /* re */
+                                             -0.9637760657954398 /* im */
+                                         },
+                                         {
+                                             0.727378644550051,  /* re */
+                                             -0.9621214042690416 /* im */
+                                         },
+                                         {
+                                             0.721480310614947,  /* re */
+                                             -0.9604305194155658 /* im */
+                                         },
+                                         {
+                                             0.7155924627887281, /* re */
+                                             -0.9587034748958716 /* im */
+                                         },
+                                         {
+                                             0.7097153227455377, /* re */
+                                             -0.9569403357322088 /* im */
+                                         },
+                                         {
+                                             0.7038491117563762, /* re */
+                                             -0.9551411683057708 /* im */
+                                         },
+                                         {
+                                             0.6979940506807719, /* re */
+                                             -0.9533060403541939 /* im */
+                                         },
+                                         {
+                                             0.6921503599584651, /* re */
+                                             -0.9514350209690083 /* im */
+                                         },
+                                         {
+                                             0.6863182596011085, /* re */
+                                             -0.9495281805930367 /* im */
+                                         },
+                                         {
+                                             0.6804979691839843, /* re */
+                                             -0.9475855910177411 /* im */
+                                         },
+                                         {
+                                             0.6746897078377371, /* re */
+                                             -0.9456073253805213 /* im */
+                                         },
+                                         {
+                                             0.6688936942401236, /* re */
+                                             -0.9435934581619604 /* im */
+                                         },
+                                         {
+                                             0.66311014660778,   /* re */
+                                             -0.9415440651830208 /* im */
+                                         },
+                                         {
+                                             0.6573392826880056, /* re */
+                                             -0.9394592236021899 /* im */
+                                         },
+                                         {
+                                             0.6515813197505654, /* re */
+                                             -0.937339011912575  /* im */
+                                         },
+                                         {
+                                             0.6458364745795097, /* re */
+                                             -0.9351835099389476 /* im */
+                                         },
+                                         {
+                                             0.6401049634650119, /* re */
+                                             -0.932992798834739  /* im */
+                                         },
+                                         {
+                                             0.6343870021952261, /* re */
+                                             -0.9307669610789837 /* im */
+                                         },
+                                         {
+                                             0.6286828060481625, /* re */
+                                             -0.9285060804732156 /* im */
+                                         },
+                                         {
+                                             0.6229925897835817, /* re */
+                                             -0.9262102421383114 /* im */
+                                         },
+                                         {
+                                             0.6173165676349102, /* re */
+                                             -0.9238795325112867 /* im */
+                                         },
+                                         {
+                                             0.6116549533011737, /* re */
+                                             -0.9215140393420419 /* im */
+                                         },
+                                         {
+                                             0.6060079599389518, /* re */
+                                             -0.9191138516900578 /* im */
+                                         },
+                                         {
+                                             0.6003758001543532, /* re */
+                                             -0.9166790599210427 /* im */
+                                         },
+                                         {
+                                             0.5947586859950101, /* re */
+                                             -0.9142097557035307 /* im */
+                                         },
+                                         {
+                                             0.5891568289420961, /* re */
+                                             -0.9117060320054299 /* im */
+                                         },
+                                         {
+                                             0.5835704399023629, /* re */
+                                             -0.9091679830905224 /* im */
+                                         },
+                                         {
+                                             0.5779997292002004, /* re */
+                                             -0.9065957045149153 /* im */
+                                         },
+                                         {
+                                             0.5724449065697179, /* re */
+                                             -0.9039892931234433 /* im */
+                                         },
+                                         {
+                                             0.5669061811468481, /* re */
+                                             -0.901348847046022  /* im */
+                                         },
+                                         {
+                                             0.5613837614614723, /* re */
+                                             -0.8986744656939538 /* im */
+                                         },
+                                         {
+                                             0.5558778554295708, /* re */
+                                             -0.8959662497561852 /* im */
+                                         },
+                                         {
+                                             0.5503886703453935, /* re */
+                                             -0.8932243011955153 /* im */
+                                         },
+                                         {
+                                             0.5449164128736561, /* re */
+                                             -0.8904487232447579 /* im */
+                                         },
+                                         {
+                                             0.53946128904176,   /* re */
+                                             -0.8876396204028539 /* im */
+                                         },
+                                         {
+                                             0.5340235042320338, /* re */
+                                             -0.8847970984309378 /* im */
+                                         },
+                                         {
+                                             0.5286032631740023, /* re */
+                                             -0.881921264348355  /* im */
+                                         },
+                                         {
+                                             0.5232007699366779, /* re */
+                                             -0.8790122264286335 /* im */
+                                         },
+                                         {
+                                             0.5178162279208773, /* re */
+                                             -0.8760700941954066 /* im */
+                                         },
+                                         {
+                                             0.512449839851564,  /* re */
+                                             -0.8730949784182901 /* im */
+                                         },
+                                         {
+                                             0.507101807770216,  /* re */
+                                             -0.8700869911087115 /* im */
+                                         },
+                                         {
+                                             0.5017723330272181, /* re */
+                                             -0.8670462455156926 /* im */
+                                         },
+                                         {
+                                             0.4964616162742824, /* re */
+                                             -0.8639728561215867 /* im */
+                                         },
+                                         {
+                                             0.491169857456893,  /* re */
+                                             -0.8608669386377673 /* im */
+                                         },
+                                         {
+                                             0.48589725580677834, /* re */
+                                             -0.8577286100002721  /* im */
+                                         },
+                                         {
+                                             0.48064400983441036, /* re */
+                                             -0.8545579883654005  /* im */
+                                         },
+                                         {
+                                             0.47541031732153105, /* re */
+                                             -0.8513551931052652  /* im */
+                                         },
+                                         {
+                                             0.4701963753137054, /* re */
+                                             -0.8481203448032972 /* im */
+                                         },
+                                         {
+                                             0.46500238011290285, /* re */
+                                             -0.8448535652497071  /* im */
+                                         },
+                                         {
+                                             0.45982852727010715, /* re */
+                                             -0.8415549774368984  /* im */
+                                         },
+                                         {
+                                             0.45467501157795354, /* re */
+                                             -0.8382247055548381  /* im */
+                                         },
+                                         {
+                                             0.4495420270633952, /* re */
+                                             -0.83486287498638   /* im */
+                                         },
+                                         {
+                                             0.4444297669803978, /* re */
+                                             -0.8314696123025452 /* im */
+                                         },
+                                         {
+                                             0.43933842380266397, /* re */
+                                             -0.8280450452577558  /* im */
+                                         },
+                                         {
+                                             0.4342681892163869, /* re */
+                                             -0.8245893027850253 /* im */
+                                         },
+                                         {
+                                             0.42921925411303274, /* re */
+                                             -0.8211025149911046  /* im */
+                                         },
+                                         {
+                                             0.42419180858215466, /* re */
+                                             -0.8175848131515837  /* im */
+                                         },
+                                         {
+                                             0.4191860419042355, /* re */
+                                             -0.8140363297059484 /* im */
+                                         },
+                                         {
+                                             0.41420214254356114, /* re */
+                                             -0.8104571982525948  /* im */
+                                         },
+                                         {
+                                             0.40924029814112584, /* re */
+                                             -0.8068475535437993  /* im */
+                                         },
+                                         {
+                                             0.40430069550756664, /* re */
+                                             -0.8032075314806449  /* im */
+                                         },
+                                         {
+                                             0.399383520616131, /* re */
+                                             -0.799537269107905 /* im */
+                                         },
+                                         {
+                                             0.39448895859567445, /* re */
+                                             -0.7958369046088836  /* im */
+                                         },
+                                         {
+                                             0.3896171937236905, /* re */
+                                             -0.7921065773002124 /* im */
+                                         },
+                                         {
+                                             0.3847684094193732, /* re */
+                                             -0.7883464276266063 /* im */
+                                         },
+                                         {
+                                             0.3799427882367109, /* re */
+                                             -0.7845565971555752 /* im */
+                                         },
+                                         {
+                                             0.37514051185761366, /* re */
+                                             -0.7807372285720945  /* im */
+                                         },
+                                         {
+                                             0.370361761085073,  /* re */
+                                             -0.7768884656732324 /* im */
+                                         },
+                                         {
+                                             0.3656067158363545, /* re */
+                                             -0.773010453362737  /* im */
+                                         },
+                                         {
+                                             0.36087555513622427, /* re */
+                                             -0.7691033376455797  /* im */
+                                         },
+                                         {
+                                             0.3561684571102086, /* re */
+                                             -0.765167265622459  /* im */
+                                         },
+                                         {
+                                             0.35148559897788756, /* re */
+                                             -0.7612023854842618  /* im */
+                                         },
+                                         {
+                                             0.34682715704622324, /* re */
+                                             -0.7572088465064846  /* im */
+                                         },
+                                         {
+                                             0.34219330670292136, /* re */
+                                             -0.7531867990436125  /* im */
+                                         },
+                                         {
+                                             0.3375842224098282, /* re */
+                                             -0.7491363945234594 /* im */
+                                         },
+                                         {
+                                             0.33300007769636253, /* re */
+                                             -0.745057785441466   /* im */
+                                         },
+                                         {
+                                             0.32844104515298167, /* re */
+                                             -0.7409511253549592  /* im */
+                                         },
+                                         {
+                                             0.3239072964246841, /* re */
+                                             -0.7368165688773698 /* im */
+                                         },
+                                         {
+                                             0.319399002204547,  /* re */
+                                             -0.7326542716724128 /* im */
+                                         },
+                                         {
+                                             0.31491633222729964, /* re */
+                                             -0.7284643904482252  /* im */
+                                         },
+                                         {
+                                             0.31045945526293317, /* re */
+                                             -0.724247082951467   /* im */
+                                         },
+                                         {
+                                             0.3060285391103461, /* re */
+                                             -0.7200025079613817 /* im */
+                                         },
+                                         {
+                                             0.3016237505910271, /* re */
+                                             -0.7157308252838186 /* im */
+                                         },
+                                         {
+                                             0.2972452555427747, /* re */
+                                             -0.7114321957452164 /* im */
+                                         },
+                                         {
+                                             0.2928932188134524, /* re */
+                                             -0.7071067811865476 /* im */
+                                         },
+                                         {
+                                             0.28856780425478357, /* re */
+                                             -0.7027547444572253  /* im */
+                                         },
+                                         {
+                                             0.2842691747161814, /* re */
+                                             -0.6983762494089729 /* im */
+                                         },
+                                         {
+                                             0.27999749203861835, /* re */
+                                             -0.6939714608896539  /* im */
+                                         },
+                                         {
+                                             0.275752917048533,  /* re */
+                                             -0.6895405447370668 /* im */
+                                         },
+                                         {
+                                             0.2715356095517748, /* re */
+                                             -0.6850836677727004 /* im */
+                                         },
+                                         {
+                                             0.2673457283275872, /* re */
+                                             -0.680600997795453  /* im */
+                                         },
+                                         {
+                                             0.2631834311226302, /* re */
+                                             -0.6760927035753159 /* im */
+                                         },
+                                         {
+                                             0.2590488746450408, /* re */
+                                             -0.6715589548470183 /* im */
+                                         },
+                                         {
+                                             0.25494221455853405, /* re */
+                                             -0.6669999223036375  /* im */
+                                         },
+                                         {
+                                             0.25086360547654063, /* re */
+                                             -0.6624157775901718  /* im */
+                                         },
+                                         {
+                                             0.24681320095638748, /* re */
+                                             -0.6578066932970786  /* im */
+                                         },
+                                         {
+                                             0.24279115349351543, /* re */
+                                             -0.6531728429537768  /* im */
+                                         },
+                                         {
+                                             0.23879761451573822, /* re */
+                                             -0.6485144010221124  /* im */
+                                         },
+                                         {
+                                             0.23483273437754104, /* re */
+                                             -0.6438315428897914  /* im */
+                                         },
+                                         {
+                                             0.2308966623544203, /* re */
+                                             -0.6391244448637757 /* im */
+                                         },
+                                         {
+                                             0.226989546637263,  /* re */
+                                             -0.6343932841636455 /* im */
+                                         },
+                                         {
+                                             0.22311153432676756, /* re */
+                                             -0.629638238914927   /* im */
+                                         },
+                                         {
+                                             0.2192627714279055, /* re */
+                                             -0.6248594881423863 /* im */
+                                         },
+                                         {
+                                             0.21544340284442476, /* re */
+                                             -0.6200572117632891  /* im */
+                                         },
+                                         {
+                                             0.21165357237339366, /* re */
+                                             -0.6152315905806268  /* im */
+                                         },
+                                         {
+                                             0.2078934226997876, /* re */
+                                             -0.6103828062763095 /* im */
+                                         },
+                                         {
+                                             0.20416309539111643, /* re */
+                                             -0.6055110414043255  /* im */
+                                         },
+                                         {
+                                             0.200462730892095, /* re */
+                                             -0.600616479383869 /* im */
+                                         },
+                                         {
+                                             0.19679246851935506, /* re */
+                                             -0.5956993044924334  /* im */
+                                         },
+                                         {
+                                             0.19315244645620067, /* re */
+                                             -0.5907597018588742  /* im */
+                                         },
+                                         {
+                                             0.18954280174740523, /* re */
+                                             -0.5857978574564389  /* im */
+                                         },
+                                         {
+                                             0.1859636702940516, /* re */
+                                             -0.5808139580957645 /* im */
+                                         },
+                                         {
+                                             0.1824151868484163, /* re */
+                                             -0.5758081914178453 /* im */
+                                         },
+                                         {
+                                             0.17889748500889535, /* re */
+                                             -0.5707807458869673  /* im */
+                                         },
+                                         {
+                                             0.1754106972149747, /* re */
+                                             -0.5657318107836131 /* im */
+                                         },
+                                         {
+                                             0.1719549547422442, /* re */
+                                             -0.560661576197336  /* im */
+                                         },
+                                         {
+                                             0.16853038769745476, /* re */
+                                             -0.5555702330196022  /* im */
+                                         },
+                                         {
+                                             0.16513712501362,   /* re */
+                                             -0.5504579729366048 /* im */
+                                         },
+                                         {
+                                             0.16177529444516192, /* re */
+                                             -0.5453249884220465  /* im */
+                                         },
+                                         {
+                                             0.15844502256310156, /* re */
+                                             -0.5401714727298929  /* im */
+                                         },
+                                         {
+                                             0.15514643475029288, /* re */
+                                             -0.5349976198870972  /* im */
+                                         },
+                                         {
+                                             0.15187965519670277, /* re */
+                                             -0.5298036246862946  /* im */
+                                         },
+                                         {
+                                             0.1486448068947348, /* re */
+                                             -0.524589682678469  /* im */
+                                         },
+                                         {
+                                             0.14544201163459947, /* re */
+                                             -0.5193559901655896  /* im */
+                                         },
+                                         {
+                                             0.14227138999972788, /* re */
+                                             -0.5141027441932217  /* im */
+                                         },
+                                         {
+                                             0.1391330613622327, /* re */
+                                             -0.508830142543107  /* im */
+                                         },
+                                         {
+                                             0.1360271438784133, /* re */
+                                             -0.5035383837257176 /* im */
+                                         },
+                                         {
+                                             0.13295375448430735, /* re */
+                                             -0.4982276669727818  /* im */
+                                         },
+                                         {
+                                             0.12991300889128854, /* re */
+                                             -0.49289819222978404 /* im */
+                                         },
+                                         {
+                                             0.1269050215817099, /* re */
+                                             -0.487550160148436  /* im */
+                                         },
+                                         {
+                                             0.1239299058045934, /* re */
+                                             -0.4821837720791227 /* im */
+                                         },
+                                         {
+                                             0.12098777357136647, /* re */
+                                             -0.4767992300633221  /* im */
+                                         },
+                                         {
+                                             0.11807873565164495, /* re */
+                                             -0.47139673682599764 /* im */
+                                         },
+                                         {
+                                             0.11520290156906221, /* re */
+                                             -0.4659764957679662  /* im */
+                                         },
+                                         {
+                                             0.11236037959714607, /* re */
+                                             -0.46053871095824    /* im */
+                                         },
+                                         {
+                                             0.10955127675524212, /* re */
+                                             -0.45508358712634384 /* im */
+                                         },
+                                         {
+                                             0.10677569880448468, /* re */
+                                             -0.44961132965460654 /* im */
+                                         },
+                                         {
+                                             0.10403375024381478, /* re */
+                                             -0.4441221445704292  /* im */
+                                         },
+                                         {
+                                             0.10132553430604618, /* re */
+                                             -0.43861623853852766 /* im */
+                                         },
+                                         {
+                                             0.09865115295397797, /* re */
+                                             -0.43309381885315196 /* im */
+                                         },
+                                         {
+                                             0.09601070687655666, /* re */
+                                             -0.4275550934302821  /* im */
+                                         },
+                                         {
+                                             0.09340429548508467, /* re */
+                                             -0.4220002707997997  /* im */
+                                         },
+                                         {
+                                             0.09083201690947762, /* re */
+                                             -0.41642956009763715 /* im */
+                                         },
+                                         {
+                                             0.08829396799457012, /* re */
+                                             -0.4108431710579039  /* im */
+                                         },
+                                         {
+                                             0.08579024429646931, /* re */
+                                             -0.40524131400498986 /* im */
+                                         },
+                                         {
+                                             0.0833209400789573, /* re */
+                                             -0.3996241998456468 /* im */
+                                         },
+                                         {
+                                             0.08088614830994223, /* re */
+                                             -0.3939920400610481  /* im */
+                                         },
+                                         {
+                                             0.0784859606579581,  /* re */
+                                             -0.38834504669882625 /* im */
+                                         },
+                                         {
+                                             0.07612046748871326, /* re */
+                                             -0.3826834323650898  /* im */
+                                         },
+                                         {
+                                             0.07378975786168862, /* re */
+                                             -0.37700741021641826 /* im */
+                                         },
+                                         {
+                                             0.07149391952678441, /* re */
+                                             -0.3713171939518375  /* im */
+                                         },
+                                         {
+                                             0.06923303892101629, /* re */
+                                             -0.36561299780477385 /* im */
+                                         },
+                                         {
+                                             0.06700720116526104, /* re */
+                                             -0.3598950365349881  /* im */
+                                         },
+                                         {
+                                             0.06481649006105239, /* re */
+                                             -0.35416352542049034 /* im */
+                                         },
+                                         {
+                                             0.06266098808742504, /* re */
+                                             -0.34841868024943456 /* im */
+                                         },
+                                         {
+                                             0.06054077639781008, /* re */
+                                             -0.3426607173119944  /* im */
+                                         },
+                                         {
+                                             0.058455934816979194, /* re */
+                                             -0.33688985339222005  /* im */
+                                         },
+                                         {
+                                             0.056406541838039614, /* re */
+                                             -0.33110630575987643  /* im */
+                                         },
+                                         {
+                                             0.05439267461947872, /* re */
+                                             -0.3253102921622629  /* im */
+                                         },
+                                         {
+                                             0.05241440898225891, /* re */
+                                             -0.3195020308160157  /* im */
+                                         },
+                                         {
+                                             0.050471819406963325, /* re */
+                                             -0.3136817403988915   /* im */
+                                         },
+                                         {
+                                             0.04856497903099166, /* re */
+                                             -0.30784964004153487 /* im */
+                                         },
+                                         {
+                                             0.04669395964580614, /* re */
+                                             -0.3020059493192281  /* im */
+                                         },
+                                         {
+                                             0.04485883169422922, /* re */
+                                             -0.2961508882436238  /* im */
+                                         },
+                                         {
+                                             0.043059664267791176, /* re */
+                                             -0.29028467725446233  /* im */
+                                         },
+                                         {
+                                             0.0412965251041284, /* re */
+                                             -0.2844075372112719 /* im */
+                                         },
+                                         {
+                                             0.03956948058443421, /* re */
+                                             -0.27851968938505306 /* im */
+                                         },
+                                         {
+                                             0.03787859573095842, /* re */
+                                             -0.272621355449949   /* im */
+                                         },
+                                         {
+                                             0.03622393420456016, /* re */
+                                             -0.26671275747489837 /* im */
+                                         },
+                                         {
+                                             0.0346055583023106, /* re */
+                                             -0.2607941179152755 /* im */
+                                         },
+                                         {
+                                             0.03302352895514793, /* re */
+                                             -0.25486565960451457 /* im */
+                                         },
+                                         {
+                                             0.03147790572558273, /* re */
+                                             -0.24892760574572015 /* im */
+                                         },
+                                         {
+                                             0.029968746805456026, /* re */
+                                             -0.24298017990326387  /* im */
+                                         },
+                                         {
+                                             0.028496109013748216, /* re */
+                                             -0.2370236059943672   /* im */
+                                         },
+                                         {
+                                             0.027060047794439823, /* re */
+                                             -0.2310581082806711   /* im */
+                                         },
+                                         {
+                                             0.025660617214424142, /* re */
+                                             -0.22508391135979283  /* im */
+                                         },
+                                         {
+                                             0.02429786996147143, /* re */
+                                             -0.2191012401568698  /* im */
+                                         },
+                                         {
+                                             0.022971857342245605, /* re */
+                                             -0.21311031991609136  /* im */
+                                         },
+                                         {
+                                             0.021682629280372345, /* re */
+                                             -0.20711137619221856  /* im */
+                                         },
+                                         {
+                                             0.02043023431455948, /* re */
+                                             -0.2011046348420919  /* im */
+                                         },
+                                         {
+                                             0.01921471959676957, /* re */
+                                             -0.19509032201612825 /* im */
+                                         },
+                                         {
+                                             0.018036130890444757, /* re */
+                                             -0.1890686641498062   /* im */
+                                         },
+                                         {
+                                             0.016894512568783715, /* re */
+                                             -0.18303988795514095  /* im */
+                                         },
+                                         {
+                                             0.015789907613070975, /* re */
+                                             -0.17700422041214875  /* im */
+                                         },
+                                         {
+                                             0.014722357611058778, /* re */
+                                             -0.17096188876030122  /* im */
+                                         },
+                                         {
+                                             0.01369190275540133, /* re */
+                                             -0.16491312048996992 /* im */
+                                         },
+                                         {
+                                             0.012698581842141565, /* re */
+                                             -0.15885814333386145  /* im */
+                                         },
+                                         {
+                                             0.011742432269250536, /* re */
+                                             -0.15279718525844344  /* im */
+                                         },
+                                         {
+                                             0.010823490035218986, /* re */
+                                             -0.14673047445536175  /* im */
+                                         },
+                                         {
+                                             0.009941789737702877, /* re */
+                                             -0.1406582393328492   /* im */
+                                         },
+                                         {
+                                             0.00909736457221999, /* re */
+                                             -0.13458070850712617 /* im */
+                                         },
+                                         {
+                                             0.008290246330900475, /* re */
+                                             -0.12849811079379317  /* im */
+                                         },
+                                         {
+                                             0.007520465401290033, /* re */
+                                             -0.1224106751992162   /* im */
+                                         },
+                                         {
+                                             0.0067880507652055,  /* re */
+                                             -0.11631863091190475 /* im */
+                                         },
+                                         {
+                                             0.0060930299976439395, /* re */
+                                             -0.11022220729388306   /* im */
+                                         },
+                                         {
+                                             0.005435429265744585, /* re */
+                                             -0.10412163387205459  /* im */
+                                         },
+                                         {
+                                             0.004815273327803071, /* re */
+                                             -0.0980171403295606   /* im */
+                                         },
+                                         {
+                                             0.004232585532340183, /* re */
+                                             -0.09190895649713272  /* im */
+                                         },
+                                         {
+                                             0.0036873878172219987, /* re */
+                                             -0.0857973123444399    /* im */
+                                         },
+                                         {
+                                             0.003179700708834332, /* re */
+                                             -0.07968243797143013  /* im */
+                                         },
+                                         {
+                                             0.002709543321309793, /* re */
+                                             -0.07356456359966743  /* im */
+                                         },
+                                         {
+                                             0.0022769333558083638, /* re */
+                                             -0.06744391956366405   /* im */
+                                         },
+                                         {
+                                             0.0018818870998508208, /* re */
+                                             -0.06132073630220858   /* im */
+                                         },
+                                         {
+                                             0.0015244194267052258, /* re */
+                                             -0.05519524434968994   /* im */
+                                         },
+                                         {
+                                             0.001204543794827595, /* re */
+                                             -0.049067674327418015 /* im */
+                                         },
+                                         {
+                                             0.0009222722473546385, /* re */
+                                             -0.04293825693494082   /* im */
+                                         },
+                                         {
+                                             0.0006776154116504562, /* re */
+                                             -0.03680722294135883   /* im */
+                                         },
+                                         {
+                                             0.00047058249890685744, /* re */
+                                             -0.030674803176636626   /* im */
+                                         },
+                                         {
+                                             0.00030118130379575003, /* re */
+                                             -0.024541228522912288   /* im */
+                                         },
+                                         {
+                                             0.0001694182041765968, /* re */
+                                             -0.01840672990580482   /* im */
+                                         },
+                                         {
+                                             7.529816085549701E-5, /* re */
+                                             -0.012271538285719925 /* im */
+                                         },
+                                         {
+                                             1.882471739889091E-5, /* re */
+                                             -0.006135884649154475 /* im */
+                                         },
+                                         {
+                                             0.0, /* re */
+                                             -0.0 /* im */
+                                         },
+                                         {
+                                             1.882471739889091E-5, /* re */
+                                             0.006135884649154475  /* im */
+                                         },
+                                         {
+                                             7.529816085549701E-5, /* re */
+                                             0.012271538285719925  /* im */
+                                         },
+                                         {
+                                             0.0001694182041765968, /* re */
+                                             0.01840672990580482    /* im */
+                                         },
+                                         {
+                                             0.00030118130379575003, /* re */
+                                             0.024541228522912288    /* im */
+                                         },
+                                         {
+                                             0.00047058249890685744, /* re */
+                                             0.030674803176636626    /* im */
+                                         },
+                                         {
+                                             0.0006776154116504562, /* re */
+                                             0.03680722294135883    /* im */
+                                         },
+                                         {
+                                             0.0009222722473546385, /* re */
+                                             0.04293825693494082    /* im */
+                                         },
+                                         {
+                                             0.001204543794827595, /* re */
+                                             0.049067674327418015  /* im */
+                                         },
+                                         {
+                                             0.0015244194267052258, /* re */
+                                             0.05519524434968994    /* im */
+                                         },
+                                         {
+                                             0.0018818870998508208, /* re */
+                                             0.06132073630220858    /* im */
+                                         },
+                                         {
+                                             0.0022769333558083638, /* re */
+                                             0.06744391956366405    /* im */
+                                         },
+                                         {
+                                             0.002709543321309793, /* re */
+                                             0.07356456359966743   /* im */
+                                         },
+                                         {
+                                             0.003179700708834332, /* re */
+                                             0.07968243797143013   /* im */
+                                         },
+                                         {
+                                             0.0036873878172219987, /* re */
+                                             0.0857973123444399     /* im */
+                                         },
+                                         {
+                                             0.004232585532340183, /* re */
+                                             0.09190895649713272   /* im */
+                                         },
+                                         {
+                                             0.004815273327803071, /* re */
+                                             0.0980171403295606    /* im */
+                                         },
+                                         {
+                                             0.005435429265744585, /* re */
+                                             0.10412163387205459   /* im */
+                                         },
+                                         {
+                                             0.0060930299976439395, /* re */
+                                             0.11022220729388306    /* im */
+                                         },
+                                         {
+                                             0.0067880507652055, /* re */
+                                             0.11631863091190475 /* im */
+                                         },
+                                         {
+                                             0.007520465401290033, /* re */
+                                             0.1224106751992162    /* im */
+                                         },
+                                         {
+                                             0.008290246330900475, /* re */
+                                             0.12849811079379317   /* im */
+                                         },
+                                         {
+                                             0.00909736457221999, /* re */
+                                             0.13458070850712617  /* im */
+                                         },
+                                         {
+                                             0.009941789737702877, /* re */
+                                             0.1406582393328492    /* im */
+                                         },
+                                         {
+                                             0.010823490035218986, /* re */
+                                             0.14673047445536175   /* im */
+                                         },
+                                         {
+                                             0.011742432269250536, /* re */
+                                             0.15279718525844344   /* im */
+                                         },
+                                         {
+                                             0.012698581842141565, /* re */
+                                             0.15885814333386145   /* im */
+                                         },
+                                         {
+                                             0.01369190275540133, /* re */
+                                             0.16491312048996992  /* im */
+                                         },
+                                         {
+                                             0.014722357611058778, /* re */
+                                             0.17096188876030122   /* im */
+                                         },
+                                         {
+                                             0.015789907613070975, /* re */
+                                             0.17700422041214875   /* im */
+                                         },
+                                         {
+                                             0.016894512568783715, /* re */
+                                             0.18303988795514095   /* im */
+                                         },
+                                         {
+                                             0.018036130890444757, /* re */
+                                             0.1890686641498062    /* im */
+                                         },
+                                         {
+                                             0.01921471959676957, /* re */
+                                             0.19509032201612825  /* im */
+                                         },
+                                         {
+                                             0.02043023431455948, /* re */
+                                             0.2011046348420919   /* im */
+                                         },
+                                         {
+                                             0.021682629280372345, /* re */
+                                             0.20711137619221856   /* im */
+                                         },
+                                         {
+                                             0.022971857342245605, /* re */
+                                             0.21311031991609136   /* im */
+                                         },
+                                         {
+                                             0.02429786996147143, /* re */
+                                             0.2191012401568698   /* im */
+                                         },
+                                         {
+                                             0.025660617214424142, /* re */
+                                             0.22508391135979283   /* im */
+                                         },
+                                         {
+                                             0.027060047794439823, /* re */
+                                             0.2310581082806711    /* im */
+                                         },
+                                         {
+                                             0.028496109013748216, /* re */
+                                             0.2370236059943672    /* im */
+                                         },
+                                         {
+                                             0.029968746805456026, /* re */
+                                             0.24298017990326387   /* im */
+                                         },
+                                         {
+                                             0.03147790572558273, /* re */
+                                             0.24892760574572015  /* im */
+                                         },
+                                         {
+                                             0.03302352895514793, /* re */
+                                             0.25486565960451457  /* im */
+                                         },
+                                         {
+                                             0.0346055583023106, /* re */
+                                             0.2607941179152755  /* im */
+                                         },
+                                         {
+                                             0.03622393420456016, /* re */
+                                             0.26671275747489837  /* im */
+                                         },
+                                         {
+                                             0.03787859573095842, /* re */
+                                             0.272621355449949    /* im */
+                                         },
+                                         {
+                                             0.03956948058443421, /* re */
+                                             0.27851968938505306  /* im */
+                                         },
+                                         {
+                                             0.0412965251041284, /* re */
+                                             0.2844075372112719  /* im */
+                                         },
+                                         {
+                                             0.043059664267791176, /* re */
+                                             0.29028467725446233   /* im */
+                                         },
+                                         {
+                                             0.04485883169422922, /* re */
+                                             0.2961508882436238   /* im */
+                                         },
+                                         {
+                                             0.04669395964580614, /* re */
+                                             0.3020059493192281   /* im */
+                                         },
+                                         {
+                                             0.04856497903099166, /* re */
+                                             0.30784964004153487  /* im */
+                                         },
+                                         {
+                                             0.050471819406963325, /* re */
+                                             0.3136817403988915    /* im */
+                                         },
+                                         {
+                                             0.05241440898225891, /* re */
+                                             0.3195020308160157   /* im */
+                                         },
+                                         {
+                                             0.05439267461947872, /* re */
+                                             0.3253102921622629   /* im */
+                                         },
+                                         {
+                                             0.056406541838039614, /* re */
+                                             0.33110630575987643   /* im */
+                                         },
+                                         {
+                                             0.058455934816979194, /* re */
+                                             0.33688985339222005   /* im */
+                                         },
+                                         {
+                                             0.06054077639781008, /* re */
+                                             0.3426607173119944   /* im */
+                                         },
+                                         {
+                                             0.06266098808742504, /* re */
+                                             0.34841868024943456  /* im */
+                                         },
+                                         {
+                                             0.06481649006105239, /* re */
+                                             0.35416352542049034  /* im */
+                                         },
+                                         {
+                                             0.06700720116526104, /* re */
+                                             0.3598950365349881   /* im */
+                                         },
+                                         {
+                                             0.06923303892101629, /* re */
+                                             0.36561299780477385  /* im */
+                                         },
+                                         {
+                                             0.07149391952678441, /* re */
+                                             0.3713171939518375   /* im */
+                                         },
+                                         {
+                                             0.07378975786168862, /* re */
+                                             0.37700741021641826  /* im */
+                                         },
+                                         {
+                                             0.07612046748871326, /* re */
+                                             0.3826834323650898   /* im */
+                                         },
+                                         {
+                                             0.0784859606579581, /* re */
+                                             0.38834504669882625 /* im */
+                                         },
+                                         {
+                                             0.08088614830994223, /* re */
+                                             0.3939920400610481   /* im */
+                                         },
+                                         {
+                                             0.0833209400789573, /* re */
+                                             0.3996241998456468  /* im */
+                                         },
+                                         {
+                                             0.08579024429646931, /* re */
+                                             0.40524131400498986  /* im */
+                                         },
+                                         {
+                                             0.08829396799457012, /* re */
+                                             0.4108431710579039   /* im */
+                                         },
+                                         {
+                                             0.09083201690947762, /* re */
+                                             0.41642956009763715  /* im */
+                                         },
+                                         {
+                                             0.09340429548508467, /* re */
+                                             0.4220002707997997   /* im */
+                                         },
+                                         {
+                                             0.09601070687655666, /* re */
+                                             0.4275550934302821   /* im */
+                                         },
+                                         {
+                                             0.09865115295397797, /* re */
+                                             0.43309381885315196  /* im */
+                                         },
+                                         {
+                                             0.10132553430604618, /* re */
+                                             0.43861623853852766  /* im */
+                                         },
+                                         {
+                                             0.10403375024381478, /* re */
+                                             0.4441221445704292   /* im */
+                                         },
+                                         {
+                                             0.10677569880448468, /* re */
+                                             0.44961132965460654  /* im */
+                                         },
+                                         {
+                                             0.10955127675524212, /* re */
+                                             0.45508358712634384  /* im */
+                                         },
+                                         {
+                                             0.11236037959714607, /* re */
+                                             0.46053871095824     /* im */
+                                         },
+                                         {
+                                             0.11520290156906221, /* re */
+                                             0.4659764957679662   /* im */
+                                         },
+                                         {
+                                             0.11807873565164495, /* re */
+                                             0.47139673682599764  /* im */
+                                         },
+                                         {
+                                             0.12098777357136647, /* re */
+                                             0.4767992300633221   /* im */
+                                         },
+                                         {
+                                             0.1239299058045934, /* re */
+                                             0.4821837720791227  /* im */
+                                         },
+                                         {
+                                             0.1269050215817099, /* re */
+                                             0.487550160148436   /* im */
+                                         },
+                                         {
+                                             0.12991300889128854, /* re */
+                                             0.49289819222978404  /* im */
+                                         },
+                                         {
+                                             0.13295375448430735, /* re */
+                                             0.4982276669727818   /* im */
+                                         },
+                                         {
+                                             0.1360271438784133, /* re */
+                                             0.5035383837257176  /* im */
+                                         },
+                                         {
+                                             0.1391330613622327, /* re */
+                                             0.508830142543107   /* im */
+                                         },
+                                         {
+                                             0.14227138999972788, /* re */
+                                             0.5141027441932217   /* im */
+                                         },
+                                         {
+                                             0.14544201163459947, /* re */
+                                             0.5193559901655896   /* im */
+                                         },
+                                         {
+                                             0.1486448068947348, /* re */
+                                             0.524589682678469   /* im */
+                                         },
+                                         {
+                                             0.15187965519670277, /* re */
+                                             0.5298036246862946   /* im */
+                                         },
+                                         {
+                                             0.15514643475029288, /* re */
+                                             0.5349976198870972   /* im */
+                                         },
+                                         {
+                                             0.15844502256310156, /* re */
+                                             0.5401714727298929   /* im */
+                                         },
+                                         {
+                                             0.16177529444516192, /* re */
+                                             0.5453249884220465   /* im */
+                                         },
+                                         {
+                                             0.16513712501362,  /* re */
+                                             0.5504579729366048 /* im */
+                                         },
+                                         {
+                                             0.16853038769745476, /* re */
+                                             0.5555702330196022   /* im */
+                                         },
+                                         {
+                                             0.1719549547422442, /* re */
+                                             0.560661576197336   /* im */
+                                         },
+                                         {
+                                             0.1754106972149747, /* re */
+                                             0.5657318107836131  /* im */
+                                         },
+                                         {
+                                             0.17889748500889535, /* re */
+                                             0.5707807458869673   /* im */
+                                         },
+                                         {
+                                             0.1824151868484163, /* re */
+                                             0.5758081914178453  /* im */
+                                         },
+                                         {
+                                             0.1859636702940516, /* re */
+                                             0.5808139580957645  /* im */
+                                         },
+                                         {
+                                             0.18954280174740523, /* re */
+                                             0.5857978574564389   /* im */
+                                         },
+                                         {
+                                             0.19315244645620067, /* re */
+                                             0.5907597018588742   /* im */
+                                         },
+                                         {
+                                             0.19679246851935506, /* re */
+                                             0.5956993044924334   /* im */
+                                         },
+                                         {
+                                             0.200462730892095, /* re */
+                                             0.600616479383869  /* im */
+                                         },
+                                         {
+                                             0.20416309539111643, /* re */
+                                             0.6055110414043255   /* im */
+                                         },
+                                         {
+                                             0.2078934226997876, /* re */
+                                             0.6103828062763095  /* im */
+                                         },
+                                         {
+                                             0.21165357237339366, /* re */
+                                             0.6152315905806268   /* im */
+                                         },
+                                         {
+                                             0.21544340284442476, /* re */
+                                             0.6200572117632891   /* im */
+                                         },
+                                         {
+                                             0.2192627714279055, /* re */
+                                             0.6248594881423863  /* im */
+                                         },
+                                         {
+                                             0.22311153432676756, /* re */
+                                             0.629638238914927    /* im */
+                                         },
+                                         {
+                                             0.226989546637263, /* re */
+                                             0.6343932841636455 /* im */
+                                         },
+                                         {
+                                             0.2308966623544203, /* re */
+                                             0.6391244448637757  /* im */
+                                         },
+                                         {
+                                             0.23483273437754104, /* re */
+                                             0.6438315428897914   /* im */
+                                         },
+                                         {
+                                             0.23879761451573822, /* re */
+                                             0.6485144010221124   /* im */
+                                         },
+                                         {
+                                             0.24279115349351543, /* re */
+                                             0.6531728429537768   /* im */
+                                         },
+                                         {
+                                             0.24681320095638748, /* re */
+                                             0.6578066932970786   /* im */
+                                         },
+                                         {
+                                             0.25086360547654063, /* re */
+                                             0.6624157775901718   /* im */
+                                         },
+                                         {
+                                             0.25494221455853405, /* re */
+                                             0.6669999223036375   /* im */
+                                         },
+                                         {
+                                             0.2590488746450408, /* re */
+                                             0.6715589548470183  /* im */
+                                         },
+                                         {
+                                             0.2631834311226302, /* re */
+                                             0.6760927035753159  /* im */
+                                         },
+                                         {
+                                             0.2673457283275872, /* re */
+                                             0.680600997795453   /* im */
+                                         },
+                                         {
+                                             0.2715356095517748, /* re */
+                                             0.6850836677727004  /* im */
+                                         },
+                                         {
+                                             0.275752917048533, /* re */
+                                             0.6895405447370668 /* im */
+                                         },
+                                         {
+                                             0.27999749203861835, /* re */
+                                             0.6939714608896539   /* im */
+                                         },
+                                         {
+                                             0.2842691747161814, /* re */
+                                             0.6983762494089729  /* im */
+                                         },
+                                         {
+                                             0.28856780425478357, /* re */
+                                             0.7027547444572253   /* im */
+                                         },
+                                         {
+                                             0.2928932188134524, /* re */
+                                             0.7071067811865476  /* im */
+                                         },
+                                         {
+                                             0.2972452555427747, /* re */
+                                             0.7114321957452164  /* im */
+                                         },
+                                         {
+                                             0.3016237505910271, /* re */
+                                             0.7157308252838186  /* im */
+                                         },
+                                         {
+                                             0.3060285391103461, /* re */
+                                             0.7200025079613817  /* im */
+                                         },
+                                         {
+                                             0.31045945526293317, /* re */
+                                             0.724247082951467    /* im */
+                                         },
+                                         {
+                                             0.31491633222729964, /* re */
+                                             0.7284643904482252   /* im */
+                                         },
+                                         {
+                                             0.319399002204547, /* re */
+                                             0.7326542716724128 /* im */
+                                         },
+                                         {
+                                             0.3239072964246841, /* re */
+                                             0.7368165688773698  /* im */
+                                         },
+                                         {
+                                             0.32844104515298167, /* re */
+                                             0.7409511253549592   /* im */
+                                         },
+                                         {
+                                             0.33300007769636253, /* re */
+                                             0.745057785441466    /* im */
+                                         },
+                                         {
+                                             0.3375842224098282, /* re */
+                                             0.7491363945234594  /* im */
+                                         },
+                                         {
+                                             0.34219330670292136, /* re */
+                                             0.7531867990436125   /* im */
+                                         },
+                                         {
+                                             0.34682715704622324, /* re */
+                                             0.7572088465064846   /* im */
+                                         },
+                                         {
+                                             0.35148559897788756, /* re */
+                                             0.7612023854842618   /* im */
+                                         },
+                                         {
+                                             0.3561684571102086, /* re */
+                                             0.765167265622459   /* im */
+                                         },
+                                         {
+                                             0.36087555513622427, /* re */
+                                             0.7691033376455797   /* im */
+                                         },
+                                         {
+                                             0.3656067158363545, /* re */
+                                             0.773010453362737   /* im */
+                                         },
+                                         {
+                                             0.370361761085073, /* re */
+                                             0.7768884656732324 /* im */
+                                         },
+                                         {
+                                             0.37514051185761366, /* re */
+                                             0.7807372285720945   /* im */
+                                         },
+                                         {
+                                             0.3799427882367109, /* re */
+                                             0.7845565971555752  /* im */
+                                         },
+                                         {
+                                             0.3847684094193732, /* re */
+                                             0.7883464276266063  /* im */
+                                         },
+                                         {
+                                             0.3896171937236905, /* re */
+                                             0.7921065773002124  /* im */
+                                         },
+                                         {
+                                             0.39448895859567445, /* re */
+                                             0.7958369046088836   /* im */
+                                         },
+                                         {
+                                             0.399383520616131, /* re */
+                                             0.799537269107905  /* im */
+                                         },
+                                         {
+                                             0.40430069550756664, /* re */
+                                             0.8032075314806449   /* im */
+                                         },
+                                         {
+                                             0.40924029814112584, /* re */
+                                             0.8068475535437993   /* im */
+                                         },
+                                         {
+                                             0.41420214254356114, /* re */
+                                             0.8104571982525948   /* im */
+                                         },
+                                         {
+                                             0.4191860419042355, /* re */
+                                             0.8140363297059484  /* im */
+                                         },
+                                         {
+                                             0.42419180858215466, /* re */
+                                             0.8175848131515837   /* im */
+                                         },
+                                         {
+                                             0.42921925411303274, /* re */
+                                             0.8211025149911046   /* im */
+                                         },
+                                         {
+                                             0.4342681892163869, /* re */
+                                             0.8245893027850253  /* im */
+                                         },
+                                         {
+                                             0.43933842380266397, /* re */
+                                             0.8280450452577558   /* im */
+                                         },
+                                         {
+                                             0.4444297669803978, /* re */
+                                             0.8314696123025452  /* im */
+                                         },
+                                         {
+                                             0.4495420270633952, /* re */
+                                             0.83486287498638    /* im */
+                                         },
+                                         {
+                                             0.45467501157795354, /* re */
+                                             0.8382247055548381   /* im */
+                                         },
+                                         {
+                                             0.45982852727010715, /* re */
+                                             0.8415549774368984   /* im */
+                                         },
+                                         {
+                                             0.46500238011290285, /* re */
+                                             0.8448535652497071   /* im */
+                                         },
+                                         {
+                                             0.4701963753137054, /* re */
+                                             0.8481203448032972  /* im */
+                                         },
+                                         {
+                                             0.47541031732153105, /* re */
+                                             0.8513551931052652   /* im */
+                                         },
+                                         {
+                                             0.48064400983441036, /* re */
+                                             0.8545579883654005   /* im */
+                                         },
+                                         {
+                                             0.48589725580677834, /* re */
+                                             0.8577286100002721   /* im */
+                                         },
+                                         {
+                                             0.491169857456893, /* re */
+                                             0.8608669386377673 /* im */
+                                         },
+                                         {
+                                             0.4964616162742824, /* re */
+                                             0.8639728561215867  /* im */
+                                         },
+                                         {
+                                             0.5017723330272181, /* re */
+                                             0.8670462455156926  /* im */
+                                         },
+                                         {
+                                             0.507101807770216, /* re */
+                                             0.8700869911087115 /* im */
+                                         },
+                                         {
+                                             0.512449839851564, /* re */
+                                             0.8730949784182901 /* im */
+                                         },
+                                         {
+                                             0.5178162279208773, /* re */
+                                             0.8760700941954066  /* im */
+                                         },
+                                         {
+                                             0.5232007699366779, /* re */
+                                             0.8790122264286335  /* im */
+                                         },
+                                         {
+                                             0.5286032631740023, /* re */
+                                             0.881921264348355   /* im */
+                                         },
+                                         {
+                                             0.5340235042320338, /* re */
+                                             0.8847970984309378  /* im */
+                                         },
+                                         {
+                                             0.53946128904176,  /* re */
+                                             0.8876396204028539 /* im */
+                                         },
+                                         {
+                                             0.5449164128736561, /* re */
+                                             0.8904487232447579  /* im */
+                                         },
+                                         {
+                                             0.5503886703453935, /* re */
+                                             0.8932243011955153  /* im */
+                                         },
+                                         {
+                                             0.5558778554295708, /* re */
+                                             0.8959662497561852  /* im */
+                                         },
+                                         {
+                                             0.5613837614614723, /* re */
+                                             0.8986744656939538  /* im */
+                                         },
+                                         {
+                                             0.5669061811468481, /* re */
+                                             0.901348847046022   /* im */
+                                         },
+                                         {
+                                             0.5724449065697179, /* re */
+                                             0.9039892931234433  /* im */
+                                         },
+                                         {
+                                             0.5779997292002004, /* re */
+                                             0.9065957045149153  /* im */
+                                         },
+                                         {
+                                             0.5835704399023629, /* re */
+                                             0.9091679830905224  /* im */
+                                         },
+                                         {
+                                             0.5891568289420961, /* re */
+                                             0.9117060320054299  /* im */
+                                         },
+                                         {
+                                             0.5947586859950101, /* re */
+                                             0.9142097557035307  /* im */
+                                         },
+                                         {
+                                             0.6003758001543532, /* re */
+                                             0.9166790599210427  /* im */
+                                         },
+                                         {
+                                             0.6060079599389518, /* re */
+                                             0.9191138516900578  /* im */
+                                         },
+                                         {
+                                             0.6116549533011737, /* re */
+                                             0.9215140393420419  /* im */
+                                         },
+                                         {
+                                             0.6173165676349102, /* re */
+                                             0.9238795325112867  /* im */
+                                         },
+                                         {
+                                             0.6229925897835817, /* re */
+                                             0.9262102421383114  /* im */
+                                         },
+                                         {
+                                             0.6286828060481625, /* re */
+                                             0.9285060804732156  /* im */
+                                         },
+                                         {
+                                             0.6343870021952261, /* re */
+                                             0.9307669610789837  /* im */
+                                         },
+                                         {
+                                             0.6401049634650119, /* re */
+                                             0.932992798834739   /* im */
+                                         },
+                                         {
+                                             0.6458364745795097, /* re */
+                                             0.9351835099389476  /* im */
+                                         },
+                                         {
+                                             0.6515813197505654, /* re */
+                                             0.937339011912575   /* im */
+                                         },
+                                         {
+                                             0.6573392826880056, /* re */
+                                             0.9394592236021899  /* im */
+                                         },
+                                         {
+                                             0.66311014660778,  /* re */
+                                             0.9415440651830208 /* im */
+                                         },
+                                         {
+                                             0.6688936942401236, /* re */
+                                             0.9435934581619604  /* im */
+                                         },
+                                         {
+                                             0.6746897078377371, /* re */
+                                             0.9456073253805213  /* im */
+                                         },
+                                         {
+                                             0.6804979691839843, /* re */
+                                             0.9475855910177411  /* im */
+                                         },
+                                         {
+                                             0.6863182596011085, /* re */
+                                             0.9495281805930367  /* im */
+                                         },
+                                         {
+                                             0.6921503599584651, /* re */
+                                             0.9514350209690083  /* im */
+                                         },
+                                         {
+                                             0.6979940506807719, /* re */
+                                             0.9533060403541939  /* im */
+                                         },
+                                         {
+                                             0.7038491117563762, /* re */
+                                             0.9551411683057708  /* im */
+                                         },
+                                         {
+                                             0.7097153227455377, /* re */
+                                             0.9569403357322088  /* im */
+                                         },
+                                         {
+                                             0.7155924627887281, /* re */
+                                             0.9587034748958716  /* im */
+                                         },
+                                         {
+                                             0.721480310614947, /* re */
+                                             0.9604305194155658 /* im */
+                                         },
+                                         {
+                                             0.727378644550051, /* re */
+                                             0.9621214042690416 /* im */
+                                         },
+                                         {
+                                             0.7332872425251016, /* re */
+                                             0.9637760657954398  /* im */
+                                         },
+                                         {
+                                             0.7392058820847245, /* re */
+                                             0.9653944416976894  /* im */
+                                         },
+                                         {
+                                             0.7451343403954854, /* re */
+                                             0.9669764710448521  /* im */
+                                         },
+                                         {
+                                             0.7510723942542799, /* re */
+                                             0.9685220942744173  /* im */
+                                         },
+                                         {
+                                             0.7570198200967362, /* re */
+                                             0.970031253194544   /* im */
+                                         },
+                                         {
+                                             0.7629763940056328, /* re */
+                                             0.9715038909862518  /* im */
+                                         },
+                                         {
+                                             0.7689418917193289, /* re */
+                                             0.9729399522055602  /* im */
+                                         },
+                                         {
+                                             0.7749160886402071, /* re */
+                                             0.9743393827855759  /* im */
+                                         },
+                                         {
+                                             0.7808987598431302, /* re */
+                                             0.9757021300385286  /* im */
+                                         },
+                                         {
+                                             0.7868896800839087, /* re */
+                                             0.9770281426577544  /* im */
+                                         },
+                                         {
+                                             0.7928886238077815, /* re */
+                                             0.9783173707196277  /* im */
+                                         },
+                                         {
+                                             0.798895365157908, /* re */
+                                             0.9795697656854405 /* im */
+                                         },
+                                         {
+                                             0.8049096779838718, /* re */
+                                             0.9807852804032304  /* im */
+                                         },
+                                         {
+                                             0.8109313358501938, /* re */
+                                             0.9819638691095552  /* im */
+                                         },
+                                         {
+                                             0.8169601120448591, /* re */
+                                             0.9831054874312163  /* im */
+                                         },
+                                         {
+                                             0.8229957795878513, /* re */
+                                             0.984210092386929   /* im */
+                                         },
+                                         {
+                                             0.8290381112396987, /* re */
+                                             0.9852776423889412  /* im */
+                                         },
+                                         {
+                                             0.8350868795100301, /* re */
+                                             0.9863080972445987  /* im */
+                                         },
+                                         {
+                                             0.8411418566661386, /* re */
+                                             0.9873014181578584  /* im */
+                                         },
+                                         {
+                                             0.8472028147415566, /* re */
+                                             0.9882575677307495  /* im */
+                                         },
+                                         {
+                                             0.8532695255446383, /* re */
+                                             0.989176509964781   /* im */
+                                         },
+                                         {
+                                             0.8593417606671507, /* re */
+                                             0.9900582102622971  /* im */
+                                         },
+                                         {
+                                             0.8654192914928738, /* re */
+                                             0.99090263542778    /* im */
+                                         },
+                                         {
+                                             0.8715018892062069, /* re */
+                                             0.9917097536690995  /* im */
+                                         },
+                                         {
+                                             0.8775893248007838, /* re */
+                                             0.99247953459871    /* im */
+                                         },
+                                         {
+                                             0.8836813690880952, /* re */
+                                             0.9932119492347945  /* im */
+                                         },
+                                         {
+                                             0.8897777927061169, /* re */
+                                             0.9939069700023561  /* im */
+                                         },
+                                         {
+                                             0.8958783661279455, /* re */
+                                             0.9945645707342554  /* im */
+                                         },
+                                         {
+                                             0.9019828596704393, /* re */
+                                             0.9951847266721969  /* im */
+                                         },
+                                         {
+                                             0.9080910435028673, /* re */
+                                             0.9957674144676598  /* im */
+                                         },
+                                         {
+                                             0.9142026876555601, /* re */
+                                             0.996312612182778   /* im */
+                                         },
+                                         {
+                                             0.9203175620285698, /* re */
+                                             0.9968202992911657  /* im */
+                                         },
+                                         {
+                                             0.9264354364003325, /* re */
+                                             0.9972904566786902  /* im */
+                                         },
+                                         {
+                                             0.932556080436336, /* re */
+                                             0.9977230666441916 /* im */
+                                         },
+                                         {
+                                             0.9386792636977914, /* re */
+                                             0.9981181129001492  /* im */
+                                         },
+                                         {
+                                             0.9448047556503101, /* re */
+                                             0.9984755805732948  /* im */
+                                         },
+                                         {
+                                             0.950932325672582, /* re */
+                                             0.9987954562051724 /* im */
+                                         },
+                                         {
+                                             0.9570617430650592, /* re */
+                                             0.9990777277526454  /* im */
+                                         },
+                                         {
+                                             0.9631927770586411, /* re */
+                                             0.9993223845883495  /* im */
+                                         },
+                                         {
+                                             0.9693251968233634, /* re */
+                                             0.9995294175010931  /* im */
+                                         },
+                                         {
+                                             0.9754587714770877, /* re */
+                                             0.9996988186962042  /* im */
+                                         },
+                                         {
+                                             0.9815932700941952, /* re */
+                                             0.9998305817958234  /* im */
+                                         },
+                                         {
+                                             0.9877284617142801, /* re */
+                                             0.9999247018391445  /* im */
+                                         },
+                                         {
+                                             0.9938641153508455, /* re */
+                                             0.9999811752826011  /* im */
+                                         }};
+  static const creal_T reconVar2[512] = {{
+                                             1.0, /* re */
+                                             1.0  /* im */
+                                         },
+                                         {
+                                             1.0061358846491544, /* re */
+                                             0.9999811752826011  /* im */
+                                         },
+                                         {
+                                             1.01227153828572,  /* re */
+                                             0.9999247018391445 /* im */
+                                         },
+                                         {
+                                             1.0184067299058048, /* re */
+                                             0.9998305817958234  /* im */
+                                         },
+                                         {
+                                             1.0245412285229123, /* re */
+                                             0.9996988186962042  /* im */
+                                         },
+                                         {
+                                             1.0306748031766366, /* re */
+                                             0.9995294175010931  /* im */
+                                         },
+                                         {
+                                             1.0368072229413587, /* re */
+                                             0.9993223845883495  /* im */
+                                         },
+                                         {
+                                             1.0429382569349408, /* re */
+                                             0.9990777277526454  /* im */
+                                         },
+                                         {
+                                             1.049067674327418, /* re */
+                                             0.9987954562051724 /* im */
+                                         },
+                                         {
+                                             1.05519524434969,  /* re */
+                                             0.9984755805732948 /* im */
+                                         },
+                                         {
+                                             1.0613207363022086, /* re */
+                                             0.9981181129001492  /* im */
+                                         },
+                                         {
+                                             1.067443919563664, /* re */
+                                             0.9977230666441916 /* im */
+                                         },
+                                         {
+                                             1.0735645635996673, /* re */
+                                             0.9972904566786902  /* im */
+                                         },
+                                         {
+                                             1.07968243797143,  /* re */
+                                             0.9968202992911657 /* im */
+                                         },
+                                         {
+                                             1.08579731234444, /* re */
+                                             0.996312612182778 /* im */
+                                         },
+                                         {
+                                             1.0919089564971327, /* re */
+                                             0.9957674144676598  /* im */
+                                         },
+                                         {
+                                             1.0980171403295607, /* re */
+                                             0.9951847266721969  /* im */
+                                         },
+                                         {
+                                             1.1041216338720545, /* re */
+                                             0.9945645707342554  /* im */
+                                         },
+                                         {
+                                             1.110222207293883, /* re */
+                                             0.9939069700023561 /* im */
+                                         },
+                                         {
+                                             1.1163186309119046, /* re */
+                                             0.9932119492347945  /* im */
+                                         },
+                                         {
+                                             1.1224106751992162, /* re */
+                                             0.99247953459871    /* im */
+                                         },
+                                         {
+                                             1.1284981107937933, /* re */
+                                             0.9917097536690995  /* im */
+                                         },
+                                         {
+                                             1.1345807085071262, /* re */
+                                             0.99090263542778    /* im */
+                                         },
+                                         {
+                                             1.1406582393328493, /* re */
+                                             0.9900582102622971  /* im */
+                                         },
+                                         {
+                                             1.1467304744553617, /* re */
+                                             0.989176509964781   /* im */
+                                         },
+                                         {
+                                             1.1527971852584433, /* re */
+                                             0.9882575677307495  /* im */
+                                         },
+                                         {
+                                             1.1588581433338614, /* re */
+                                             0.9873014181578584  /* im */
+                                         },
+                                         {
+                                             1.1649131204899699, /* re */
+                                             0.9863080972445987  /* im */
+                                         },
+                                         {
+                                             1.1709618887603013, /* re */
+                                             0.9852776423889412  /* im */
+                                         },
+                                         {
+                                             1.1770042204121487, /* re */
+                                             0.984210092386929   /* im */
+                                         },
+                                         {
+                                             1.183039887955141, /* re */
+                                             0.9831054874312163 /* im */
+                                         },
+                                         {
+                                             1.1890686641498063, /* re */
+                                             0.9819638691095552  /* im */
+                                         },
+                                         {
+                                             1.1950903220161282, /* re */
+                                             0.9807852804032304  /* im */
+                                         },
+                                         {
+                                             1.201104634842092, /* re */
+                                             0.9795697656854405 /* im */
+                                         },
+                                         {
+                                             1.2071113761922185, /* re */
+                                             0.9783173707196277  /* im */
+                                         },
+                                         {
+                                             1.2131103199160913, /* re */
+                                             0.9770281426577544  /* im */
+                                         },
+                                         {
+                                             1.2191012401568697, /* re */
+                                             0.9757021300385286  /* im */
+                                         },
+                                         {
+                                             1.2250839113597929, /* re */
+                                             0.9743393827855759  /* im */
+                                         },
+                                         {
+                                             1.231058108280671, /* re */
+                                             0.9729399522055602 /* im */
+                                         },
+                                         {
+                                             1.2370236059943671, /* re */
+                                             0.9715038909862518  /* im */
+                                         },
+                                         {
+                                             1.2429801799032638, /* re */
+                                             0.970031253194544   /* im */
+                                         },
+                                         {
+                                             1.2489276057457201, /* re */
+                                             0.9685220942744173  /* im */
+                                         },
+                                         {
+                                             1.2548656596045147, /* re */
+                                             0.9669764710448521  /* im */
+                                         },
+                                         {
+                                             1.2607941179152755, /* re */
+                                             0.9653944416976894  /* im */
+                                         },
+                                         {
+                                             1.2667127574748984, /* re */
+                                             0.9637760657954398  /* im */
+                                         },
+                                         {
+                                             1.272621355449949, /* re */
+                                             0.9621214042690416 /* im */
+                                         },
+                                         {
+                                             1.278519689385053, /* re */
+                                             0.9604305194155658 /* im */
+                                         },
+                                         {
+                                             1.2844075372112718, /* re */
+                                             0.9587034748958716  /* im */
+                                         },
+                                         {
+                                             1.2902846772544623, /* re */
+                                             0.9569403357322088  /* im */
+                                         },
+                                         {
+                                             1.296150888243624, /* re */
+                                             0.9551411683057708 /* im */
+                                         },
+                                         {
+                                             1.302005949319228, /* re */
+                                             0.9533060403541939 /* im */
+                                         },
+                                         {
+                                             1.307849640041535, /* re */
+                                             0.9514350209690083 /* im */
+                                         },
+                                         {
+                                             1.3136817403988914, /* re */
+                                             0.9495281805930367  /* im */
+                                         },
+                                         {
+                                             1.3195020308160157, /* re */
+                                             0.9475855910177411  /* im */
+                                         },
+                                         {
+                                             1.3253102921622628, /* re */
+                                             0.9456073253805213  /* im */
+                                         },
+                                         {
+                                             1.3311063057598764, /* re */
+                                             0.9435934581619604  /* im */
+                                         },
+                                         {
+                                             1.33688985339222,  /* re */
+                                             0.9415440651830208 /* im */
+                                         },
+                                         {
+                                             1.3426607173119944, /* re */
+                                             0.9394592236021899  /* im */
+                                         },
+                                         {
+                                             1.3484186802494347, /* re */
+                                             0.937339011912575   /* im */
+                                         },
+                                         {
+                                             1.3541635254204905, /* re */
+                                             0.9351835099389476  /* im */
+                                         },
+                                         {
+                                             1.3598950365349882, /* re */
+                                             0.932992798834739   /* im */
+                                         },
+                                         {
+                                             1.365612997804774, /* re */
+                                             0.9307669610789837 /* im */
+                                         },
+                                         {
+                                             1.3713171939518376, /* re */
+                                             0.9285060804732156  /* im */
+                                         },
+                                         {
+                                             1.3770074102164183, /* re */
+                                             0.9262102421383114  /* im */
+                                         },
+                                         {
+                                             1.3826834323650898, /* re */
+                                             0.9238795325112867  /* im */
+                                         },
+                                         {
+                                             1.3883450466988263, /* re */
+                                             0.9215140393420419  /* im */
+                                         },
+                                         {
+                                             1.3939920400610482, /* re */
+                                             0.9191138516900578  /* im */
+                                         },
+                                         {
+                                             1.399624199845647, /* re */
+                                             0.9166790599210427 /* im */
+                                         },
+                                         {
+                                             1.4052413140049897, /* re */
+                                             0.9142097557035307  /* im */
+                                         },
+                                         {
+                                             1.410843171057904, /* re */
+                                             0.9117060320054299 /* im */
+                                         },
+                                         {
+                                             1.416429560097637, /* re */
+                                             0.9091679830905224 /* im */
+                                         },
+                                         {
+                                             1.4220002707997996, /* re */
+                                             0.9065957045149153  /* im */
+                                         },
+                                         {
+                                             1.427555093430282, /* re */
+                                             0.9039892931234433 /* im */
+                                         },
+                                         {
+                                             1.433093818853152, /* re */
+                                             0.901348847046022  /* im */
+                                         },
+                                         {
+                                             1.4386162385385277, /* re */
+                                             0.8986744656939538  /* im */
+                                         },
+                                         {
+                                             1.444122144570429, /* re */
+                                             0.8959662497561852 /* im */
+                                         },
+                                         {
+                                             1.4496113296546065, /* re */
+                                             0.8932243011955153  /* im */
+                                         },
+                                         {
+                                             1.455083587126344, /* re */
+                                             0.8904487232447579 /* im */
+                                         },
+                                         {
+                                             1.46053871095824,  /* re */
+                                             0.8876396204028539 /* im */
+                                         },
+                                         {
+                                             1.4659764957679662, /* re */
+                                             0.8847970984309378  /* im */
+                                         },
+                                         {
+                                             1.4713967368259977, /* re */
+                                             0.881921264348355   /* im */
+                                         },
+                                         {
+                                             1.4767992300633221, /* re */
+                                             0.8790122264286335  /* im */
+                                         },
+                                         {
+                                             1.4821837720791227, /* re */
+                                             0.8760700941954066  /* im */
+                                         },
+                                         {
+                                             1.487550160148436, /* re */
+                                             0.8730949784182901 /* im */
+                                         },
+                                         {
+                                             1.492898192229784, /* re */
+                                             0.8700869911087115 /* im */
+                                         },
+                                         {
+                                             1.4982276669727819, /* re */
+                                             0.8670462455156926  /* im */
+                                         },
+                                         {
+                                             1.5035383837257177, /* re */
+                                             0.8639728561215867  /* im */
+                                         },
+                                         {
+                                             1.508830142543107, /* re */
+                                             0.8608669386377673 /* im */
+                                         },
+                                         {
+                                             1.5141027441932216, /* re */
+                                             0.8577286100002721  /* im */
+                                         },
+                                         {
+                                             1.5193559901655895, /* re */
+                                             0.8545579883654005  /* im */
+                                         },
+                                         {
+                                             1.524589682678469, /* re */
+                                             0.8513551931052652 /* im */
+                                         },
+                                         {
+                                             1.5298036246862945, /* re */
+                                             0.8481203448032972  /* im */
+                                         },
+                                         {
+                                             1.5349976198870972, /* re */
+                                             0.8448535652497071  /* im */
+                                         },
+                                         {
+                                             1.540171472729893, /* re */
+                                             0.8415549774368984 /* im */
+                                         },
+                                         {
+                                             1.5453249884220464, /* re */
+                                             0.8382247055548381  /* im */
+                                         },
+                                         {
+                                             1.5504579729366048, /* re */
+                                             0.83486287498638    /* im */
+                                         },
+                                         {
+                                             1.5555702330196022, /* re */
+                                             0.8314696123025452  /* im */
+                                         },
+                                         {
+                                             1.5606615761973361, /* re */
+                                             0.8280450452577558  /* im */
+                                         },
+                                         {
+                                             1.5657318107836131, /* re */
+                                             0.8245893027850253  /* im */
+                                         },
+                                         {
+                                             1.5707807458869674, /* re */
+                                             0.8211025149911046  /* im */
+                                         },
+                                         {
+                                             1.5758081914178454, /* re */
+                                             0.8175848131515837  /* im */
+                                         },
+                                         {
+                                             1.5808139580957645, /* re */
+                                             0.8140363297059484  /* im */
+                                         },
+                                         {
+                                             1.5857978574564389, /* re */
+                                             0.8104571982525948  /* im */
+                                         },
+                                         {
+                                             1.5907597018588742, /* re */
+                                             0.8068475535437993  /* im */
+                                         },
+                                         {
+                                             1.5956993044924332, /* re */
+                                             0.8032075314806449  /* im */
+                                         },
+                                         {
+                                             1.600616479383869, /* re */
+                                             0.799537269107905  /* im */
+                                         },
+                                         {
+                                             1.6055110414043257, /* re */
+                                             0.7958369046088836  /* im */
+                                         },
+                                         {
+                                             1.6103828062763095, /* re */
+                                             0.7921065773002124  /* im */
+                                         },
+                                         {
+                                             1.6152315905806267, /* re */
+                                             0.7883464276266063  /* im */
+                                         },
+                                         {
+                                             1.6200572117632892, /* re */
+                                             0.7845565971555752  /* im */
+                                         },
+                                         {
+                                             1.6248594881423863, /* re */
+                                             0.7807372285720945  /* im */
+                                         },
+                                         {
+                                             1.6296382389149269, /* re */
+                                             0.7768884656732324  /* im */
+                                         },
+                                         {
+                                             1.6343932841636455, /* re */
+                                             0.773010453362737   /* im */
+                                         },
+                                         {
+                                             1.6391244448637758, /* re */
+                                             0.7691033376455797  /* im */
+                                         },
+                                         {
+                                             1.6438315428897914, /* re */
+                                             0.765167265622459   /* im */
+                                         },
+                                         {
+                                             1.6485144010221124, /* re */
+                                             0.7612023854842618  /* im */
+                                         },
+                                         {
+                                             1.6531728429537766, /* re */
+                                             0.7572088465064846  /* im */
+                                         },
+                                         {
+                                             1.6578066932970787, /* re */
+                                             0.7531867990436125  /* im */
+                                         },
+                                         {
+                                             1.6624157775901718, /* re */
+                                             0.7491363945234594  /* im */
+                                         },
+                                         {
+                                             1.6669999223036376, /* re */
+                                             0.745057785441466   /* im */
+                                         },
+                                         {
+                                             1.6715589548470184, /* re */
+                                             0.7409511253549592  /* im */
+                                         },
+                                         {
+                                             1.676092703575316, /* re */
+                                             0.7368165688773698 /* im */
+                                         },
+                                         {
+                                             1.680600997795453, /* re */
+                                             0.7326542716724128 /* im */
+                                         },
+                                         {
+                                             1.6850836677727004, /* re */
+                                             0.7284643904482252  /* im */
+                                         },
+                                         {
+                                             1.6895405447370668, /* re */
+                                             0.724247082951467   /* im */
+                                         },
+                                         {
+                                             1.693971460889654, /* re */
+                                             0.7200025079613817 /* im */
+                                         },
+                                         {
+                                             1.698376249408973, /* re */
+                                             0.7157308252838186 /* im */
+                                         },
+                                         {
+                                             1.7027547444572253, /* re */
+                                             0.7114321957452164  /* im */
+                                         },
+                                         {
+                                             1.7071067811865475, /* re */
+                                             0.7071067811865476  /* im */
+                                         },
+                                         {
+                                             1.7114321957452163, /* re */
+                                             0.7027547444572253  /* im */
+                                         },
+                                         {
+                                             1.7157308252838186, /* re */
+                                             0.6983762494089729  /* im */
+                                         },
+                                         {
+                                             1.7200025079613817, /* re */
+                                             0.6939714608896539  /* im */
+                                         },
+                                         {
+                                             1.7242470829514671, /* re */
+                                             0.6895405447370668  /* im */
+                                         },
+                                         {
+                                             1.728464390448225, /* re */
+                                             0.6850836677727004 /* im */
+                                         },
+                                         {
+                                             1.7326542716724127, /* re */
+                                             0.680600997795453   /* im */
+                                         },
+                                         {
+                                             1.7368165688773698, /* re */
+                                             0.6760927035753159  /* im */
+                                         },
+                                         {
+                                             1.7409511253549592, /* re */
+                                             0.6715589548470183  /* im */
+                                         },
+                                         {
+                                             1.745057785441466, /* re */
+                                             0.6669999223036375 /* im */
+                                         },
+                                         {
+                                             1.7491363945234593, /* re */
+                                             0.6624157775901718  /* im */
+                                         },
+                                         {
+                                             1.7531867990436125, /* re */
+                                             0.6578066932970786  /* im */
+                                         },
+                                         {
+                                             1.7572088465064846, /* re */
+                                             0.6531728429537768  /* im */
+                                         },
+                                         {
+                                             1.7612023854842618, /* re */
+                                             0.6485144010221124  /* im */
+                                         },
+                                         {
+                                             1.765167265622459, /* re */
+                                             0.6438315428897914 /* im */
+                                         },
+                                         {
+                                             1.7691033376455798, /* re */
+                                             0.6391244448637757  /* im */
+                                         },
+                                         {
+                                             1.7730104533627369, /* re */
+                                             0.6343932841636455  /* im */
+                                         },
+                                         {
+                                             1.7768884656732324, /* re */
+                                             0.629638238914927   /* im */
+                                         },
+                                         {
+                                             1.7807372285720944, /* re */
+                                             0.6248594881423863  /* im */
+                                         },
+                                         {
+                                             1.7845565971555752, /* re */
+                                             0.6200572117632891  /* im */
+                                         },
+                                         {
+                                             1.7883464276266063, /* re */
+                                             0.6152315905806268  /* im */
+                                         },
+                                         {
+                                             1.7921065773002125, /* re */
+                                             0.6103828062763095  /* im */
+                                         },
+                                         {
+                                             1.7958369046088836, /* re */
+                                             0.6055110414043255  /* im */
+                                         },
+                                         {
+                                             1.799537269107905, /* re */
+                                             0.600616479383869  /* im */
+                                         },
+                                         {
+                                             1.8032075314806448, /* re */
+                                             0.5956993044924334  /* im */
+                                         },
+                                         {
+                                             1.8068475535437993, /* re */
+                                             0.5907597018588742  /* im */
+                                         },
+                                         {
+                                             1.8104571982525948, /* re */
+                                             0.5857978574564389  /* im */
+                                         },
+                                         {
+                                             1.8140363297059485, /* re */
+                                             0.5808139580957645  /* im */
+                                         },
+                                         {
+                                             1.8175848131515837, /* re */
+                                             0.5758081914178453  /* im */
+                                         },
+                                         {
+                                             1.8211025149911046, /* re */
+                                             0.5707807458869673  /* im */
+                                         },
+                                         {
+                                             1.8245893027850253, /* re */
+                                             0.5657318107836131  /* im */
+                                         },
+                                         {
+                                             1.8280450452577557, /* re */
+                                             0.560661576197336   /* im */
+                                         },
+                                         {
+                                             1.8314696123025453, /* re */
+                                             0.5555702330196022  /* im */
+                                         },
+                                         {
+                                             1.83486287498638,  /* re */
+                                             0.5504579729366048 /* im */
+                                         },
+                                         {
+                                             1.838224705554838, /* re */
+                                             0.5453249884220465 /* im */
+                                         },
+                                         {
+                                             1.8415549774368984, /* re */
+                                             0.5401714727298929  /* im */
+                                         },
+                                         {
+                                             1.8448535652497071, /* re */
+                                             0.5349976198870972  /* im */
+                                         },
+                                         {
+                                             1.8481203448032972, /* re */
+                                             0.5298036246862946  /* im */
+                                         },
+                                         {
+                                             1.8513551931052652, /* re */
+                                             0.524589682678469   /* im */
+                                         },
+                                         {
+                                             1.8545579883654004, /* re */
+                                             0.5193559901655896  /* im */
+                                         },
+                                         {
+                                             1.8577286100002721, /* re */
+                                             0.5141027441932217  /* im */
+                                         },
+                                         {
+                                             1.8608669386377672, /* re */
+                                             0.508830142543107   /* im */
+                                         },
+                                         {
+                                             1.8639728561215867, /* re */
+                                             0.5035383837257176  /* im */
+                                         },
+                                         {
+                                             1.8670462455156926, /* re */
+                                             0.4982276669727818  /* im */
+                                         },
+                                         {
+                                             1.8700869911087115, /* re */
+                                             0.49289819222978404 /* im */
+                                         },
+                                         {
+                                             1.87309497841829, /* re */
+                                             0.487550160148436 /* im */
+                                         },
+                                         {
+                                             1.8760700941954065, /* re */
+                                             0.4821837720791227  /* im */
+                                         },
+                                         {
+                                             1.8790122264286335, /* re */
+                                             0.4767992300633221  /* im */
+                                         },
+                                         {
+                                             1.881921264348355,  /* re */
+                                             0.47139673682599764 /* im */
+                                         },
+                                         {
+                                             1.884797098430938, /* re */
+                                             0.4659764957679662 /* im */
+                                         },
+                                         {
+                                             1.887639620402854, /* re */
+                                             0.46053871095824   /* im */
+                                         },
+                                         {
+                                             1.890448723244758,  /* re */
+                                             0.45508358712634384 /* im */
+                                         },
+                                         {
+                                             1.8932243011955152, /* re */
+                                             0.44961132965460654 /* im */
+                                         },
+                                         {
+                                             1.895966249756185, /* re */
+                                             0.4441221445704292 /* im */
+                                         },
+                                         {
+                                             1.8986744656939538, /* re */
+                                             0.43861623853852766 /* im */
+                                         },
+                                         {
+                                             1.901348847046022,  /* re */
+                                             0.43309381885315196 /* im */
+                                         },
+                                         {
+                                             1.9039892931234434, /* re */
+                                             0.4275550934302821  /* im */
+                                         },
+                                         {
+                                             1.9065957045149153, /* re */
+                                             0.4220002707997997  /* im */
+                                         },
+                                         {
+                                             1.9091679830905224, /* re */
+                                             0.41642956009763715 /* im */
+                                         },
+                                         {
+                                             1.91170603200543,  /* re */
+                                             0.4108431710579039 /* im */
+                                         },
+                                         {
+                                             1.9142097557035307, /* re */
+                                             0.40524131400498986 /* im */
+                                         },
+                                         {
+                                             1.9166790599210426, /* re */
+                                             0.3996241998456468  /* im */
+                                         },
+                                         {
+                                             1.9191138516900579, /* re */
+                                             0.3939920400610481  /* im */
+                                         },
+                                         {
+                                             1.9215140393420418, /* re */
+                                             0.38834504669882625 /* im */
+                                         },
+                                         {
+                                             1.9238795325112867, /* re */
+                                             0.3826834323650898  /* im */
+                                         },
+                                         {
+                                             1.9262102421383114, /* re */
+                                             0.37700741021641826 /* im */
+                                         },
+                                         {
+                                             1.9285060804732157, /* re */
+                                             0.3713171939518375  /* im */
+                                         },
+                                         {
+                                             1.9307669610789837, /* re */
+                                             0.36561299780477385 /* im */
+                                         },
+                                         {
+                                             1.9329927988347388, /* re */
+                                             0.3598950365349881  /* im */
+                                         },
+                                         {
+                                             1.9351835099389476, /* re */
+                                             0.35416352542049034 /* im */
+                                         },
+                                         {
+                                             1.937339011912575,  /* re */
+                                             0.34841868024943456 /* im */
+                                         },
+                                         {
+                                             1.93945922360219,  /* re */
+                                             0.3426607173119944 /* im */
+                                         },
+                                         {
+                                             1.9415440651830207, /* re */
+                                             0.33688985339222005 /* im */
+                                         },
+                                         {
+                                             1.9435934581619603, /* re */
+                                             0.33110630575987643 /* im */
+                                         },
+                                         {
+                                             1.9456073253805213, /* re */
+                                             0.3253102921622629  /* im */
+                                         },
+                                         {
+                                             1.947585591017741, /* re */
+                                             0.3195020308160157 /* im */
+                                         },
+                                         {
+                                             1.9495281805930367, /* re */
+                                             0.3136817403988915  /* im */
+                                         },
+                                         {
+                                             1.9514350209690083, /* re */
+                                             0.30784964004153487 /* im */
+                                         },
+                                         {
+                                             1.9533060403541938, /* re */
+                                             0.3020059493192281  /* im */
+                                         },
+                                         {
+                                             1.955141168305771, /* re */
+                                             0.2961508882436238 /* im */
+                                         },
+                                         {
+                                             1.9569403357322088, /* re */
+                                             0.29028467725446233 /* im */
+                                         },
+                                         {
+                                             1.9587034748958716, /* re */
+                                             0.2844075372112719  /* im */
+                                         },
+                                         {
+                                             1.9604305194155658, /* re */
+                                             0.27851968938505306 /* im */
+                                         },
+                                         {
+                                             1.9621214042690416, /* re */
+                                             0.272621355449949   /* im */
+                                         },
+                                         {
+                                             1.96377606579544,   /* re */
+                                             0.26671275747489837 /* im */
+                                         },
+                                         {
+                                             1.9653944416976894, /* re */
+                                             0.2607941179152755  /* im */
+                                         },
+                                         {
+                                             1.966976471044852,  /* re */
+                                             0.25486565960451457 /* im */
+                                         },
+                                         {
+                                             1.9685220942744173, /* re */
+                                             0.24892760574572015 /* im */
+                                         },
+                                         {
+                                             1.970031253194544,  /* re */
+                                             0.24298017990326387 /* im */
+                                         },
+                                         {
+                                             1.9715038909862517, /* re */
+                                             0.2370236059943672  /* im */
+                                         },
+                                         {
+                                             1.9729399522055602, /* re */
+                                             0.2310581082806711  /* im */
+                                         },
+                                         {
+                                             1.9743393827855757, /* re */
+                                             0.22508391135979283 /* im */
+                                         },
+                                         {
+                                             1.9757021300385285, /* re */
+                                             0.2191012401568698  /* im */
+                                         },
+                                         {
+                                             1.9770281426577543, /* re */
+                                             0.21311031991609136 /* im */
+                                         },
+                                         {
+                                             1.9783173707196275, /* re */
+                                             0.20711137619221856 /* im */
+                                         },
+                                         {
+                                             1.9795697656854405, /* re */
+                                             0.2011046348420919  /* im */
+                                         },
+                                         {
+                                             1.9807852804032304, /* re */
+                                             0.19509032201612825 /* im */
+                                         },
+                                         {
+                                             1.9819638691095554, /* re */
+                                             0.1890686641498062  /* im */
+                                         },
+                                         {
+                                             1.9831054874312164, /* re */
+                                             0.18303988795514095 /* im */
+                                         },
+                                         {
+                                             1.984210092386929,  /* re */
+                                             0.17700422041214875 /* im */
+                                         },
+                                         {
+                                             1.985277642388941,  /* re */
+                                             0.17096188876030122 /* im */
+                                         },
+                                         {
+                                             1.9863080972445988, /* re */
+                                             0.16491312048996992 /* im */
+                                         },
+                                         {
+                                             1.9873014181578585, /* re */
+                                             0.15885814333386145 /* im */
+                                         },
+                                         {
+                                             1.9882575677307495, /* re */
+                                             0.15279718525844344 /* im */
+                                         },
+                                         {
+                                             1.9891765099647811, /* re */
+                                             0.14673047445536175 /* im */
+                                         },
+                                         {
+                                             1.9900582102622972, /* re */
+                                             0.1406582393328492  /* im */
+                                         },
+                                         {
+                                             1.99090263542778,   /* re */
+                                             0.13458070850712617 /* im */
+                                         },
+                                         {
+                                             1.9917097536690995, /* re */
+                                             0.12849811079379317 /* im */
+                                         },
+                                         {
+                                             1.99247953459871,  /* re */
+                                             0.1224106751992162 /* im */
+                                         },
+                                         {
+                                             1.9932119492347944, /* re */
+                                             0.11631863091190475 /* im */
+                                         },
+                                         {
+                                             1.9939069700023562, /* re */
+                                             0.11022220729388306 /* im */
+                                         },
+                                         {
+                                             1.9945645707342554, /* re */
+                                             0.10412163387205459 /* im */
+                                         },
+                                         {
+                                             1.995184726672197, /* re */
+                                             0.0980171403295606 /* im */
+                                         },
+                                         {
+                                             1.9957674144676598, /* re */
+                                             0.09190895649713272 /* im */
+                                         },
+                                         {
+                                             1.996312612182778, /* re */
+                                             0.0857973123444399 /* im */
+                                         },
+                                         {
+                                             1.9968202992911657, /* re */
+                                             0.07968243797143013 /* im */
+                                         },
+                                         {
+                                             1.9972904566786902, /* re */
+                                             0.07356456359966743 /* im */
+                                         },
+                                         {
+                                             1.9977230666441916, /* re */
+                                             0.06744391956366405 /* im */
+                                         },
+                                         {
+                                             1.998118112900149,  /* re */
+                                             0.06132073630220858 /* im */
+                                         },
+                                         {
+                                             1.9984755805732948, /* re */
+                                             0.05519524434968994 /* im */
+                                         },
+                                         {
+                                             1.9987954562051724,  /* re */
+                                             0.049067674327418015 /* im */
+                                         },
+                                         {
+                                             1.9990777277526455, /* re */
+                                             0.04293825693494082 /* im */
+                                         },
+                                         {
+                                             1.9993223845883494, /* re */
+                                             0.03680722294135883 /* im */
+                                         },
+                                         {
+                                             1.9995294175010931,  /* re */
+                                             0.030674803176636626 /* im */
+                                         },
+                                         {
+                                             1.9996988186962041,  /* re */
+                                             0.024541228522912288 /* im */
+                                         },
+                                         {
+                                             1.9998305817958233, /* re */
+                                             0.01840672990580482 /* im */
+                                         },
+                                         {
+                                             1.9999247018391446,  /* re */
+                                             0.012271538285719925 /* im */
+                                         },
+                                         {
+                                             1.999981175282601,   /* re */
+                                             0.006135884649154475 /* im */
+                                         },
+                                         {
+                                             2.0, /* re */
+                                             0.0  /* im */
+                                         },
+                                         {
+                                             1.999981175282601,    /* re */
+                                             -0.006135884649154475 /* im */
+                                         },
+                                         {
+                                             1.9999247018391446,   /* re */
+                                             -0.012271538285719925 /* im */
+                                         },
+                                         {
+                                             1.9998305817958233,  /* re */
+                                             -0.01840672990580482 /* im */
+                                         },
+                                         {
+                                             1.9996988186962041,   /* re */
+                                             -0.024541228522912288 /* im */
+                                         },
+                                         {
+                                             1.9995294175010931,   /* re */
+                                             -0.030674803176636626 /* im */
+                                         },
+                                         {
+                                             1.9993223845883494,  /* re */
+                                             -0.03680722294135883 /* im */
+                                         },
+                                         {
+                                             1.9990777277526455,  /* re */
+                                             -0.04293825693494082 /* im */
+                                         },
+                                         {
+                                             1.9987954562051724,   /* re */
+                                             -0.049067674327418015 /* im */
+                                         },
+                                         {
+                                             1.9984755805732948,  /* re */
+                                             -0.05519524434968994 /* im */
+                                         },
+                                         {
+                                             1.998118112900149,   /* re */
+                                             -0.06132073630220858 /* im */
+                                         },
+                                         {
+                                             1.9977230666441916,  /* re */
+                                             -0.06744391956366405 /* im */
+                                         },
+                                         {
+                                             1.9972904566786902,  /* re */
+                                             -0.07356456359966743 /* im */
+                                         },
+                                         {
+                                             1.9968202992911657,  /* re */
+                                             -0.07968243797143013 /* im */
+                                         },
+                                         {
+                                             1.996312612182778,  /* re */
+                                             -0.0857973123444399 /* im */
+                                         },
+                                         {
+                                             1.9957674144676598,  /* re */
+                                             -0.09190895649713272 /* im */
+                                         },
+                                         {
+                                             1.995184726672197,  /* re */
+                                             -0.0980171403295606 /* im */
+                                         },
+                                         {
+                                             1.9945645707342554,  /* re */
+                                             -0.10412163387205459 /* im */
+                                         },
+                                         {
+                                             1.9939069700023562,  /* re */
+                                             -0.11022220729388306 /* im */
+                                         },
+                                         {
+                                             1.9932119492347944,  /* re */
+                                             -0.11631863091190475 /* im */
+                                         },
+                                         {
+                                             1.99247953459871,   /* re */
+                                             -0.1224106751992162 /* im */
+                                         },
+                                         {
+                                             1.9917097536690995,  /* re */
+                                             -0.12849811079379317 /* im */
+                                         },
+                                         {
+                                             1.99090263542778,    /* re */
+                                             -0.13458070850712617 /* im */
+                                         },
+                                         {
+                                             1.9900582102622972, /* re */
+                                             -0.1406582393328492 /* im */
+                                         },
+                                         {
+                                             1.9891765099647811,  /* re */
+                                             -0.14673047445536175 /* im */
+                                         },
+                                         {
+                                             1.9882575677307495,  /* re */
+                                             -0.15279718525844344 /* im */
+                                         },
+                                         {
+                                             1.9873014181578585,  /* re */
+                                             -0.15885814333386145 /* im */
+                                         },
+                                         {
+                                             1.9863080972445988,  /* re */
+                                             -0.16491312048996992 /* im */
+                                         },
+                                         {
+                                             1.985277642388941,   /* re */
+                                             -0.17096188876030122 /* im */
+                                         },
+                                         {
+                                             1.984210092386929,   /* re */
+                                             -0.17700422041214875 /* im */
+                                         },
+                                         {
+                                             1.9831054874312164,  /* re */
+                                             -0.18303988795514095 /* im */
+                                         },
+                                         {
+                                             1.9819638691095554, /* re */
+                                             -0.1890686641498062 /* im */
+                                         },
+                                         {
+                                             1.9807852804032304,  /* re */
+                                             -0.19509032201612825 /* im */
+                                         },
+                                         {
+                                             1.9795697656854405, /* re */
+                                             -0.2011046348420919 /* im */
+                                         },
+                                         {
+                                             1.9783173707196275,  /* re */
+                                             -0.20711137619221856 /* im */
+                                         },
+                                         {
+                                             1.9770281426577543,  /* re */
+                                             -0.21311031991609136 /* im */
+                                         },
+                                         {
+                                             1.9757021300385285, /* re */
+                                             -0.2191012401568698 /* im */
+                                         },
+                                         {
+                                             1.9743393827855757,  /* re */
+                                             -0.22508391135979283 /* im */
+                                         },
+                                         {
+                                             1.9729399522055602, /* re */
+                                             -0.2310581082806711 /* im */
+                                         },
+                                         {
+                                             1.9715038909862517, /* re */
+                                             -0.2370236059943672 /* im */
+                                         },
+                                         {
+                                             1.970031253194544,   /* re */
+                                             -0.24298017990326387 /* im */
+                                         },
+                                         {
+                                             1.9685220942744173,  /* re */
+                                             -0.24892760574572015 /* im */
+                                         },
+                                         {
+                                             1.966976471044852,   /* re */
+                                             -0.25486565960451457 /* im */
+                                         },
+                                         {
+                                             1.9653944416976894, /* re */
+                                             -0.2607941179152755 /* im */
+                                         },
+                                         {
+                                             1.96377606579544,    /* re */
+                                             -0.26671275747489837 /* im */
+                                         },
+                                         {
+                                             1.9621214042690416, /* re */
+                                             -0.272621355449949  /* im */
+                                         },
+                                         {
+                                             1.9604305194155658,  /* re */
+                                             -0.27851968938505306 /* im */
+                                         },
+                                         {
+                                             1.9587034748958716, /* re */
+                                             -0.2844075372112719 /* im */
+                                         },
+                                         {
+                                             1.9569403357322088,  /* re */
+                                             -0.29028467725446233 /* im */
+                                         },
+                                         {
+                                             1.955141168305771,  /* re */
+                                             -0.2961508882436238 /* im */
+                                         },
+                                         {
+                                             1.9533060403541938, /* re */
+                                             -0.3020059493192281 /* im */
+                                         },
+                                         {
+                                             1.9514350209690083,  /* re */
+                                             -0.30784964004153487 /* im */
+                                         },
+                                         {
+                                             1.9495281805930367, /* re */
+                                             -0.3136817403988915 /* im */
+                                         },
+                                         {
+                                             1.947585591017741,  /* re */
+                                             -0.3195020308160157 /* im */
+                                         },
+                                         {
+                                             1.9456073253805213, /* re */
+                                             -0.3253102921622629 /* im */
+                                         },
+                                         {
+                                             1.9435934581619603,  /* re */
+                                             -0.33110630575987643 /* im */
+                                         },
+                                         {
+                                             1.9415440651830207,  /* re */
+                                             -0.33688985339222005 /* im */
+                                         },
+                                         {
+                                             1.93945922360219,   /* re */
+                                             -0.3426607173119944 /* im */
+                                         },
+                                         {
+                                             1.937339011912575,   /* re */
+                                             -0.34841868024943456 /* im */
+                                         },
+                                         {
+                                             1.9351835099389476,  /* re */
+                                             -0.35416352542049034 /* im */
+                                         },
+                                         {
+                                             1.9329927988347388, /* re */
+                                             -0.3598950365349881 /* im */
+                                         },
+                                         {
+                                             1.9307669610789837,  /* re */
+                                             -0.36561299780477385 /* im */
+                                         },
+                                         {
+                                             1.9285060804732157, /* re */
+                                             -0.3713171939518375 /* im */
+                                         },
+                                         {
+                                             1.9262102421383114,  /* re */
+                                             -0.37700741021641826 /* im */
+                                         },
+                                         {
+                                             1.9238795325112867, /* re */
+                                             -0.3826834323650898 /* im */
+                                         },
+                                         {
+                                             1.9215140393420418,  /* re */
+                                             -0.38834504669882625 /* im */
+                                         },
+                                         {
+                                             1.9191138516900579, /* re */
+                                             -0.3939920400610481 /* im */
+                                         },
+                                         {
+                                             1.9166790599210426, /* re */
+                                             -0.3996241998456468 /* im */
+                                         },
+                                         {
+                                             1.9142097557035307,  /* re */
+                                             -0.40524131400498986 /* im */
+                                         },
+                                         {
+                                             1.91170603200543,   /* re */
+                                             -0.4108431710579039 /* im */
+                                         },
+                                         {
+                                             1.9091679830905224,  /* re */
+                                             -0.41642956009763715 /* im */
+                                         },
+                                         {
+                                             1.9065957045149153, /* re */
+                                             -0.4220002707997997 /* im */
+                                         },
+                                         {
+                                             1.9039892931234434, /* re */
+                                             -0.4275550934302821 /* im */
+                                         },
+                                         {
+                                             1.901348847046022,   /* re */
+                                             -0.43309381885315196 /* im */
+                                         },
+                                         {
+                                             1.8986744656939538,  /* re */
+                                             -0.43861623853852766 /* im */
+                                         },
+                                         {
+                                             1.895966249756185,  /* re */
+                                             -0.4441221445704292 /* im */
+                                         },
+                                         {
+                                             1.8932243011955152,  /* re */
+                                             -0.44961132965460654 /* im */
+                                         },
+                                         {
+                                             1.890448723244758,   /* re */
+                                             -0.45508358712634384 /* im */
+                                         },
+                                         {
+                                             1.887639620402854, /* re */
+                                             -0.46053871095824  /* im */
+                                         },
+                                         {
+                                             1.884797098430938,  /* re */
+                                             -0.4659764957679662 /* im */
+                                         },
+                                         {
+                                             1.881921264348355,   /* re */
+                                             -0.47139673682599764 /* im */
+                                         },
+                                         {
+                                             1.8790122264286335, /* re */
+                                             -0.4767992300633221 /* im */
+                                         },
+                                         {
+                                             1.8760700941954065, /* re */
+                                             -0.4821837720791227 /* im */
+                                         },
+                                         {
+                                             1.87309497841829,  /* re */
+                                             -0.487550160148436 /* im */
+                                         },
+                                         {
+                                             1.8700869911087115,  /* re */
+                                             -0.49289819222978404 /* im */
+                                         },
+                                         {
+                                             1.8670462455156926, /* re */
+                                             -0.4982276669727818 /* im */
+                                         },
+                                         {
+                                             1.8639728561215867, /* re */
+                                             -0.5035383837257176 /* im */
+                                         },
+                                         {
+                                             1.8608669386377672, /* re */
+                                             -0.508830142543107  /* im */
+                                         },
+                                         {
+                                             1.8577286100002721, /* re */
+                                             -0.5141027441932217 /* im */
+                                         },
+                                         {
+                                             1.8545579883654004, /* re */
+                                             -0.5193559901655896 /* im */
+                                         },
+                                         {
+                                             1.8513551931052652, /* re */
+                                             -0.524589682678469  /* im */
+                                         },
+                                         {
+                                             1.8481203448032972, /* re */
+                                             -0.5298036246862946 /* im */
+                                         },
+                                         {
+                                             1.8448535652497071, /* re */
+                                             -0.5349976198870972 /* im */
+                                         },
+                                         {
+                                             1.8415549774368984, /* re */
+                                             -0.5401714727298929 /* im */
+                                         },
+                                         {
+                                             1.838224705554838,  /* re */
+                                             -0.5453249884220465 /* im */
+                                         },
+                                         {
+                                             1.83486287498638,   /* re */
+                                             -0.5504579729366048 /* im */
+                                         },
+                                         {
+                                             1.8314696123025453, /* re */
+                                             -0.5555702330196022 /* im */
+                                         },
+                                         {
+                                             1.8280450452577557, /* re */
+                                             -0.560661576197336  /* im */
+                                         },
+                                         {
+                                             1.8245893027850253, /* re */
+                                             -0.5657318107836131 /* im */
+                                         },
+                                         {
+                                             1.8211025149911046, /* re */
+                                             -0.5707807458869673 /* im */
+                                         },
+                                         {
+                                             1.8175848131515837, /* re */
+                                             -0.5758081914178453 /* im */
+                                         },
+                                         {
+                                             1.8140363297059485, /* re */
+                                             -0.5808139580957645 /* im */
+                                         },
+                                         {
+                                             1.8104571982525948, /* re */
+                                             -0.5857978574564389 /* im */
+                                         },
+                                         {
+                                             1.8068475535437993, /* re */
+                                             -0.5907597018588742 /* im */
+                                         },
+                                         {
+                                             1.8032075314806448, /* re */
+                                             -0.5956993044924334 /* im */
+                                         },
+                                         {
+                                             1.799537269107905, /* re */
+                                             -0.600616479383869 /* im */
+                                         },
+                                         {
+                                             1.7958369046088836, /* re */
+                                             -0.6055110414043255 /* im */
+                                         },
+                                         {
+                                             1.7921065773002125, /* re */
+                                             -0.6103828062763095 /* im */
+                                         },
+                                         {
+                                             1.7883464276266063, /* re */
+                                             -0.6152315905806268 /* im */
+                                         },
+                                         {
+                                             1.7845565971555752, /* re */
+                                             -0.6200572117632891 /* im */
+                                         },
+                                         {
+                                             1.7807372285720944, /* re */
+                                             -0.6248594881423863 /* im */
+                                         },
+                                         {
+                                             1.7768884656732324, /* re */
+                                             -0.629638238914927  /* im */
+                                         },
+                                         {
+                                             1.7730104533627369, /* re */
+                                             -0.6343932841636455 /* im */
+                                         },
+                                         {
+                                             1.7691033376455798, /* re */
+                                             -0.6391244448637757 /* im */
+                                         },
+                                         {
+                                             1.765167265622459,  /* re */
+                                             -0.6438315428897914 /* im */
+                                         },
+                                         {
+                                             1.7612023854842618, /* re */
+                                             -0.6485144010221124 /* im */
+                                         },
+                                         {
+                                             1.7572088465064846, /* re */
+                                             -0.6531728429537768 /* im */
+                                         },
+                                         {
+                                             1.7531867990436125, /* re */
+                                             -0.6578066932970786 /* im */
+                                         },
+                                         {
+                                             1.7491363945234593, /* re */
+                                             -0.6624157775901718 /* im */
+                                         },
+                                         {
+                                             1.745057785441466,  /* re */
+                                             -0.6669999223036375 /* im */
+                                         },
+                                         {
+                                             1.7409511253549592, /* re */
+                                             -0.6715589548470183 /* im */
+                                         },
+                                         {
+                                             1.7368165688773698, /* re */
+                                             -0.6760927035753159 /* im */
+                                         },
+                                         {
+                                             1.7326542716724127, /* re */
+                                             -0.680600997795453  /* im */
+                                         },
+                                         {
+                                             1.728464390448225,  /* re */
+                                             -0.6850836677727004 /* im */
+                                         },
+                                         {
+                                             1.7242470829514671, /* re */
+                                             -0.6895405447370668 /* im */
+                                         },
+                                         {
+                                             1.7200025079613817, /* re */
+                                             -0.6939714608896539 /* im */
+                                         },
+                                         {
+                                             1.7157308252838186, /* re */
+                                             -0.6983762494089729 /* im */
+                                         },
+                                         {
+                                             1.7114321957452163, /* re */
+                                             -0.7027547444572253 /* im */
+                                         },
+                                         {
+                                             1.7071067811865475, /* re */
+                                             -0.7071067811865476 /* im */
+                                         },
+                                         {
+                                             1.7027547444572253, /* re */
+                                             -0.7114321957452164 /* im */
+                                         },
+                                         {
+                                             1.698376249408973,  /* re */
+                                             -0.7157308252838186 /* im */
+                                         },
+                                         {
+                                             1.693971460889654,  /* re */
+                                             -0.7200025079613817 /* im */
+                                         },
+                                         {
+                                             1.6895405447370668, /* re */
+                                             -0.724247082951467  /* im */
+                                         },
+                                         {
+                                             1.6850836677727004, /* re */
+                                             -0.7284643904482252 /* im */
+                                         },
+                                         {
+                                             1.680600997795453,  /* re */
+                                             -0.7326542716724128 /* im */
+                                         },
+                                         {
+                                             1.676092703575316,  /* re */
+                                             -0.7368165688773698 /* im */
+                                         },
+                                         {
+                                             1.6715589548470184, /* re */
+                                             -0.7409511253549592 /* im */
+                                         },
+                                         {
+                                             1.6669999223036376, /* re */
+                                             -0.745057785441466  /* im */
+                                         },
+                                         {
+                                             1.6624157775901718, /* re */
+                                             -0.7491363945234594 /* im */
+                                         },
+                                         {
+                                             1.6578066932970787, /* re */
+                                             -0.7531867990436125 /* im */
+                                         },
+                                         {
+                                             1.6531728429537766, /* re */
+                                             -0.7572088465064846 /* im */
+                                         },
+                                         {
+                                             1.6485144010221124, /* re */
+                                             -0.7612023854842618 /* im */
+                                         },
+                                         {
+                                             1.6438315428897914, /* re */
+                                             -0.765167265622459  /* im */
+                                         },
+                                         {
+                                             1.6391244448637758, /* re */
+                                             -0.7691033376455797 /* im */
+                                         },
+                                         {
+                                             1.6343932841636455, /* re */
+                                             -0.773010453362737  /* im */
+                                         },
+                                         {
+                                             1.6296382389149269, /* re */
+                                             -0.7768884656732324 /* im */
+                                         },
+                                         {
+                                             1.6248594881423863, /* re */
+                                             -0.7807372285720945 /* im */
+                                         },
+                                         {
+                                             1.6200572117632892, /* re */
+                                             -0.7845565971555752 /* im */
+                                         },
+                                         {
+                                             1.6152315905806267, /* re */
+                                             -0.7883464276266063 /* im */
+                                         },
+                                         {
+                                             1.6103828062763095, /* re */
+                                             -0.7921065773002124 /* im */
+                                         },
+                                         {
+                                             1.6055110414043257, /* re */
+                                             -0.7958369046088836 /* im */
+                                         },
+                                         {
+                                             1.600616479383869, /* re */
+                                             -0.799537269107905 /* im */
+                                         },
+                                         {
+                                             1.5956993044924332, /* re */
+                                             -0.8032075314806449 /* im */
+                                         },
+                                         {
+                                             1.5907597018588742, /* re */
+                                             -0.8068475535437993 /* im */
+                                         },
+                                         {
+                                             1.5857978574564389, /* re */
+                                             -0.8104571982525948 /* im */
+                                         },
+                                         {
+                                             1.5808139580957645, /* re */
+                                             -0.8140363297059484 /* im */
+                                         },
+                                         {
+                                             1.5758081914178454, /* re */
+                                             -0.8175848131515837 /* im */
+                                         },
+                                         {
+                                             1.5707807458869674, /* re */
+                                             -0.8211025149911046 /* im */
+                                         },
+                                         {
+                                             1.5657318107836131, /* re */
+                                             -0.8245893027850253 /* im */
+                                         },
+                                         {
+                                             1.5606615761973361, /* re */
+                                             -0.8280450452577558 /* im */
+                                         },
+                                         {
+                                             1.5555702330196022, /* re */
+                                             -0.8314696123025452 /* im */
+                                         },
+                                         {
+                                             1.5504579729366048, /* re */
+                                             -0.83486287498638   /* im */
+                                         },
+                                         {
+                                             1.5453249884220464, /* re */
+                                             -0.8382247055548381 /* im */
+                                         },
+                                         {
+                                             1.540171472729893,  /* re */
+                                             -0.8415549774368984 /* im */
+                                         },
+                                         {
+                                             1.5349976198870972, /* re */
+                                             -0.8448535652497071 /* im */
+                                         },
+                                         {
+                                             1.5298036246862945, /* re */
+                                             -0.8481203448032972 /* im */
+                                         },
+                                         {
+                                             1.524589682678469,  /* re */
+                                             -0.8513551931052652 /* im */
+                                         },
+                                         {
+                                             1.5193559901655895, /* re */
+                                             -0.8545579883654005 /* im */
+                                         },
+                                         {
+                                             1.5141027441932216, /* re */
+                                             -0.8577286100002721 /* im */
+                                         },
+                                         {
+                                             1.508830142543107,  /* re */
+                                             -0.8608669386377673 /* im */
+                                         },
+                                         {
+                                             1.5035383837257177, /* re */
+                                             -0.8639728561215867 /* im */
+                                         },
+                                         {
+                                             1.4982276669727819, /* re */
+                                             -0.8670462455156926 /* im */
+                                         },
+                                         {
+                                             1.492898192229784,  /* re */
+                                             -0.8700869911087115 /* im */
+                                         },
+                                         {
+                                             1.487550160148436,  /* re */
+                                             -0.8730949784182901 /* im */
+                                         },
+                                         {
+                                             1.4821837720791227, /* re */
+                                             -0.8760700941954066 /* im */
+                                         },
+                                         {
+                                             1.4767992300633221, /* re */
+                                             -0.8790122264286335 /* im */
+                                         },
+                                         {
+                                             1.4713967368259977, /* re */
+                                             -0.881921264348355  /* im */
+                                         },
+                                         {
+                                             1.4659764957679662, /* re */
+                                             -0.8847970984309378 /* im */
+                                         },
+                                         {
+                                             1.46053871095824,   /* re */
+                                             -0.8876396204028539 /* im */
+                                         },
+                                         {
+                                             1.455083587126344,  /* re */
+                                             -0.8904487232447579 /* im */
+                                         },
+                                         {
+                                             1.4496113296546065, /* re */
+                                             -0.8932243011955153 /* im */
+                                         },
+                                         {
+                                             1.444122144570429,  /* re */
+                                             -0.8959662497561852 /* im */
+                                         },
+                                         {
+                                             1.4386162385385277, /* re */
+                                             -0.8986744656939538 /* im */
+                                         },
+                                         {
+                                             1.433093818853152, /* re */
+                                             -0.901348847046022 /* im */
+                                         },
+                                         {
+                                             1.427555093430282,  /* re */
+                                             -0.9039892931234433 /* im */
+                                         },
+                                         {
+                                             1.4220002707997996, /* re */
+                                             -0.9065957045149153 /* im */
+                                         },
+                                         {
+                                             1.416429560097637,  /* re */
+                                             -0.9091679830905224 /* im */
+                                         },
+                                         {
+                                             1.410843171057904,  /* re */
+                                             -0.9117060320054299 /* im */
+                                         },
+                                         {
+                                             1.4052413140049897, /* re */
+                                             -0.9142097557035307 /* im */
+                                         },
+                                         {
+                                             1.399624199845647,  /* re */
+                                             -0.9166790599210427 /* im */
+                                         },
+                                         {
+                                             1.3939920400610482, /* re */
+                                             -0.9191138516900578 /* im */
+                                         },
+                                         {
+                                             1.3883450466988263, /* re */
+                                             -0.9215140393420419 /* im */
+                                         },
+                                         {
+                                             1.3826834323650898, /* re */
+                                             -0.9238795325112867 /* im */
+                                         },
+                                         {
+                                             1.3770074102164183, /* re */
+                                             -0.9262102421383114 /* im */
+                                         },
+                                         {
+                                             1.3713171939518376, /* re */
+                                             -0.9285060804732156 /* im */
+                                         },
+                                         {
+                                             1.365612997804774,  /* re */
+                                             -0.9307669610789837 /* im */
+                                         },
+                                         {
+                                             1.3598950365349882, /* re */
+                                             -0.932992798834739  /* im */
+                                         },
+                                         {
+                                             1.3541635254204905, /* re */
+                                             -0.9351835099389476 /* im */
+                                         },
+                                         {
+                                             1.3484186802494347, /* re */
+                                             -0.937339011912575  /* im */
+                                         },
+                                         {
+                                             1.3426607173119944, /* re */
+                                             -0.9394592236021899 /* im */
+                                         },
+                                         {
+                                             1.33688985339222,   /* re */
+                                             -0.9415440651830208 /* im */
+                                         },
+                                         {
+                                             1.3311063057598764, /* re */
+                                             -0.9435934581619604 /* im */
+                                         },
+                                         {
+                                             1.3253102921622628, /* re */
+                                             -0.9456073253805213 /* im */
+                                         },
+                                         {
+                                             1.3195020308160157, /* re */
+                                             -0.9475855910177411 /* im */
+                                         },
+                                         {
+                                             1.3136817403988914, /* re */
+                                             -0.9495281805930367 /* im */
+                                         },
+                                         {
+                                             1.307849640041535,  /* re */
+                                             -0.9514350209690083 /* im */
+                                         },
+                                         {
+                                             1.302005949319228,  /* re */
+                                             -0.9533060403541939 /* im */
+                                         },
+                                         {
+                                             1.296150888243624,  /* re */
+                                             -0.9551411683057708 /* im */
+                                         },
+                                         {
+                                             1.2902846772544623, /* re */
+                                             -0.9569403357322088 /* im */
+                                         },
+                                         {
+                                             1.2844075372112718, /* re */
+                                             -0.9587034748958716 /* im */
+                                         },
+                                         {
+                                             1.278519689385053,  /* re */
+                                             -0.9604305194155658 /* im */
+                                         },
+                                         {
+                                             1.272621355449949,  /* re */
+                                             -0.9621214042690416 /* im */
+                                         },
+                                         {
+                                             1.2667127574748984, /* re */
+                                             -0.9637760657954398 /* im */
+                                         },
+                                         {
+                                             1.2607941179152755, /* re */
+                                             -0.9653944416976894 /* im */
+                                         },
+                                         {
+                                             1.2548656596045147, /* re */
+                                             -0.9669764710448521 /* im */
+                                         },
+                                         {
+                                             1.2489276057457201, /* re */
+                                             -0.9685220942744173 /* im */
+                                         },
+                                         {
+                                             1.2429801799032638, /* re */
+                                             -0.970031253194544  /* im */
+                                         },
+                                         {
+                                             1.2370236059943671, /* re */
+                                             -0.9715038909862518 /* im */
+                                         },
+                                         {
+                                             1.231058108280671,  /* re */
+                                             -0.9729399522055602 /* im */
+                                         },
+                                         {
+                                             1.2250839113597929, /* re */
+                                             -0.9743393827855759 /* im */
+                                         },
+                                         {
+                                             1.2191012401568697, /* re */
+                                             -0.9757021300385286 /* im */
+                                         },
+                                         {
+                                             1.2131103199160913, /* re */
+                                             -0.9770281426577544 /* im */
+                                         },
+                                         {
+                                             1.2071113761922185, /* re */
+                                             -0.9783173707196277 /* im */
+                                         },
+                                         {
+                                             1.201104634842092,  /* re */
+                                             -0.9795697656854405 /* im */
+                                         },
+                                         {
+                                             1.1950903220161282, /* re */
+                                             -0.9807852804032304 /* im */
+                                         },
+                                         {
+                                             1.1890686641498063, /* re */
+                                             -0.9819638691095552 /* im */
+                                         },
+                                         {
+                                             1.183039887955141,  /* re */
+                                             -0.9831054874312163 /* im */
+                                         },
+                                         {
+                                             1.1770042204121487, /* re */
+                                             -0.984210092386929  /* im */
+                                         },
+                                         {
+                                             1.1709618887603013, /* re */
+                                             -0.9852776423889412 /* im */
+                                         },
+                                         {
+                                             1.1649131204899699, /* re */
+                                             -0.9863080972445987 /* im */
+                                         },
+                                         {
+                                             1.1588581433338614, /* re */
+                                             -0.9873014181578584 /* im */
+                                         },
+                                         {
+                                             1.1527971852584433, /* re */
+                                             -0.9882575677307495 /* im */
+                                         },
+                                         {
+                                             1.1467304744553617, /* re */
+                                             -0.989176509964781  /* im */
+                                         },
+                                         {
+                                             1.1406582393328493, /* re */
+                                             -0.9900582102622971 /* im */
+                                         },
+                                         {
+                                             1.1345807085071262, /* re */
+                                             -0.99090263542778   /* im */
+                                         },
+                                         {
+                                             1.1284981107937933, /* re */
+                                             -0.9917097536690995 /* im */
+                                         },
+                                         {
+                                             1.1224106751992162, /* re */
+                                             -0.99247953459871   /* im */
+                                         },
+                                         {
+                                             1.1163186309119046, /* re */
+                                             -0.9932119492347945 /* im */
+                                         },
+                                         {
+                                             1.110222207293883,  /* re */
+                                             -0.9939069700023561 /* im */
+                                         },
+                                         {
+                                             1.1041216338720545, /* re */
+                                             -0.9945645707342554 /* im */
+                                         },
+                                         {
+                                             1.0980171403295607, /* re */
+                                             -0.9951847266721969 /* im */
+                                         },
+                                         {
+                                             1.0919089564971327, /* re */
+                                             -0.9957674144676598 /* im */
+                                         },
+                                         {
+                                             1.08579731234444,  /* re */
+                                             -0.996312612182778 /* im */
+                                         },
+                                         {
+                                             1.07968243797143,   /* re */
+                                             -0.9968202992911657 /* im */
+                                         },
+                                         {
+                                             1.0735645635996673, /* re */
+                                             -0.9972904566786902 /* im */
+                                         },
+                                         {
+                                             1.067443919563664,  /* re */
+                                             -0.9977230666441916 /* im */
+                                         },
+                                         {
+                                             1.0613207363022086, /* re */
+                                             -0.9981181129001492 /* im */
+                                         },
+                                         {
+                                             1.05519524434969,   /* re */
+                                             -0.9984755805732948 /* im */
+                                         },
+                                         {
+                                             1.049067674327418,  /* re */
+                                             -0.9987954562051724 /* im */
+                                         },
+                                         {
+                                             1.0429382569349408, /* re */
+                                             -0.9990777277526454 /* im */
+                                         },
+                                         {
+                                             1.0368072229413587, /* re */
+                                             -0.9993223845883495 /* im */
+                                         },
+                                         {
+                                             1.0306748031766366, /* re */
+                                             -0.9995294175010931 /* im */
+                                         },
+                                         {
+                                             1.0245412285229123, /* re */
+                                             -0.9996988186962042 /* im */
+                                         },
+                                         {
+                                             1.0184067299058048, /* re */
+                                             -0.9998305817958234 /* im */
+                                         },
+                                         {
+                                             1.01227153828572,   /* re */
+                                             -0.9999247018391445 /* im */
+                                         },
+                                         {
+                                             1.0061358846491544, /* re */
+                                             -0.9999811752826011 /* im */
+                                         }};
+  static const double dv[256] = {1.0,
+                                 0.9999247018391445,
+                                 0.9996988186962042,
+                                 0.9993223845883495,
+                                 0.9987954562051724,
+                                 0.9981181129001492,
+                                 0.9972904566786902,
+                                 0.996312612182778,
+                                 0.9951847266721969,
+                                 0.9939069700023561,
+                                 0.99247953459871,
+                                 0.99090263542778,
+                                 0.989176509964781,
+                                 0.9873014181578584,
+                                 0.9852776423889412,
+                                 0.9831054874312163,
+                                 0.9807852804032304,
+                                 0.9783173707196277,
+                                 0.9757021300385286,
+                                 0.9729399522055602,
+                                 0.970031253194544,
+                                 0.9669764710448521,
+                                 0.9637760657954398,
+                                 0.9604305194155658,
+                                 0.9569403357322088,
+                                 0.9533060403541939,
+                                 0.9495281805930367,
+                                 0.9456073253805213,
+                                 0.9415440651830208,
+                                 0.937339011912575,
+                                 0.932992798834739,
+                                 0.9285060804732156,
+                                 0.9238795325112867,
+                                 0.9191138516900578,
+                                 0.9142097557035307,
+                                 0.9091679830905224,
+                                 0.9039892931234433,
+                                 0.8986744656939538,
+                                 0.8932243011955153,
+                                 0.8876396204028539,
+                                 0.881921264348355,
+                                 0.8760700941954066,
+                                 0.8700869911087115,
+                                 0.8639728561215867,
+                                 0.8577286100002721,
+                                 0.8513551931052652,
+                                 0.8448535652497071,
+                                 0.8382247055548381,
+                                 0.8314696123025452,
+                                 0.8245893027850253,
+                                 0.8175848131515837,
+                                 0.8104571982525948,
+                                 0.8032075314806449,
+                                 0.7958369046088836,
+                                 0.7883464276266063,
+                                 0.7807372285720945,
+                                 0.773010453362737,
+                                 0.765167265622459,
+                                 0.7572088465064846,
+                                 0.7491363945234594,
+                                 0.7409511253549592,
+                                 0.7326542716724128,
+                                 0.724247082951467,
+                                 0.7157308252838186,
+                                 0.7071067811865476,
+                                 0.6983762494089729,
+                                 0.6895405447370668,
+                                 0.680600997795453,
+                                 0.6715589548470183,
+                                 0.6624157775901718,
+                                 0.6531728429537768,
+                                 0.6438315428897914,
+                                 0.6343932841636455,
+                                 0.6248594881423863,
+                                 0.6152315905806268,
+                                 0.6055110414043255,
+                                 0.5956993044924334,
+                                 0.5857978574564389,
+                                 0.5758081914178453,
+                                 0.5657318107836131,
+                                 0.5555702330196022,
+                                 0.5453249884220465,
+                                 0.5349976198870972,
+                                 0.524589682678469,
+                                 0.5141027441932217,
+                                 0.5035383837257176,
+                                 0.49289819222978404,
+                                 0.4821837720791227,
+                                 0.47139673682599764,
+                                 0.46053871095824,
+                                 0.44961132965460654,
+                                 0.43861623853852766,
+                                 0.4275550934302821,
+                                 0.41642956009763715,
+                                 0.40524131400498986,
+                                 0.3939920400610481,
+                                 0.3826834323650898,
+                                 0.3713171939518375,
+                                 0.3598950365349881,
+                                 0.34841868024943456,
+                                 0.33688985339222005,
+                                 0.3253102921622629,
+                                 0.3136817403988915,
+                                 0.3020059493192281,
+                                 0.29028467725446233,
+                                 0.27851968938505306,
+                                 0.26671275747489837,
+                                 0.25486565960451457,
+                                 0.24298017990326387,
+                                 0.2310581082806711,
+                                 0.2191012401568698,
+                                 0.20711137619221856,
+                                 0.19509032201612825,
+                                 0.18303988795514095,
+                                 0.17096188876030122,
+                                 0.15885814333386145,
+                                 0.14673047445536175,
+                                 0.13458070850712617,
+                                 0.1224106751992162,
+                                 0.11022220729388306,
+                                 0.0980171403295606,
+                                 0.0857973123444399,
+                                 0.07356456359966743,
+                                 0.06132073630220858,
+                                 0.049067674327418015,
+                                 0.03680722294135883,
+                                 0.024541228522912288,
+                                 0.012271538285719925,
+                                 0.0,
+                                 -0.012271538285719925,
+                                 -0.024541228522912288,
+                                 -0.03680722294135883,
+                                 -0.049067674327418015,
+                                 -0.06132073630220858,
+                                 -0.07356456359966743,
+                                 -0.0857973123444399,
+                                 -0.0980171403295606,
+                                 -0.11022220729388306,
+                                 -0.1224106751992162,
+                                 -0.13458070850712617,
+                                 -0.14673047445536175,
+                                 -0.15885814333386145,
+                                 -0.17096188876030122,
+                                 -0.18303988795514095,
+                                 -0.19509032201612825,
+                                 -0.20711137619221856,
+                                 -0.2191012401568698,
+                                 -0.2310581082806711,
+                                 -0.24298017990326387,
+                                 -0.25486565960451457,
+                                 -0.26671275747489837,
+                                 -0.27851968938505306,
+                                 -0.29028467725446233,
+                                 -0.3020059493192281,
+                                 -0.3136817403988915,
+                                 -0.3253102921622629,
+                                 -0.33688985339222005,
+                                 -0.34841868024943456,
+                                 -0.3598950365349881,
+                                 -0.3713171939518375,
+                                 -0.3826834323650898,
+                                 -0.3939920400610481,
+                                 -0.40524131400498986,
+                                 -0.41642956009763715,
+                                 -0.4275550934302821,
+                                 -0.43861623853852766,
+                                 -0.44961132965460654,
+                                 -0.46053871095824,
+                                 -0.47139673682599764,
+                                 -0.4821837720791227,
+                                 -0.49289819222978404,
+                                 -0.5035383837257176,
+                                 -0.5141027441932217,
+                                 -0.524589682678469,
+                                 -0.5349976198870972,
+                                 -0.5453249884220465,
+                                 -0.5555702330196022,
+                                 -0.5657318107836131,
+                                 -0.5758081914178453,
+                                 -0.5857978574564389,
+                                 -0.5956993044924334,
+                                 -0.6055110414043255,
+                                 -0.6152315905806268,
+                                 -0.6248594881423863,
+                                 -0.6343932841636455,
+                                 -0.6438315428897914,
+                                 -0.6531728429537768,
+                                 -0.6624157775901718,
+                                 -0.6715589548470183,
+                                 -0.680600997795453,
+                                 -0.6895405447370668,
+                                 -0.6983762494089729,
+                                 -0.7071067811865476,
+                                 -0.7157308252838186,
+                                 -0.724247082951467,
+                                 -0.7326542716724128,
+                                 -0.7409511253549592,
+                                 -0.7491363945234594,
+                                 -0.7572088465064846,
+                                 -0.765167265622459,
+                                 -0.773010453362737,
+                                 -0.7807372285720945,
+                                 -0.7883464276266063,
+                                 -0.7958369046088836,
+                                 -0.8032075314806449,
+                                 -0.8104571982525948,
+                                 -0.8175848131515837,
+                                 -0.8245893027850253,
+                                 -0.8314696123025452,
+                                 -0.8382247055548381,
+                                 -0.8448535652497071,
+                                 -0.8513551931052652,
+                                 -0.8577286100002721,
+                                 -0.8639728561215867,
+                                 -0.8700869911087115,
+                                 -0.8760700941954066,
+                                 -0.881921264348355,
+                                 -0.8876396204028539,
+                                 -0.8932243011955153,
+                                 -0.8986744656939538,
+                                 -0.9039892931234433,
+                                 -0.9091679830905224,
+                                 -0.9142097557035307,
+                                 -0.9191138516900578,
+                                 -0.9238795325112867,
+                                 -0.9285060804732156,
+                                 -0.932992798834739,
+                                 -0.937339011912575,
+                                 -0.9415440651830208,
+                                 -0.9456073253805213,
+                                 -0.9495281805930367,
+                                 -0.9533060403541939,
+                                 -0.9569403357322088,
+                                 -0.9604305194155658,
+                                 -0.9637760657954398,
+                                 -0.9669764710448521,
+                                 -0.970031253194544,
+                                 -0.9729399522055602,
+                                 -0.9757021300385286,
+                                 -0.9783173707196277,
+                                 -0.9807852804032304,
+                                 -0.9831054874312163,
+                                 -0.9852776423889412,
+                                 -0.9873014181578584,
+                                 -0.989176509964781,
+                                 -0.99090263542778,
+                                 -0.99247953459871,
+                                 -0.9939069700023561,
+                                 -0.9951847266721969,
+                                 -0.996312612182778,
+                                 -0.9972904566786902,
+                                 -0.9981181129001492,
+                                 -0.9987954562051724,
+                                 -0.9993223845883495,
+                                 -0.9996988186962042,
+                                 -0.9999247018391445};
+  static const double dv1[256] = {0.0,
+                                  -0.012271538285719925,
+                                  -0.024541228522912288,
+                                  -0.03680722294135883,
+                                  -0.049067674327418015,
+                                  -0.06132073630220858,
+                                  -0.07356456359966743,
+                                  -0.0857973123444399,
+                                  -0.0980171403295606,
+                                  -0.11022220729388306,
+                                  -0.1224106751992162,
+                                  -0.13458070850712617,
+                                  -0.14673047445536175,
+                                  -0.15885814333386145,
+                                  -0.17096188876030122,
+                                  -0.18303988795514095,
+                                  -0.19509032201612825,
+                                  -0.20711137619221856,
+                                  -0.2191012401568698,
+                                  -0.2310581082806711,
+                                  -0.24298017990326387,
+                                  -0.25486565960451457,
+                                  -0.26671275747489837,
+                                  -0.27851968938505306,
+                                  -0.29028467725446233,
+                                  -0.3020059493192281,
+                                  -0.3136817403988915,
+                                  -0.3253102921622629,
+                                  -0.33688985339222005,
+                                  -0.34841868024943456,
+                                  -0.3598950365349881,
+                                  -0.3713171939518375,
+                                  -0.3826834323650898,
+                                  -0.3939920400610481,
+                                  -0.40524131400498986,
+                                  -0.41642956009763715,
+                                  -0.4275550934302821,
+                                  -0.43861623853852766,
+                                  -0.44961132965460654,
+                                  -0.46053871095824,
+                                  -0.47139673682599764,
+                                  -0.4821837720791227,
+                                  -0.49289819222978404,
+                                  -0.5035383837257176,
+                                  -0.5141027441932217,
+                                  -0.524589682678469,
+                                  -0.5349976198870972,
+                                  -0.5453249884220465,
+                                  -0.5555702330196022,
+                                  -0.5657318107836131,
+                                  -0.5758081914178453,
+                                  -0.5857978574564389,
+                                  -0.5956993044924334,
+                                  -0.6055110414043255,
+                                  -0.6152315905806268,
+                                  -0.6248594881423863,
+                                  -0.6343932841636455,
+                                  -0.6438315428897914,
+                                  -0.6531728429537768,
+                                  -0.6624157775901718,
+                                  -0.6715589548470183,
+                                  -0.680600997795453,
+                                  -0.6895405447370668,
+                                  -0.6983762494089729,
+                                  -0.7071067811865476,
+                                  -0.7157308252838186,
+                                  -0.724247082951467,
+                                  -0.7326542716724128,
+                                  -0.7409511253549592,
+                                  -0.7491363945234594,
+                                  -0.7572088465064846,
+                                  -0.765167265622459,
+                                  -0.773010453362737,
+                                  -0.7807372285720945,
+                                  -0.7883464276266063,
+                                  -0.7958369046088836,
+                                  -0.8032075314806449,
+                                  -0.8104571982525948,
+                                  -0.8175848131515837,
+                                  -0.8245893027850253,
+                                  -0.8314696123025452,
+                                  -0.8382247055548381,
+                                  -0.8448535652497071,
+                                  -0.8513551931052652,
+                                  -0.8577286100002721,
+                                  -0.8639728561215867,
+                                  -0.8700869911087115,
+                                  -0.8760700941954066,
+                                  -0.881921264348355,
+                                  -0.8876396204028539,
+                                  -0.8932243011955153,
+                                  -0.8986744656939538,
+                                  -0.9039892931234433,
+                                  -0.9091679830905224,
+                                  -0.9142097557035307,
+                                  -0.9191138516900578,
+                                  -0.9238795325112867,
+                                  -0.9285060804732156,
+                                  -0.932992798834739,
+                                  -0.937339011912575,
+                                  -0.9415440651830208,
+                                  -0.9456073253805213,
+                                  -0.9495281805930367,
+                                  -0.9533060403541939,
+                                  -0.9569403357322088,
+                                  -0.9604305194155658,
+                                  -0.9637760657954398,
+                                  -0.9669764710448521,
+                                  -0.970031253194544,
+                                  -0.9729399522055602,
+                                  -0.9757021300385286,
+                                  -0.9783173707196277,
+                                  -0.9807852804032304,
+                                  -0.9831054874312163,
+                                  -0.9852776423889412,
+                                  -0.9873014181578584,
+                                  -0.989176509964781,
+                                  -0.99090263542778,
+                                  -0.99247953459871,
+                                  -0.9939069700023561,
+                                  -0.9951847266721969,
+                                  -0.996312612182778,
+                                  -0.9972904566786902,
+                                  -0.9981181129001492,
+                                  -0.9987954562051724,
+                                  -0.9993223845883495,
+                                  -0.9996988186962042,
+                                  -0.9999247018391445,
+                                  -1.0,
+                                  -0.9999247018391445,
+                                  -0.9996988186962042,
+                                  -0.9993223845883495,
+                                  -0.9987954562051724,
+                                  -0.9981181129001492,
+                                  -0.9972904566786902,
+                                  -0.996312612182778,
+                                  -0.9951847266721969,
+                                  -0.9939069700023561,
+                                  -0.99247953459871,
+                                  -0.99090263542778,
+                                  -0.989176509964781,
+                                  -0.9873014181578584,
+                                  -0.9852776423889412,
+                                  -0.9831054874312163,
+                                  -0.9807852804032304,
+                                  -0.9783173707196277,
+                                  -0.9757021300385286,
+                                  -0.9729399522055602,
+                                  -0.970031253194544,
+                                  -0.9669764710448521,
+                                  -0.9637760657954398,
+                                  -0.9604305194155658,
+                                  -0.9569403357322088,
+                                  -0.9533060403541939,
+                                  -0.9495281805930367,
+                                  -0.9456073253805213,
+                                  -0.9415440651830208,
+                                  -0.937339011912575,
+                                  -0.932992798834739,
+                                  -0.9285060804732156,
+                                  -0.9238795325112867,
+                                  -0.9191138516900578,
+                                  -0.9142097557035307,
+                                  -0.9091679830905224,
+                                  -0.9039892931234433,
+                                  -0.8986744656939538,
+                                  -0.8932243011955153,
+                                  -0.8876396204028539,
+                                  -0.881921264348355,
+                                  -0.8760700941954066,
+                                  -0.8700869911087115,
+                                  -0.8639728561215867,
+                                  -0.8577286100002721,
+                                  -0.8513551931052652,
+                                  -0.8448535652497071,
+                                  -0.8382247055548381,
+                                  -0.8314696123025452,
+                                  -0.8245893027850253,
+                                  -0.8175848131515837,
+                                  -0.8104571982525948,
+                                  -0.8032075314806449,
+                                  -0.7958369046088836,
+                                  -0.7883464276266063,
+                                  -0.7807372285720945,
+                                  -0.773010453362737,
+                                  -0.765167265622459,
+                                  -0.7572088465064846,
+                                  -0.7491363945234594,
+                                  -0.7409511253549592,
+                                  -0.7326542716724128,
+                                  -0.724247082951467,
+                                  -0.7157308252838186,
+                                  -0.7071067811865476,
+                                  -0.6983762494089729,
+                                  -0.6895405447370668,
+                                  -0.680600997795453,
+                                  -0.6715589548470183,
+                                  -0.6624157775901718,
+                                  -0.6531728429537768,
+                                  -0.6438315428897914,
+                                  -0.6343932841636455,
+                                  -0.6248594881423863,
+                                  -0.6152315905806268,
+                                  -0.6055110414043255,
+                                  -0.5956993044924334,
+                                  -0.5857978574564389,
+                                  -0.5758081914178453,
+                                  -0.5657318107836131,
+                                  -0.5555702330196022,
+                                  -0.5453249884220465,
+                                  -0.5349976198870972,
+                                  -0.524589682678469,
+                                  -0.5141027441932217,
+                                  -0.5035383837257176,
+                                  -0.49289819222978404,
+                                  -0.4821837720791227,
+                                  -0.47139673682599764,
+                                  -0.46053871095824,
+                                  -0.44961132965460654,
+                                  -0.43861623853852766,
+                                  -0.4275550934302821,
+                                  -0.41642956009763715,
+                                  -0.40524131400498986,
+                                  -0.3939920400610481,
+                                  -0.3826834323650898,
+                                  -0.3713171939518375,
+                                  -0.3598950365349881,
+                                  -0.34841868024943456,
+                                  -0.33688985339222005,
+                                  -0.3253102921622629,
+                                  -0.3136817403988915,
+                                  -0.3020059493192281,
+                                  -0.29028467725446233,
+                                  -0.27851968938505306,
+                                  -0.26671275747489837,
+                                  -0.25486565960451457,
+                                  -0.24298017990326387,
+                                  -0.2310581082806711,
+                                  -0.2191012401568698,
+                                  -0.20711137619221856,
+                                  -0.19509032201612825,
+                                  -0.18303988795514095,
+                                  -0.17096188876030122,
+                                  -0.15885814333386145,
+                                  -0.14673047445536175,
+                                  -0.13458070850712617,
+                                  -0.1224106751992162,
+                                  -0.11022220729388306,
+                                  -0.0980171403295606,
+                                  -0.0857973123444399,
+                                  -0.07356456359966743,
+                                  -0.06132073630220858,
+                                  -0.049067674327418015,
+                                  -0.03680722294135883,
+                                  -0.024541228522912288,
+                                  -0.012271538285719925};
+  static const short bitrevIndex[512] = {
+      1,   257, 129, 385, 65,  321, 193, 449, 33,  289, 161, 417, 97,  353, 225,
+      481, 17,  273, 145, 401, 81,  337, 209, 465, 49,  305, 177, 433, 113, 369,
+      241, 497, 9,   265, 137, 393, 73,  329, 201, 457, 41,  297, 169, 425, 105,
+      361, 233, 489, 25,  281, 153, 409, 89,  345, 217, 473, 57,  313, 185, 441,
+      121, 377, 249, 505, 5,   261, 133, 389, 69,  325, 197, 453, 37,  293, 165,
+      421, 101, 357, 229, 485, 21,  277, 149, 405, 85,  341, 213, 469, 53,  309,
+      181, 437, 117, 373, 245, 501, 13,  269, 141, 397, 77,  333, 205, 461, 45,
+      301, 173, 429, 109, 365, 237, 493, 29,  285, 157, 413, 93,  349, 221, 477,
+      61,  317, 189, 445, 125, 381, 253, 509, 3,   259, 131, 387, 67,  323, 195,
+      451, 35,  291, 163, 419, 99,  355, 227, 483, 19,  275, 147, 403, 83,  339,
+      211, 467, 51,  307, 179, 435, 115, 371, 243, 499, 11,  267, 139, 395, 75,
+      331, 203, 459, 43,  299, 171, 427, 107, 363, 235, 491, 27,  283, 155, 411,
+      91,  347, 219, 475, 59,  315, 187, 443, 123, 379, 251, 507, 7,   263, 135,
+      391, 71,  327, 199, 455, 39,  295, 167, 423, 103, 359, 231, 487, 23,  279,
+      151, 407, 87,  343, 215, 471, 55,  311, 183, 439, 119, 375, 247, 503, 15,
+      271, 143, 399, 79,  335, 207, 463, 47,  303, 175, 431, 111, 367, 239, 495,
+      31,  287, 159, 415, 95,  351, 223, 479, 63,  319, 191, 447, 127, 383, 255,
+      511, 2,   258, 130, 386, 66,  322, 194, 450, 34,  290, 162, 418, 98,  354,
+      226, 482, 18,  274, 146, 402, 82,  338, 210, 466, 50,  306, 178, 434, 114,
+      370, 242, 498, 10,  266, 138, 394, 74,  330, 202, 458, 42,  298, 170, 426,
+      106, 362, 234, 490, 26,  282, 154, 410, 90,  346, 218, 474, 58,  314, 186,
+      442, 122, 378, 250, 506, 6,   262, 134, 390, 70,  326, 198, 454, 38,  294,
+      166, 422, 102, 358, 230, 486, 22,  278, 150, 406, 86,  342, 214, 470, 54,
+      310, 182, 438, 118, 374, 246, 502, 14,  270, 142, 398, 78,  334, 206, 462,
+      46,  302, 174, 430, 110, 366, 238, 494, 30,  286, 158, 414, 94,  350, 222,
+      478, 62,  318, 190, 446, 126, 382, 254, 510, 4,   260, 132, 388, 68,  324,
+      196, 452, 36,  292, 164, 420, 100, 356, 228, 484, 20,  276, 148, 404, 84,
+      340, 212, 468, 52,  308, 180, 436, 116, 372, 244, 500, 12,  268, 140, 396,
+      76,  332, 204, 460, 44,  300, 172, 428, 108, 364, 236, 492, 28,  284, 156,
+      412, 92,  348, 220, 476, 60,  316, 188, 444, 124, 380, 252, 508, 8,   264,
+      136, 392, 72,  328, 200, 456, 40,  296, 168, 424, 104, 360, 232, 488, 24,
+      280, 152, 408, 88,  344, 216, 472, 56,  312, 184, 440, 120, 376, 248, 504,
+      16,  272, 144, 400, 80,  336, 208, 464, 48,  304, 176, 432, 112, 368, 240,
+      496, 32,  288, 160, 416, 96,  352, 224, 480, 64,  320, 192, 448, 128, 384,
+      256, 512};
+  static const short iv[512] = {
+      1,   512, 511, 510, 509, 508, 507, 506, 505, 504, 503, 502, 501, 500, 499,
+      498, 497, 496, 495, 494, 493, 492, 491, 490, 489, 488, 487, 486, 485, 484,
+      483, 482, 481, 480, 479, 478, 477, 476, 475, 474, 473, 472, 471, 470, 469,
+      468, 467, 466, 465, 464, 463, 462, 461, 460, 459, 458, 457, 456, 455, 454,
+      453, 452, 451, 450, 449, 448, 447, 446, 445, 444, 443, 442, 441, 440, 439,
+      438, 437, 436, 435, 434, 433, 432, 431, 430, 429, 428, 427, 426, 425, 424,
+      423, 422, 421, 420, 419, 418, 417, 416, 415, 414, 413, 412, 411, 410, 409,
+      408, 407, 406, 405, 404, 403, 402, 401, 400, 399, 398, 397, 396, 395, 394,
+      393, 392, 391, 390, 389, 388, 387, 386, 385, 384, 383, 382, 381, 380, 379,
+      378, 377, 376, 375, 374, 373, 372, 371, 370, 369, 368, 367, 366, 365, 364,
+      363, 362, 361, 360, 359, 358, 357, 356, 355, 354, 353, 352, 351, 350, 349,
+      348, 347, 346, 345, 344, 343, 342, 341, 340, 339, 338, 337, 336, 335, 334,
+      333, 332, 331, 330, 329, 328, 327, 326, 325, 324, 323, 322, 321, 320, 319,
+      318, 317, 316, 315, 314, 313, 312, 311, 310, 309, 308, 307, 306, 305, 304,
+      303, 302, 301, 300, 299, 298, 297, 296, 295, 294, 293, 292, 291, 290, 289,
+      288, 287, 286, 285, 284, 283, 282, 281, 280, 279, 278, 277, 276, 275, 274,
+      273, 272, 271, 270, 269, 268, 267, 266, 265, 264, 263, 262, 261, 260, 259,
+      258, 257, 256, 255, 254, 253, 252, 251, 250, 249, 248, 247, 246, 245, 244,
+      243, 242, 241, 240, 239, 238, 237, 236, 235, 234, 233, 232, 231, 230, 229,
+      228, 227, 226, 225, 224, 223, 222, 221, 220, 219, 218, 217, 216, 215, 214,
+      213, 212, 211, 210, 209, 208, 207, 206, 205, 204, 203, 202, 201, 200, 199,
+      198, 197, 196, 195, 194, 193, 192, 191, 190, 189, 188, 187, 186, 185, 184,
+      183, 182, 181, 180, 179, 178, 177, 176, 175, 174, 173, 172, 171, 170, 169,
+      168, 167, 166, 165, 164, 163, 162, 161, 160, 159, 158, 157, 156, 155, 154,
+      153, 152, 151, 150, 149, 148, 147, 146, 145, 144, 143, 142, 141, 140, 139,
+      138, 137, 136, 135, 134, 133, 132, 131, 130, 129, 128, 127, 126, 125, 124,
+      123, 122, 121, 120, 119, 118, 117, 116, 115, 114, 113, 112, 111, 110, 109,
+      108, 107, 106, 105, 104, 103, 102, 101, 100, 99,  98,  97,  96,  95,  94,
+      93,  92,  91,  90,  89,  88,  87,  86,  85,  84,  83,  82,  81,  80,  79,
+      78,  77,  76,  75,  74,  73,  72,  71,  70,  69,  68,  67,  66,  65,  64,
+      63,  62,  61,  60,  59,  58,  57,  56,  55,  54,  53,  52,  51,  50,  49,
+      48,  47,  46,  45,  44,  43,  42,  41,  40,  39,  38,  37,  36,  35,  34,
+      33,  32,  31,  30,  29,  28,  27,  26,  25,  24,  23,  22,  21,  20,  19,
+      18,  17,  16,  15,  14,  13,  12,  11,  10,  9,   8,   7,   6,   5,   4,
+      3,   2};
+  double b_im;
+  double b_re;
+  double im;
+  double re;
+  double temp2_im;
+  double temp2_re;
+  double temp_im;
+  double temp_re;
+  int b_i;
+  int i;
+  int iDelta;
+  int iDelta2;
+  int iheight;
+  int istart;
+  int j;
+  int k;
+  for (i = 0; i < 512; i++) {
+    j = xoffInit + (i << 1);
+    istart = bitrevIndex[i] - 1;
+    y[istart].re = x[j];
+    y[istart].im = x[j + 1];
+  }
+  for (i = 0; i <= 510; i += 2) {
+    re = y[i + 1].re;
+    im = y[i + 1].im;
+    temp_re = re;
+    temp_im = im;
+    b_re = y[i].re;
+    b_im = y[i].im;
+    re = b_re - re;
+    im = b_im - im;
+    y[i + 1].re = re;
+    y[i + 1].im = im;
+    b_re += temp_re;
+    b_im += temp_im;
+    y[i].re = b_re;
+    y[i].im = b_im;
+  }
+  iDelta = 2;
+  iDelta2 = 4;
+  k = 128;
+  iheight = 509;
+  while (k > 0) {
+    for (b_i = 0; b_i < iheight; b_i += iDelta2) {
+      j = b_i + iDelta;
+      temp_re = y[j].re;
+      temp_im = y[j].im;
+      y[j].re = y[b_i].re - temp_re;
+      y[j].im = y[b_i].im - temp_im;
+      y[b_i].re += temp_re;
+      y[b_i].im += temp_im;
+    }
+    istart = 1;
+    for (j = k; j < 256; j += k) {
+      int ihi;
+      temp2_re = dv[j];
+      temp2_im = dv1[j];
+      b_i = istart;
+      ihi = istart + iheight;
+      while (b_i < ihi) {
+        int temp_re_tmp;
+        temp_re_tmp = b_i + iDelta;
+        re = y[temp_re_tmp].im;
+        im = y[temp_re_tmp].re;
+        temp_re = temp2_re * im - temp2_im * re;
+        temp_im = temp2_re * re + temp2_im * im;
+        y[temp_re_tmp].re = y[b_i].re - temp_re;
+        y[temp_re_tmp].im = y[b_i].im - temp_im;
+        y[b_i].re += temp_re;
+        y[b_i].im += temp_im;
+        b_i += iDelta2;
+      }
+      istart++;
+    }
+    k >>= 1;
+    iDelta = iDelta2;
+    iDelta2 += iDelta2;
+    iheight -= iDelta;
+  }
+  temp_re = y[0].re;
+  temp_im = y[0].im;
+  re = y[0].re - (-y[0].im);
+  im = -y[0].re + y[0].im;
+  y[0].re = 0.5 * (re + re);
+  re = temp_re - y[0].im;
+  y[0].im = 0.5 * (im + re);
+  y[512].re = 0.5 * (re + re);
+  y[512].im = 0.5 * ((temp_re + temp_im) + (-temp_re - temp_im));
+  for (i = 0; i < 255; i++) {
+    temp_re = y[i + 1].re;
+    temp_im = y[i + 1].im;
+    j = iv[i + 1];
+    temp2_re = y[j - 1].re;
+    temp2_im = y[j - 1].im;
+    re = reconVar1[i + 1].im;
+    im = reconVar1[i + 1].re;
+    b_re = reconVar2[i + 1].im;
+    b_im = reconVar2[i + 1].re;
+    y[i + 1].re = 0.5 * ((temp_re * im - temp_im * re) +
+                         (temp2_re * b_im - -temp2_im * b_re));
+    y[i + 1].im = 0.5 * ((temp_re * re + temp_im * im) +
+                         (temp2_re * b_re + -temp2_im * b_im));
+    y[i + 513].re = 0.5 * ((temp_re * b_im - temp_im * b_re) +
+                           (temp2_re * im - -temp2_im * re));
+    y[i + 513].im = 0.5 * ((temp_re * b_re + temp_im * b_im) +
+                           (temp2_re * re + -temp2_im * im));
+    re = reconVar1[j - 1].im;
+    im = reconVar1[j - 1].re;
+    b_re = reconVar2[j - 1].im;
+    b_im = reconVar2[j - 1].re;
+    y[j - 1].re = 0.5 * ((temp2_re * im - temp2_im * re) +
+                         (temp_re * b_im - -temp_im * b_re));
+    y[j - 1].im = 0.5 * ((temp2_re * re + temp2_im * im) +
+                         (temp_re * b_re + -temp_im * b_im));
+    y[j + 511].re = 0.5 * ((temp2_re * b_im - temp2_im * b_re) +
+                           (temp_re * im - -temp_im * re));
+    y[j + 511].im = 0.5 * ((temp2_re * b_re + temp2_im * b_im) +
+                           (temp_re * re + -temp_im * im));
+  }
+  temp_im = y[256].im;
+  re = y[256].re * 0.0;
+  im = y[256].im * 0.0;
+  b_re = -y[256].im;
+  b_im = y[256].re * 2.0;
+  temp2_re = b_re * 0.0;
+  y[256].re = 0.5 * ((re - im) + (b_im - temp2_re));
+  y[256].im = 0.5 * ((re + im) + (re + b_re * 2.0));
+  y[768].re = 0.5 * ((b_im - im) + (re - temp2_re));
+  y[768].im = 0.5 * ((re + temp_im * 2.0) + (re + temp2_re));
+}
+
+/*
+ * Arguments    : const creal_T x[945175]
+ *                const double costab[524288]
+ *                const double sintab[524288]
+ *                creal_T y[1048576]
+ * Return Type  : void
+ */
+static void d_FFTImplementationCallback_r2b(const creal_T x[945175],
+                                            const double costab[524288],
+                                            const double sintab[524288],
+                                            creal_T y[1048576])
+{
+  double re;
+  double temp_im;
+  double temp_re;
+  double temp_re_tmp;
+  double twid_re;
+  int b_i;
+  int i;
+  int iDelta;
+  int iDelta2;
+  int iheight;
+  int iy;
+  int ju;
+  int k;
+  memset(&y[0], 0, 1048576U * sizeof(creal_T));
+  iy = 0;
+  ju = 0;
+  for (i = 0; i < 945174; i++) {
+    boolean_T tst;
+    y[iy] = x[i];
+    iy = 1048576;
+    tst = true;
+    while (tst) {
+      iy >>= 1;
+      ju ^= iy;
+      tst = ((ju & iy) == 0);
+    }
+    iy = ju;
+  }
+  y[iy] = x[945174];
+  for (i = 0; i <= 1048574; i += 2) {
+    temp_re = y[i + 1].re;
+    temp_re_tmp = y[i + 1].im;
+    temp_im = temp_re_tmp;
+    re = y[i].re;
+    twid_re = y[i].im;
+    y[i + 1].re = re - temp_re;
+    temp_re_tmp = twid_re - temp_re_tmp;
+    y[i + 1].im = temp_re_tmp;
+    re += temp_re;
+    y[i].re = re;
+    y[i].im = twid_re + temp_im;
+  }
+  iDelta = 2;
+  iDelta2 = 4;
+  k = 262144;
+  iheight = 1048573;
+  while (k > 0) {
+    for (b_i = 0; b_i < iheight; b_i += iDelta2) {
+      iy = b_i + iDelta;
+      temp_re = y[iy].re;
+      temp_im = y[iy].im;
+      y[iy].re = y[b_i].re - temp_re;
+      y[iy].im = y[b_i].im - temp_im;
+      y[b_i].re += temp_re;
+      y[b_i].im += temp_im;
+    }
+    iy = 1;
+    for (ju = k; ju < 524288; ju += k) {
+      double twid_im;
+      int ihi;
+      twid_re = costab[ju];
+      twid_im = sintab[ju];
+      b_i = iy;
+      ihi = iy + iheight;
+      while (b_i < ihi) {
+        int b_temp_re_tmp;
+        b_temp_re_tmp = b_i + iDelta;
+        temp_re_tmp = y[b_temp_re_tmp].im;
+        re = y[b_temp_re_tmp].re;
+        temp_re = twid_re * re - twid_im * temp_re_tmp;
+        temp_im = twid_re * temp_re_tmp + twid_im * re;
+        y[b_temp_re_tmp].re = y[b_i].re - temp_re;
+        y[b_temp_re_tmp].im = y[b_i].im - temp_im;
+        y[b_i].re += temp_re;
+        y[b_i].im += temp_im;
+        b_i += iDelta2;
+      }
+      iy++;
+    }
+    k = (int)((unsigned int)k >> 1);
+    iDelta = iDelta2;
+    iDelta2 += iDelta2;
+    iheight -= iDelta;
+  }
+}
+
+/*
+ * Arguments    : const creal_T x[1048576]
+ *                const double costab[524288]
+ *                const double sintab[524288]
+ *                creal_T y[1048576]
+ * Return Type  : void
+ */
+static void e_FFTImplementationCallback_r2b(const creal_T x[1048576],
+                                            const double costab[524288],
+                                            const double sintab[524288],
+                                            creal_T y[1048576])
+{
+  double re;
+  double temp_im;
+  double temp_re;
+  double temp_re_tmp;
+  double twid_re;
+  int b_i;
+  int c_i;
+  int i;
+  int iDelta;
+  int iDelta2;
+  int iheight;
+  int iy;
+  int ju;
+  int k;
+  iy = 0;
+  ju = 0;
+  for (i = 0; i < 1048575; i++) {
+    boolean_T tst;
+    y[iy] = x[i];
+    iy = 1048576;
+    tst = true;
+    while (tst) {
+      iy >>= 1;
+      ju ^= iy;
+      tst = ((ju & iy) == 0);
+    }
+    iy = ju;
+  }
+  y[iy] = x[1048575];
+  for (i = 0; i <= 1048574; i += 2) {
+    temp_re = y[i + 1].re;
+    temp_re_tmp = y[i + 1].im;
+    temp_im = temp_re_tmp;
+    re = y[i].re;
+    twid_re = y[i].im;
+    y[i + 1].re = re - temp_re;
+    temp_re_tmp = twid_re - temp_re_tmp;
+    y[i + 1].im = temp_re_tmp;
+    re += temp_re;
+    y[i].re = re;
+    y[i].im = twid_re + temp_im;
+  }
+  iDelta = 2;
+  iDelta2 = 4;
+  k = 262144;
+  iheight = 1048573;
+  while (k > 0) {
+    for (c_i = 0; c_i < iheight; c_i += iDelta2) {
+      iy = c_i + iDelta;
+      temp_re = y[iy].re;
+      temp_im = y[iy].im;
+      y[iy].re = y[c_i].re - temp_re;
+      y[iy].im = y[c_i].im - temp_im;
+      y[c_i].re += temp_re;
+      y[c_i].im += temp_im;
+    }
+    iy = 1;
+    for (ju = k; ju < 524288; ju += k) {
+      double twid_im;
+      int ihi;
+      twid_re = costab[ju];
+      twid_im = sintab[ju];
+      c_i = iy;
+      ihi = iy + iheight;
+      while (c_i < ihi) {
+        int b_temp_re_tmp;
+        b_temp_re_tmp = c_i + iDelta;
+        temp_re_tmp = y[b_temp_re_tmp].im;
+        re = y[b_temp_re_tmp].re;
+        temp_re = twid_re * re - twid_im * temp_re_tmp;
+        temp_im = twid_re * temp_re_tmp + twid_im * re;
+        y[b_temp_re_tmp].re = y[c_i].re - temp_re;
+        y[b_temp_re_tmp].im = y[c_i].im - temp_im;
+        y[c_i].re += temp_re;
+        y[c_i].im += temp_im;
+        c_i += iDelta2;
+      }
+      iy++;
+    }
+    k = (int)((unsigned int)k >> 1);
+    iDelta = iDelta2;
+    iDelta2 += iDelta2;
+    iheight -= iDelta;
+  }
+#pragma omp parallel for num_threads(omp_get_max_threads())
+
+  for (b_i = 0; b_i < 1048576; b_i++) {
+    y[b_i].re *= 9.5367431640625E-7;
+    y[b_i].im *= 9.5367431640625E-7;
+  }
+}
+
+/*
+ * Arguments    : const double x[945176]
+ *                const double costab[1048577]
+ *                const double sintab[1048577]
+ *                const double sintabinv[1048577]
+ *                creal_T y[945176]
+ * Return Type  : void
+ */
+void c_FFTImplementationCallback_dob(const double x[945176],
+                                     const double costab[1048577],
+                                     const double sintab[1048577],
+                                     const double sintabinv[1048577],
+                                     creal_T y[945176])
+{
+  static creal_T wwc[945175];
+  int k;
+  int rt;
+  rt = 0;
+  wwc[472587].re = 1.0;
+  wwc[472587].im = 0.0;
+  for (k = 0; k < 472587; k++) {
+    double nt_im;
+    double nt_re;
+    int b_y;
+    b_y = ((k + 1) << 1) - 1;
+    if (945176 - rt <= b_y) {
+      rt = (b_y + rt) - 945176;
+    } else {
+      rt += b_y;
+    }
+    nt_im = -3.141592653589793 * (double)rt / 472588.0;
+    nt_re = cos(nt_im);
+    nt_im = sin(nt_im);
+    wwc[472586 - k].re = nt_re;
+    wwc[472586 - k].im = -nt_im;
+  }
+  for (k = 472586; k >= 0; k--) {
+    wwc[k + 472588] = wwc[472586 - k];
+  }
+  c_FFTImplementationCallback_doH(x, y, wwc, costab, sintab, costab, sintabinv);
+}
+
+/*
+ * Arguments    : const double x[1889280]
+ *                creal_T y[1889280]
+ * Return Type  : void
+ */
+void f_FFTImplementationCallback_r2b(const double x[1889280],
+                                     creal_T y[1889280])
+{
+  int chan;
+  int xoff;
+#pragma omp parallel for num_threads(omp_get_max_threads()) private(xoff)
+
+  for (chan = 0; chan < 1845; chan++) {
+    xoff = chan << 10;
+    d_FFTImplementationCallback_doH(x, xoff, &y[xoff]);
+  }
+}
+
+/*
+ * File trailer for FFTImplementationCallback.c
+ *
+ * [EOF]
+ */

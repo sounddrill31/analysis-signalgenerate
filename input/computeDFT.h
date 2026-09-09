@@ -1,12 +1,12 @@
 /*
- * File: abs.h
+ * File: computeDFT.h
  *
  * MATLAB Coder version            : 26.1
  * C/C++ source code generated on  : 09-Sep-2026 13:49:20
  */
 
-#ifndef ABS_H
-#define ABS_H
+#ifndef COMPUTEDFT_H
+#define COMPUTEDFT_H
 
 /* Include Files */
 #include "rtwtypes.h"
@@ -18,9 +18,8 @@ extern "C" {
 #endif
 
 /* Function Declarations */
-void b_abs(const creal_T x[945176], double y[945176]);
-
-void c_abs(const creal_T x[946485], double y[946485]);
+void computeDFT(const double xin[1889280], double varargin_1,
+                creal_T Xx[1889280], double f[1024]);
 
 #ifdef __cplusplus
 }
@@ -28,7 +27,7 @@ void c_abs(const creal_T x[946485], double y[946485]);
 
 #endif
 /*
- * File trailer for abs.h
+ * File trailer for computeDFT.h
  *
  * [EOF]
  */
