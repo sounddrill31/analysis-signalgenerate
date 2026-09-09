@@ -85,6 +85,7 @@ def generate_wrapper(func_name):
     cpp += f"""
 using namespace emscripten;
 
+// Safely define single-thread OpenMP stubs
 extern "C" {{
     void omp_init_nest_lock(void*) {{}}
     void omp_destroy_nest_lock(void*) {{}}
@@ -95,7 +96,16 @@ extern "C" {{
     int omp_get_thread_num() {{ return 0; }}
 }}
 
+// Crucial: Declare MATLAB's auto-generated initialization function
+extern "C" void {func_name}_initialize();
+
 val run_{func_name}({', '.join(cpp_params)}) {{
+    // Prevent memory leaks by caching FFT twiddle factors once!
+    static bool is_initialized = false;
+    if (!is_initialized) {{
+        {func_name}_initialize();
+        is_initialized = true;
+    }}
 """
     call_args = []
     emx_destroys = []
@@ -121,7 +131,7 @@ val run_{func_name}({', '.join(cpp_params)}) {{
 
         elif p_type == 'array_in_emx':
             cpp += f"    size_t {name}_len = {name}_js[\"length\"].as<size_t>();\n"
-            cpp += f"    int {name}_sz[2] = {{ 1, (int){name}_len }};\n" # SAFE: Explicit 2D size
+            cpp += f"    int {name}_sz[2] = {{ 1, (int){name}_len }};\n"
             cpp += f"    emxArray_real_T *{name} = emxCreateND_real_T(2, {name}_sz);\n"
             cpp += f"    if ({name}_len > 0) {{\n"
             cpp += f"        val {name}_view = val(typed_memory_view({name}_len, {name}->data));\n"
@@ -164,7 +174,6 @@ val run_{func_name}({', '.join(cpp_params)}) {{
             cpp += f"    result.set(\"{name}\", {name}_js);\n"
 
         elif p_type == 'array_out_emx':
-            # SAFE: Dynamically calculate total elements regardless of 1D, 2D, or 3D
             cpp += f"    int {name}_numels = 1;\n"
             cpp += f"    for (int i = 0; i < {name}->numDimensions; ++i) {{\n"
             cpp += f"        {name}_numels *= {name}->size[i];\n"
