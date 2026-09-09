@@ -2,7 +2,7 @@
  * File: main.c
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 09-Sep-2026 17:49:41
+ * C/C++ source code generated on  : 10-Sep-2026 03:03:38
  */
 
 /*************************************************************************/
@@ -40,7 +40,7 @@
 #include "rt_nonfinite.h"
 
 /* Function Declarations */
-static emxArray_real_T *argInit_1xd65536_real_T(void);
+static emxArray_real_T *argInit_1xUnbounded_real_T(void);
 
 static double argInit_real_T(void);
 
@@ -49,7 +49,7 @@ static double argInit_real_T(void);
  * Arguments    : void
  * Return Type  : emxArray_real_T *
  */
-static emxArray_real_T *argInit_1xd65536_real_T(void)
+static emxArray_real_T *argInit_1xUnbounded_real_T(void)
 {
   emxArray_real_T *result;
   double *result_data;
@@ -112,7 +112,7 @@ void main_genAnalysisLogic(void)
   double stftFreq[513];
   /* Initialize function 'genAnalysisLogic' input arguments. */
   /* Initialize function input argument 'x'. */
-  x = argInit_1xd65536_real_T();
+  x = argInit_1xUnbounded_real_T();
   /* Call the entry-point 'genAnalysisLogic'. */
   emxInitArray_real_T(&t, 2);
   emxInitArray_real_T(&freq, 2);

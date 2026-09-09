@@ -2,7 +2,7 @@
  * File: fft.c
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 09-Sep-2026 17:49:41
+ * C/C++ source code generated on  : 10-Sep-2026 03:03:38
  */
 
 /* Include Files */
@@ -50,29 +50,34 @@ void fft(const emxArray_real_T *x, emxArray_creal_T *y)
     int nd2;
     boolean_T useRadix2;
     useRadix2 =
-        (((unsigned int)x->size[1] & (unsigned int)(x->size[1] - 1)) == 0U);
+        ((int)((unsigned int)x->size[1] & (unsigned int)(x->size[1] - 1)) == 0);
     n = 1;
     if (useRadix2) {
       nd2 = x->size[1];
     } else {
       n2 = (x->size[1] + x->size[1]) - 1;
       nd2 = 31;
-      if (n2 <= 1) {
-        nd2 = 0;
-      } else {
-        boolean_T exitg1;
-        n = 0;
-        exitg1 = false;
-        while (!exitg1 && (nd2 - n > 1)) {
-          b_n2 = (n + nd2) >> 1;
-          b_n = 1 << b_n2;
-          if (b_n == n2) {
-            nd2 = b_n2;
-            exitg1 = true;
-          } else if (b_n > n2) {
-            nd2 = b_n2;
-          } else {
-            n = b_n2;
+      if (n2 > MIN_int32_T) {
+        if (n2 < 0) {
+          n2 = -n2;
+        }
+        if (n2 <= 1) {
+          nd2 = 0;
+        } else {
+          boolean_T exitg1;
+          n = 0;
+          exitg1 = false;
+          while (!exitg1 && (nd2 - n > 1)) {
+            b_n2 = (n + nd2) >> 1;
+            b_n = 1 << b_n2;
+            if (b_n == n2) {
+              nd2 = b_n2;
+              exitg1 = true;
+            } else if (b_n > n2) {
+              nd2 = b_n2;
+            } else {
+              n = b_n2;
+            }
           }
         }
       }

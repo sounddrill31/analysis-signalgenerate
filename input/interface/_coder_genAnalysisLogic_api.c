@@ -2,7 +2,7 @@
  * File: _coder_genAnalysisLogic_api.c
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 09-Sep-2026 17:49:41
+ * C/C++ source code generated on  : 10-Sep-2026 03:03:38
  */
 
 /* Include Files */
@@ -142,7 +142,7 @@ static void e_emlrt_marshallIn(const emlrtStack *sp, const mxArray *src,
                                const emlrtMsgIdentifier *msgId,
                                emxArray_real_T *ret)
 {
-  static const int32_T dims[2] = {1, 65536};
+  static const int32_T dims[2] = {1, -1};
   int32_T iv[2];
   int32_T i;
   boolean_T bv[2] = {false, true};

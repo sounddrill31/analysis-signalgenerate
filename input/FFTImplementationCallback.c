@@ -2,7 +2,7 @@
  * File: FFTImplementationCallback.c
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 09-Sep-2026 17:49:41
+ * C/C++ source code generated on  : 10-Sep-2026 03:03:38
  */
 
 /* Include Files */
@@ -262,7 +262,7 @@ static void d_FFTImplementationCallback_doH(
   }
   nd2 = nRows << 1;
   e = 6.283185307179586 / (double)nd2;
-  hszCostab = (int)((unsigned int)nd2 >> 2);
+  hszCostab = nd2 / 2 / 2;
   emxInit_real_T(&costab1q, 2);
   nd2 = costab1q->size[0] * costab1q->size[1];
   costab1q->size[0] = 1;
@@ -270,7 +270,7 @@ static void d_FFTImplementationCallback_doH(
   emxEnsureCapacity_real_T(costab1q, nd2);
   costab1q_data = costab1q->data;
   costab1q_data[0] = 1.0;
-  nd2 = (unsigned short)hszCostab >> 1;
+  nd2 = hszCostab / 2;
   for (k = 0; k < nd2; k++) {
     costab1q_data[k + 1] = cos(e * ((double)k + 1.0));
   }
@@ -492,7 +492,7 @@ static void d_FFTImplementationCallback_doH(
       }
       nd2++;
     }
-    b_k = (unsigned short)b_k >> 1;
+    b_k = (int)((unsigned int)b_k >> 1);
     iDelta = iDelta2;
     iDelta2 += iDelta2;
     iheight -= iDelta;
@@ -622,8 +622,8 @@ void c_FFTImplementationCallback_doH(const emxArray_real_T *x,
     u0 = nRows;
   }
   iDelta = u0 - 2;
-  nRowsD2 = (unsigned short)nRows >> 1;
-  k = nRowsD2 >> 1;
+  nRowsD2 = (int)((unsigned int)nRows >> 1);
+  k = (int)((unsigned int)nRowsD2 >> 1);
   hszCostab = (int)((unsigned int)costab->size[1] >> 1);
   emxInit_real_T(&hcostab, 2);
   istart = hcostab->size[0] * hcostab->size[1];
@@ -771,7 +771,7 @@ void c_FFTImplementationCallback_doH(const emxArray_real_T *x,
       }
       istart++;
     }
-    k >>= 1;
+    k = (int)((unsigned int)k >> 1);
     iDelta = iDelta2;
     iDelta2 += iDelta2;
     iheight -= iDelta;
