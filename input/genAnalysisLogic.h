@@ -2,13 +2,14 @@
  * File: genAnalysisLogic.h
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 09-Sep-2026 13:49:20
+ * C/C++ source code generated on  : 09-Sep-2026 14:13:58
  */
 
 #ifndef GENANALYSISLOGIC_H
 #define GENANALYSISLOGIC_H
 
 /* Include Files */
+#include "genAnalysisLogic_types.h"
 #include "rtwtypes.h"
 #include <stddef.h>
 #include <stdlib.h>
@@ -18,11 +19,12 @@ extern "C" {
 #endif
 
 /* Function Declarations */
-extern void genAnalysisLogic(const double x[945176], double Fs,
-                             double t[945176], double freq[472589],
-                             double fftMagnitude[472589], double stftTime[1845],
+extern void genAnalysisLogic(const emxArray_real_T *x, double Fs,
+                             emxArray_real_T *t, emxArray_real_T *freq,
+                             emxArray_real_T *fftMagnitude,
+                             double stftTime_data[], int stftTime_size[2],
                              double stftFreq[513],
-                             double stftMagnitude[946485]);
+                             emxArray_real_T *stftMagnitude);
 
 #ifdef __cplusplus
 }

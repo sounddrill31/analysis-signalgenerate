@@ -2,11 +2,13 @@
  * File: abs.c
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 09-Sep-2026 13:49:20
+ * C/C++ source code generated on  : 09-Sep-2026 14:13:58
  */
 
 /* Include Files */
 #include "abs.h"
+#include "genAnalysisLogic_emxutil.h"
+#include "genAnalysisLogic_types.h"
 #include "rt_nonfinite.h"
 #include "omp.h"
 #include "rt_nonfinite.h"
@@ -14,59 +16,117 @@
 
 /* Function Definitions */
 /*
- * Arguments    : const creal_T x[945176]
- *                double y[945176]
+ * Arguments    : const emxArray_creal_T *x
+ *                emxArray_real_T *y
  * Return Type  : void
  */
-void b_abs(const creal_T x[945176], double y[945176])
+void b_abs(const emxArray_creal_T *x, emxArray_real_T *y)
 {
+  const creal_T *x_data;
   double a;
   double b;
+  double *y_data;
+  int i;
   int k;
+  int nx;
+  x_data = x->data;
+  nx = x->size[1];
+  i = y->size[0] * y->size[1];
+  y->size[0] = 1;
+  y->size[1] = x->size[1];
+  emxEnsureCapacity_real_T(y, i);
+  y_data = y->data;
+  if (x->size[1] < 1600) {
+    for (k = 0; k < nx; k++) {
+      a = fabs(x_data[k].re);
+      b = fabs(x_data[k].im);
+      if (a < b) {
+        a /= b;
+        y_data[k] = b * sqrt(a * a + 1.0);
+      } else if (a > b) {
+        b /= a;
+        y_data[k] = a * sqrt(b * b + 1.0);
+      } else if (rtIsNaN(b)) {
+        y_data[k] = rtNaN;
+      } else {
+        y_data[k] = a * 1.4142135623730951;
+      }
+    }
+  } else {
 #pragma omp parallel for num_threads(omp_get_max_threads()) private(b, a)
 
-  for (k = 0; k < 945176; k++) {
-    a = fabs(x[k].re);
-    b = fabs(x[k].im);
-    if (a < b) {
-      a /= b;
-      y[k] = b * sqrt(a * a + 1.0);
-    } else if (a > b) {
-      b /= a;
-      y[k] = a * sqrt(b * b + 1.0);
-    } else if (rtIsNaN(b)) {
-      y[k] = rtNaN;
-    } else {
-      y[k] = a * 1.4142135623730951;
+    for (k = 0; k < nx; k++) {
+      a = fabs(x_data[k].re);
+      b = fabs(x_data[k].im);
+      if (a < b) {
+        a /= b;
+        y_data[k] = b * sqrt(a * a + 1.0);
+      } else if (a > b) {
+        b /= a;
+        y_data[k] = a * sqrt(b * b + 1.0);
+      } else if (rtIsNaN(b)) {
+        y_data[k] = rtNaN;
+      } else {
+        y_data[k] = a * 1.4142135623730951;
+      }
     }
   }
 }
 
 /*
- * Arguments    : const creal_T x[946485]
- *                double y[946485]
+ * Arguments    : const emxArray_creal_T *x
+ *                emxArray_real_T *y
  * Return Type  : void
  */
-void c_abs(const creal_T x[946485], double y[946485])
+void c_abs(const emxArray_creal_T *x, emxArray_real_T *y)
 {
+  const creal_T *x_data;
   double a;
   double b;
+  double *y_data;
+  int i;
+  int i1;
   int k;
+  x_data = x->data;
+  i = 513 * x->size[1];
+  i1 = y->size[0] * y->size[1];
+  y->size[0] = 513;
+  y->size[1] = x->size[1];
+  emxEnsureCapacity_real_T(y, i1);
+  y_data = y->data;
+  if (i < 1600) {
+    for (k = 0; k < i; k++) {
+      a = fabs(x_data[k].re);
+      b = fabs(x_data[k].im);
+      if (a < b) {
+        a /= b;
+        y_data[k] = b * sqrt(a * a + 1.0);
+      } else if (a > b) {
+        b /= a;
+        y_data[k] = a * sqrt(b * b + 1.0);
+      } else if (rtIsNaN(b)) {
+        y_data[k] = rtNaN;
+      } else {
+        y_data[k] = a * 1.4142135623730951;
+      }
+    }
+  } else {
 #pragma omp parallel for num_threads(omp_get_max_threads()) private(b, a)
 
-  for (k = 0; k < 946485; k++) {
-    a = fabs(x[k].re);
-    b = fabs(x[k].im);
-    if (a < b) {
-      a /= b;
-      y[k] = b * sqrt(a * a + 1.0);
-    } else if (a > b) {
-      b /= a;
-      y[k] = a * sqrt(b * b + 1.0);
-    } else if (rtIsNaN(b)) {
-      y[k] = rtNaN;
-    } else {
-      y[k] = a * 1.4142135623730951;
+    for (k = 0; k < i; k++) {
+      a = fabs(x_data[k].re);
+      b = fabs(x_data[k].im);
+      if (a < b) {
+        a /= b;
+        y_data[k] = b * sqrt(a * a + 1.0);
+      } else if (a > b) {
+        b /= a;
+        y_data[k] = a * sqrt(b * b + 1.0);
+      } else if (rtIsNaN(b)) {
+        y_data[k] = rtNaN;
+      } else {
+        y_data[k] = a * 1.4142135623730951;
+      }
     }
   }
 }

@@ -2,13 +2,14 @@
  * File: computeDFT.h
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 09-Sep-2026 13:49:20
+ * C/C++ source code generated on  : 09-Sep-2026 14:13:58
  */
 
 #ifndef COMPUTEDFT_H
 #define COMPUTEDFT_H
 
 /* Include Files */
+#include "genAnalysisLogic_types.h"
 #include "rtwtypes.h"
 #include <stddef.h>
 #include <stdlib.h>
@@ -18,8 +19,8 @@ extern "C" {
 #endif
 
 /* Function Declarations */
-void computeDFT(const double xin[1889280], double varargin_1,
-                creal_T Xx[1889280], double f[1024]);
+void computeDFT(const emxArray_real_T *xin, double varargin_1,
+                emxArray_creal_T *Xx, double f[1024]);
 
 #ifdef __cplusplus
 }

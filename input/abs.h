@@ -2,13 +2,14 @@
  * File: abs.h
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 09-Sep-2026 13:49:20
+ * C/C++ source code generated on  : 09-Sep-2026 14:13:58
  */
 
 #ifndef ABS_H
 #define ABS_H
 
 /* Include Files */
+#include "genAnalysisLogic_types.h"
 #include "rtwtypes.h"
 #include <stddef.h>
 #include <stdlib.h>
@@ -18,9 +19,9 @@ extern "C" {
 #endif
 
 /* Function Declarations */
-void b_abs(const creal_T x[945176], double y[945176]);
+void b_abs(const emxArray_creal_T *x, emxArray_real_T *y);
 
-void c_abs(const creal_T x[946485], double y[946485]);
+void c_abs(const emxArray_creal_T *x, emxArray_real_T *y);
 
 #ifdef __cplusplus
 }

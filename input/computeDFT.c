@@ -2,32 +2,38 @@
  * File: computeDFT.c
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 09-Sep-2026 13:49:20
+ * C/C++ source code generated on  : 09-Sep-2026 14:13:58
  */
 
 /* Include Files */
 #include "computeDFT.h"
 #include "FFTImplementationCallback.h"
+#include "genAnalysisLogic_types.h"
 #include "rt_nonfinite.h"
 #include "rt_nonfinite.h"
 #include <emmintrin.h>
 
 /* Function Definitions */
 /*
- * Arguments    : const double xin[1889280]
+ * Arguments    : const emxArray_real_T *xin
  *                double varargin_1
- *                creal_T Xx[1889280]
+ *                emxArray_creal_T *Xx
  *                double f[1024]
  * Return Type  : void
  */
-void computeDFT(const double xin[1889280], double varargin_1,
-                creal_T Xx[1889280], double f[1024])
+void computeDFT(const emxArray_real_T *xin, double varargin_1,
+                emxArray_creal_T *Xx, double f[1024])
 {
   double dv[2];
   double Fs1;
   double freq_res;
   int i;
-  f_FFTImplementationCallback_r2b(xin, Xx);
+  if (xin->size[1] == 0) {
+    Xx->size[0] = 1024;
+    Xx->size[1] = 0;
+  } else {
+    g_FFTImplementationCallback_r2b(xin, Xx);
+  }
   if (rtIsNaN(varargin_1)) {
     Fs1 = 6.283185307179586;
   } else {

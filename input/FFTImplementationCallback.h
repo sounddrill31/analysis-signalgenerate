@@ -2,13 +2,14 @@
  * File: FFTImplementationCallback.h
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 09-Sep-2026 13:49:20
+ * C/C++ source code generated on  : 09-Sep-2026 14:13:58
  */
 
 #ifndef FFTIMPLEMENTATIONCALLBACK_H
 #define FFTIMPLEMENTATIONCALLBACK_H
 
 /* Include Files */
+#include "genAnalysisLogic_types.h"
 #include "rtwtypes.h"
 #include <stddef.h>
 #include <stdlib.h>
@@ -18,14 +19,24 @@ extern "C" {
 #endif
 
 /* Function Declarations */
-void c_FFTImplementationCallback_dob(const double x[945176],
-                                     const double costab[1048577],
-                                     const double sintab[1048577],
-                                     const double sintabinv[1048577],
-                                     creal_T y[945176]);
+void c_FFTImplementationCallback_dob(const emxArray_real_T *x, int n2blue,
+                                     int nfft, const emxArray_real_T *costab,
+                                     const emxArray_real_T *sintab,
+                                     const emxArray_real_T *sintabinv,
+                                     emxArray_creal_T *y);
 
-void f_FFTImplementationCallback_r2b(const double x[1889280],
-                                     creal_T y[1889280]);
+void c_FFTImplementationCallback_gen(int nRows, boolean_T useRadix2,
+                                     emxArray_real_T *costab,
+                                     emxArray_real_T *sintab,
+                                     emxArray_real_T *sintabinv);
+
+void c_FFTImplementationCallback_r2b(const emxArray_real_T *x, int n1_unsigned,
+                                     const emxArray_real_T *costab,
+                                     const emxArray_real_T *sintab,
+                                     emxArray_creal_T *y);
+
+void g_FFTImplementationCallback_r2b(const emxArray_real_T *x,
+                                     emxArray_creal_T *y);
 
 #ifdef __cplusplus
 }
