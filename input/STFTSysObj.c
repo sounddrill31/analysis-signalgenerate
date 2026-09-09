@@ -2,15 +2,35 @@
  * File: STFTSysObj.c
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 09-Sep-2026 17:33:27
+ * C/C++ source code generated on  : 09-Sep-2026 17:49:41
  */
 
 /* Include Files */
 #include "STFTSysObj.h"
 #include "genAnalysisLogic_internal_types.h"
+#include "genAnalysisLogic_types.h"
 #include "rt_nonfinite.h"
 
 /* Function Definitions */
+/*
+ * Arguments    : double in1[1024]
+ *                const emxArray_real_T *in2
+ *                const dsp_STFT *in3
+ * Return Type  : void
+ */
+void binary_expand_op(double in1[1024], const emxArray_real_T *in2,
+                      const dsp_STFT *in3)
+{
+  const double *in2_data;
+  int i;
+  int stride_0_0;
+  in2_data = in2->data;
+  stride_0_0 = (in2->size[0] != 1);
+  for (i = 0; i < 1024; i++) {
+    in1[i] = in2_data[i * stride_0_0] * in3->pObj.pWindow[i];
+  }
+}
+
 /*
  * Arguments    : dsp_internal_codegen_STFTSysObj *obj
  * Return Type  : void

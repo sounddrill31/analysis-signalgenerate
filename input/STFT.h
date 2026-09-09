@@ -2,7 +2,7 @@
  * File: STFT.h
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 09-Sep-2026 17:33:27
+ * C/C++ source code generated on  : 09-Sep-2026 17:49:41
  */
 
 #ifndef STFT_H
@@ -22,8 +22,7 @@ extern "C" {
 /* Function Declarations */
 void STFT_STFT(dsp_STFT *obj);
 
-void STFT_step(dsp_STFT *obj, const emxArray_real_T *u, creal_T y_data[],
-               int y_size[2]);
+void STFT_step(dsp_STFT *obj, const emxArray_real_T *u, emxArray_creal_T *y);
 
 #ifdef __cplusplus
 }

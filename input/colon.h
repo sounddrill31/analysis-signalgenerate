@@ -1,14 +1,15 @@
 /*
- * File: genAnalysisLogic_terminate.h
+ * File: colon.h
  *
  * MATLAB Coder version            : 26.1
  * C/C++ source code generated on  : 09-Sep-2026 17:49:41
  */
 
-#ifndef GENANALYSISLOGIC_TERMINATE_H
-#define GENANALYSISLOGIC_TERMINATE_H
+#ifndef COLON_H
+#define COLON_H
 
 /* Include Files */
+#include "genAnalysisLogic_types.h"
 #include "rtwtypes.h"
 #include <stddef.h>
 #include <stdlib.h>
@@ -18,7 +19,9 @@ extern "C" {
 #endif
 
 /* Function Declarations */
-extern void genAnalysisLogic_terminate(void);
+void b_eml_integer_colon_dispatcher(int a, int b, emxArray_int32_T *y);
+
+void eml_integer_colon_dispatcher(int a, emxArray_int32_T *y);
 
 #ifdef __cplusplus
 }
@@ -26,7 +29,7 @@ extern void genAnalysisLogic_terminate(void);
 
 #endif
 /*
- * File trailer for genAnalysisLogic_terminate.h
+ * File trailer for colon.h
  *
  * [EOF]
  */

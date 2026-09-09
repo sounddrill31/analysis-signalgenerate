@@ -2,7 +2,7 @@
  * File: genAnalysisLogic.c
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 09-Sep-2026 17:33:27
+ * C/C++ source code generated on  : 09-Sep-2026 17:49:41
  */
 
 /* Include Files */
@@ -19,6 +19,7 @@
 #include "genAnalysisLogic_types.h"
 #include "rt_nonfinite.h"
 #include <emmintrin.h>
+#include <math.h>
 
 /* Variable Definitions */
 static dsp_STFT stftObj;
@@ -30,158 +31,213 @@ static boolean_T stftObj_not_empty;
  * Time domain operations
  *  Create time vector corresponding to the input samples
  *
- * Arguments    : double Fs
+ * Arguments    : const emxArray_real_T *x
+ *                double Fs
  *                emxArray_real_T *t
  *                emxArray_real_T *freq
  *                emxArray_real_T *fftMagnitude
- *                double stftTime[32]
+ *                emxArray_real_T *stftTime
  *                double stftFreq[513]
  *                emxArray_real_T *stftMagnitude
  * Return Type  : void
  */
-void genAnalysisLogic(double Fs, emxArray_real_T *t, emxArray_real_T *freq,
-                      emxArray_real_T *fftMagnitude, double stftTime[32],
-                      double stftFreq[513], emxArray_real_T *stftMagnitude)
+void genAnalysisLogic(const emxArray_real_T *x, double Fs, emxArray_real_T *t,
+                      emxArray_real_T *freq, emxArray_real_T *fftMagnitude,
+                      emxArray_real_T *stftTime, double stftFreq[513],
+                      emxArray_real_T *stftMagnitude)
 {
-  __m128d r3;
-  emxArray_creal_T *r1;
-  emxArray_real_T *r;
-  creal_T stftFrame_data[513];
-  creal_T *r2;
-  double tmp_data[513];
+  __m128d r;
+  emxArray_creal_T *X;
+  emxArray_creal_T *b_X;
+  emxArray_creal_T *stftFrame;
+  emxArray_real_T *P2;
+  creal_T *X_data;
+  creal_T *b_X_data;
   double dv[2];
+  const double *x_data;
   double *fftMagnitude_data;
-  double *freq_data;
-  double *stftMagnitude_data;
+  double *stftTime_data;
   double *t_data;
   int endIdx;
   int i;
   int k;
+  int loop_ub;
+  int numFrames;
+  int vectorUB;
+  int x_re;
   if (!isInitialized_genAnalysisLogic) {
     genAnalysisLogic_initialize();
   }
-  emxInit_real_T(&r, 1);
-  endIdx = r->size[0];
-  r->size[0] = 16384;
-  emxEnsureCapacity_real_T(r, endIdx);
-  emxInit_creal_T(&r1);
-  endIdx = r1->size[0];
-  r1->size[0] = 16384;
-  emxEnsureCapacity_creal_T(r1, endIdx);
-  endIdx = stftMagnitude->size[0];
-  stftMagnitude->size[0] = 16416;
-  emxEnsureCapacity_real_T(stftMagnitude, endIdx);
-  stftMagnitude_data = stftMagnitude->data;
-  endIdx = fftMagnitude->size[0];
-  fftMagnitude->size[0] = 8193;
-  emxEnsureCapacity_real_T(fftMagnitude, endIdx);
-  fftMagnitude_data = fftMagnitude->data;
-  endIdx = freq->size[0];
-  freq->size[0] = 8193;
-  emxEnsureCapacity_real_T(freq, endIdx);
-  freq_data = freq->data;
-  endIdx = t->size[0];
-  t->size[0] = 16384;
+  x_data = x->data;
+  /*  Simple matlab function for Audio Signal Analysis */
+  if (x->size[1] - 1 < 0) {
+    t->size[1] = 0;
+  } else {
+    endIdx = t->size[0] * t->size[1];
+    t->size[0] = 1;
+    t->size[1] = x->size[1];
+    emxEnsureCapacity_real_T(t, endIdx);
+    t_data = t->data;
+    endIdx = x->size[1] - 1;
+    for (i = 0; i <= endIdx; i++) {
+      t_data[i] = i;
+    }
+  }
+  loop_ub = t->size[1];
+  endIdx = t->size[0] * t->size[1];
+  t->size[0] = 1;
   emxEnsureCapacity_real_T(t, endIdx);
   t_data = t->data;
-  /*  Simple matlab function for Audio Signal Analysis */
+  endIdx = (t->size[1] / 2) << 1;
+  vectorUB = endIdx - 2;
+  for (i = 0; i <= vectorUB; i += 2) {
+    _mm_storeu_pd(&t_data[i],
+                  _mm_div_pd(_mm_loadu_pd(&t_data[i]), _mm_set1_pd(Fs)));
+  }
+  for (i = endIdx; i < loop_ub; i++) {
+    t_data[i] /= Fs;
+  }
   /*  Frequency domain operations */
   /*  Calculate FFT */
+  emxInit_creal_T(&X, 2);
+  fft(x, X);
+  X_data = X->data;
   /*  Two-sided magnitude spectrum */
-  /*  Single-sided magnitude spectrum */
-  fft(r1);
-  r2 = r1->data;
-  for (i = 0; i < 16384; i++) {
+  x_re = x->size[1];
+  emxInit_creal_T(&b_X, 2);
+  endIdx = b_X->size[0] * b_X->size[1];
+  b_X->size[0] = 1;
+  vectorUB = X->size[1];
+  b_X->size[1] = X->size[1];
+  emxEnsureCapacity_creal_T(b_X, endIdx);
+  b_X_data = b_X->data;
+  for (i = 0; i < vectorUB; i++) {
     double ai;
-    double im;
-    double re;
-    t_data[i] = (double)i / Fs;
-    im = r2[i].re;
-    ai = r2[i].im;
+    double ar;
+    ar = X_data[i].re;
+    ai = X_data[i].im;
     if (ai == 0.0) {
-      re = im / 16384.0;
-      im = 0.0;
-    } else if (im == 0.0) {
-      re = 0.0;
-      im = ai / 16384.0;
+      b_X_data[i].re = ar / (double)x_re;
+      b_X_data[i].im = 0.0;
+    } else if (ar == 0.0) {
+      b_X_data[i].re = 0.0;
+      b_X_data[i].im = ai / (double)x_re;
     } else {
-      re = im / 16384.0;
-      im = ai / 16384.0;
+      b_X_data[i].re = ar / (double)x_re;
+      b_X_data[i].im = ai / (double)x_re;
     }
-    r2[i].re = re;
-    r2[i].im = im;
   }
-  b_abs(r1, r);
-  t_data = r->data;
-  emxFree_creal_T(&r1);
-  for (i = 0; i < 8193; i++) {
+  emxFree_creal_T(&X);
+  emxInit_real_T(&P2, 2);
+  b_abs(b_X, P2);
+  t_data = P2->data;
+  emxFree_creal_T(&b_X);
+  /*  Single-sided magnitude spectrum */
+  loop_ub = (int)floor((double)x->size[1] / 2.0);
+  endIdx = fftMagnitude->size[0] * fftMagnitude->size[1];
+  fftMagnitude->size[0] = 1;
+  fftMagnitude->size[1] = loop_ub + 1;
+  emxEnsureCapacity_real_T(fftMagnitude, endIdx);
+  fftMagnitude_data = fftMagnitude->data;
+  for (i = 0; i <= loop_ub; i++) {
     fftMagnitude_data[i] = t_data[i];
   }
-  emxFree_real_T(&r);
   /*  Double the magnitude except DC and Nyquist components */
-  for (i = 0; i <= 8188; i += 2) {
-    _mm_storeu_pd(
-        &fftMagnitude_data[i + 1],
-        _mm_mul_pd(_mm_set1_pd(2.0), _mm_loadu_pd(&fftMagnitude_data[i + 1])));
+  if (loop_ub + 1 > 2) {
+    endIdx = ((loop_ub - 1) / 2) << 1;
+    vectorUB = endIdx - 2;
+    for (i = 0; i <= vectorUB; i += 2) {
+      _mm_storeu_pd(&fftMagnitude_data[i + 1],
+                    _mm_mul_pd(_mm_set1_pd(2.0), _mm_loadu_pd(&t_data[i + 1])));
+    }
+    for (i = endIdx; i <= loop_ub - 2; i++) {
+      fftMagnitude_data[i + 1] = 2.0 * t_data[i + 1];
+    }
   }
-  fftMagnitude_data[8191] *= 2.0;
+  emxFree_real_T(&P2);
   /*  Frequency axis */
-  for (i = 0; i <= 8190; i += 2) {
+  endIdx = freq->size[0] * freq->size[1];
+  freq->size[0] = 1;
+  freq->size[1] = loop_ub + 1;
+  emxEnsureCapacity_real_T(freq, endIdx);
+  t_data = freq->data;
+  endIdx = ((loop_ub + 1) / 2) << 1;
+  vectorUB = endIdx - 2;
+  for (i = 0; i <= vectorUB; i += 2) {
     dv[0] = i;
     dv[1] = (double)i + 1.0;
-    r3 = _mm_loadu_pd(&dv[0]);
-    _mm_storeu_pd(&freq_data[i], _mm_div_pd(_mm_mul_pd(_mm_set1_pd(Fs), r3),
-                                            _mm_set1_pd(16384.0)));
+    r = _mm_loadu_pd(&dv[0]);
+    _mm_storeu_pd(&t_data[i], _mm_div_pd(_mm_mul_pd(_mm_set1_pd(Fs), r),
+                                         _mm_set1_pd(x_re)));
   }
-  freq_data[8192] = Fs * 8192.0 / 16384.0;
+  for (i = endIdx; i <= loop_ub; i++) {
+    t_data[i] = Fs * (double)i / (double)x_re;
+  }
   /* Short Time Fourier Transform Chart */
   /*  each hop carries 512 samples */
   if (!stftObj_not_empty) {
     STFT_STFT(&stftObj);
     stftObj_not_empty = true;
   }
+  numFrames = (int)floor((double)x->size[1] / 512.0);
   /*  513 */
+  endIdx = stftMagnitude->size[0] * stftMagnitude->size[1];
+  stftMagnitude->size[0] = 513;
+  stftMagnitude->size[1] = numFrames;
+  emxEnsureCapacity_real_T(stftMagnitude, endIdx);
+  fftMagnitude_data = stftMagnitude->data;
+  endIdx = 513 * numFrames;
+  for (i = 0; i < endIdx; i++) {
+    fftMagnitude_data[i] = 0.0;
+  }
+  endIdx = stftTime->size[0] * stftTime->size[1];
+  stftTime->size[0] = 1;
+  stftTime->size[1] = numFrames;
+  emxEnsureCapacity_real_T(stftTime, endIdx);
+  stftTime_data = stftTime->data;
   for (i = 0; i <= 510; i += 2) {
     dv[0] = i;
     dv[1] = (double)i + 1.0;
-    r3 = _mm_loadu_pd(&dv[0]);
-    _mm_storeu_pd(&stftFreq[i], _mm_div_pd(_mm_mul_pd(_mm_set1_pd(Fs), r3),
+    r = _mm_loadu_pd(&dv[0]);
+    _mm_storeu_pd(&stftFreq[i], _mm_div_pd(_mm_mul_pd(_mm_set1_pd(Fs), r),
                                            _mm_set1_pd(1024.0)));
   }
   stftFreq[512] = Fs * 512.0 / 1024.0;
   /*  populate the audio stream 512 samples at a time */
-  emxInit_real_T(&stftMagnitude, 1);
-  for (k = 0; k < 32; k++) {
-    int loop_ub;
+  emxInit_creal_T(&stftFrame, 2);
+  emxInit_real_T(&t, 2);
+  emxInit_real_T(&fftMagnitude, 1);
+  for (k = 0; k < numFrames; k++) {
     int startIdx;
     startIdx = k << 9;
     endIdx = (k + 1) << 9;
     /*  Extract the 512-sample chunk */
     if (startIdx + 1 > endIdx) {
-      loop_ub = 0;
+      x_re = 0;
       endIdx = 0;
     } else {
-      loop_ub = startIdx;
+      x_re = startIdx;
     }
-    loop_ub = endIdx - loop_ub;
-    endIdx = stftMagnitude->size[0];
-    stftMagnitude->size[0] = loop_ub;
-    emxEnsureCapacity_real_T(stftMagnitude, endIdx);
-    t_data = stftMagnitude->data;
+    loop_ub = endIdx - x_re;
+    vectorUB = fftMagnitude->size[0];
+    fftMagnitude->size[0] = loop_ub;
+    emxEnsureCapacity_real_T(fftMagnitude, vectorUB);
+    t_data = fftMagnitude->data;
     for (i = 0; i < loop_ub; i++) {
-      t_data[i] = 0.0;
+      t_data[i] = x_data[x_re + i];
     }
-    int stftFrame_size[2];
-    int tmp_size[2];
-    STFT_step(&stftObj, stftMagnitude, stftFrame_data, stftFrame_size);
+    STFT_step(&stftObj, fftMagnitude, stftFrame);
     /*  Store the results */
-    c_abs(stftFrame_data, stftFrame_size, tmp_data, tmp_size);
+    c_abs(stftFrame, t);
+    t_data = t->data;
     for (i = 0; i < 513; i++) {
-      stftMagnitude_data[i + 513 * k] = tmp_data[i];
+      fftMagnitude_data[i + 513 * k] = t_data[i];
     }
-    stftTime[k] = (((double)startIdx + 1.0) + 512.0) / Fs;
+    stftTime_data[k] = (((double)startIdx + 1.0) + 512.0) / Fs;
   }
-  emxFree_real_T(&stftMagnitude);
+  emxFree_real_T(&fftMagnitude);
+  emxFree_real_T(&t);
+  emxFree_creal_T(&stftFrame);
 }
 
 /*

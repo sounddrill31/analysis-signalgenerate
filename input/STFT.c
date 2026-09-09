@@ -2,12 +2,14 @@
  * File: STFT.c
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 09-Sep-2026 17:33:27
+ * C/C++ source code generated on  : 09-Sep-2026 17:49:41
  */
 
 /* Include Files */
 #include "STFT.h"
 #include "FFTImplementationCallback.h"
+#include "STFTSysObj.h"
+#include "colon.h"
 #include "genAnalysisLogic_emxutil.h"
 #include "genAnalysisLogic_internal_types.h"
 #include "genAnalysisLogic_types.h"
@@ -1058,32 +1060,36 @@ void STFT_STFT(dsp_STFT *obj)
 /*
  * Arguments    : dsp_STFT *obj
  *                const emxArray_real_T *u
- *                creal_T y_data[]
- *                int y_size[2]
+ *                emxArray_creal_T *y
  * Return Type  : void
  */
-void STFT_step(dsp_STFT *obj, const emxArray_real_T *u, creal_T y_data[],
-               int y_size[2])
+void STFT_step(dsp_STFT *obj, const emxArray_real_T *u, emxArray_creal_T *y)
 {
+  emxArray_int16_T *r;
+  emxArray_int32_T *b_y;
   emxArray_int32_T *bc;
-  creal_T yTwoSided[1024];
-  double out_data[2048];
+  emxArray_int32_T *c_y;
+  emxArray_real_T *d_y;
+  creal_T *d_y_data;
   double win[1024];
-  int b_y_data[16383];
-  int b_n;
+  const double *u_data;
+  double *c_y_data;
+  unsigned int inSize[8];
   int b_rPtr;
+  int b_wPtr;
   int c;
   int k;
   int n;
   int qY;
   int rPtr;
   int wPtr;
-  int y_size_idx_1;
   int yk;
+  int *b_y_data;
   int *bc_data;
-  short tmp_data[17408];
-  short inSize[8];
+  int *y_data;
+  short *r1;
   boolean_T exitg1;
+  u_data = u->data;
   if (obj->pObj.isInitialized != 1) {
     obj->pObj.isInitialized = 1;
     obj->pObj.inputVarSize[0].f1[0] = (unsigned int)u->size[0];
@@ -1109,17 +1115,17 @@ void STFT_step(dsp_STFT *obj, const emxArray_real_T *u, creal_T y_data[],
     obj->pObj.TunablePropsChanged = false;
     memcpy(&obj->pObj.pWindow[0], &obj->pObj.Window[0], 1024U * sizeof(double));
   }
-  inSize[0] = (short)u->size[0];
-  inSize[1] = 1;
+  inSize[0] = (unsigned int)u->size[0];
+  inSize[1] = 1U;
   for (k = 0; k < 6; k++) {
-    inSize[k + 2] = 1;
+    inSize[k + 2] = 1U;
   }
   yk = 0;
   exitg1 = false;
   while (!exitg1 && (yk < 8)) {
-    if (obj->pObj.inputVarSize[0].f1[yk] != (unsigned int)inSize[yk]) {
+    if (obj->pObj.inputVarSize[0].f1[yk] != inSize[yk]) {
       for (k = 0; k < 8; k++) {
-        obj->pObj.inputVarSize[0].f1[k] = (unsigned int)inSize[k];
+        obj->pObj.inputVarSize[0].f1[k] = inSize[k];
       }
       exitg1 = true;
     } else {
@@ -1140,18 +1146,17 @@ void STFT_step(dsp_STFT *obj, const emxArray_real_T *u, creal_T y_data[],
     obj->pObj.pBuff.pBuffer.CumulativeUnderrun = 0;
     memset(&obj->pObj.pBuff.pBuffer.Cache[0], 0, 1025U * sizeof(double));
   }
-  inSize[0] = (short)u->size[0];
-  inSize[1] = 1;
+  inSize[0] = (unsigned int)u->size[0];
+  inSize[1] = 1U;
   for (k = 0; k < 6; k++) {
-    inSize[k + 2] = 1;
+    inSize[k + 2] = 1U;
   }
   yk = 0;
   exitg1 = false;
   while (!exitg1 && (yk < 8)) {
-    if (obj->pObj.pBuff.pBuffer.inputVarSize[0].f1[yk] !=
-        (unsigned int)inSize[yk]) {
+    if (obj->pObj.pBuff.pBuffer.inputVarSize[0].f1[yk] != inSize[yk]) {
       for (k = 0; k < 8; k++) {
-        obj->pObj.pBuff.pBuffer.inputVarSize[0].f1[k] = (unsigned int)inSize[k];
+        obj->pObj.pBuff.pBuffer.inputVarSize[0].f1[k] = inSize[k];
       }
       exitg1 = true;
     } else {
@@ -1160,7 +1165,7 @@ void STFT_step(dsp_STFT *obj, const emxArray_real_T *u, creal_T y_data[],
   }
   wPtr = obj->pObj.pBuff.pBuffer.WritePointer;
   rPtr = obj->pObj.pBuff.pBuffer.ReadPointer;
-  qY = 0;
+  b_wPtr = 0;
   if ((wPtr < 0) && (u->size[0] < MIN_int32_T - wPtr)) {
     yk = MIN_int32_T;
   } else if ((wPtr > 0) && (u->size[0] > MAX_int32_T - wPtr)) {
@@ -1169,41 +1174,41 @@ void STFT_step(dsp_STFT *obj, const emxArray_real_T *u, creal_T y_data[],
     yk = wPtr + u->size[0];
   }
   if (yk < -2147483647) {
-    b_rPtr = MIN_int32_T;
+    qY = MIN_int32_T;
   } else {
-    b_rPtr = yk - 1;
+    qY = yk - 1;
   }
-  c = b_rPtr;
-  emxInit_int32_T(&bc);
-  if (b_rPtr > 1025) {
-    c = b_rPtr - 1025;
-    n = 1026 - wPtr;
+  c = qY;
+  emxInit_int32_T(&bc, 2);
+  emxInit_int32_T(&b_y, 2);
+  emxInit_int32_T(&c_y, 2);
+  if (qY > 1025) {
+    c = qY - 1025;
+    eml_integer_colon_dispatcher(wPtr, b_y);
+    y_data = b_y->data;
+    yk = c_y->size[0] * c_y->size[1];
+    c_y->size[0] = 1;
+    c_y->size[1] = qY - 1025;
+    emxEnsureCapacity_int32_T(c_y, yk);
+    b_y_data = c_y->data;
+    b_y_data[0] = 1;
+    yk = 1;
+    for (k = 2; k <= c; k++) {
+      yk++;
+      b_y_data[k - 1] = yk;
+    }
     yk = bc->size[0] * bc->size[1];
     bc->size[0] = 1;
-    bc->size[1] = 1026 - wPtr;
+    bc->size[1] = b_y->size[1] + c_y->size[1];
     emxEnsureCapacity_int32_T(bc, yk);
     bc_data = bc->data;
-    bc_data[0] = wPtr;
-    yk = wPtr;
-    for (k = 2; k <= n; k++) {
-      yk++;
-      bc_data[k - 1] = yk;
+    n = b_y->size[1];
+    for (k = 0; k < n; k++) {
+      bc_data[k] = y_data[k];
     }
-    y_size_idx_1 = b_rPtr - 1025;
-    b_y_data[0] = 1;
-    n = 1;
-    for (k = 2; k <= c; k++) {
-      n++;
-      b_y_data[k - 1] = n;
-    }
-    yk = bc->size[1];
-    b_n = bc->size[0] * bc->size[1];
-    bc->size[0] = 1;
-    bc->size[1] = (bc->size[1] + b_rPtr) - 1025;
-    emxEnsureCapacity_int32_T(bc, b_n);
-    bc_data = bc->data;
-    for (k = 0; k < y_size_idx_1; k++) {
-      bc_data[k + yk] = b_y_data[k];
+    b_rPtr = c_y->size[1];
+    for (k = 0; k < b_rPtr; k++) {
+      bc_data[k + b_y->size[1]] = b_y_data[k];
     }
     if (wPtr <= rPtr) {
       if (rPtr < -2147482622) {
@@ -1216,81 +1221,71 @@ void STFT_step(dsp_STFT *obj, const emxArray_real_T *u, creal_T y_data[],
       } else {
         yk++;
       }
-      if ((yk < 0) && (b_rPtr - 1025 < MIN_int32_T - yk)) {
-        qY = MIN_int32_T;
-      } else if ((yk > 0) && (b_rPtr - 1025 > MAX_int32_T - yk)) {
-        qY = MAX_int32_T;
+      if ((yk < 0) && (qY - 1025 < MIN_int32_T - yk)) {
+        b_wPtr = MIN_int32_T;
+      } else if ((yk > 0) && (qY - 1025 > MAX_int32_T - yk)) {
+        b_wPtr = MAX_int32_T;
       } else {
-        qY = (yk + b_rPtr) - 1025;
+        b_wPtr = (yk + qY) - 1025;
       }
-    } else if (rPtr <= b_rPtr - 1025) {
-      if (rPtr < b_rPtr + 2147482624) {
+    } else if (rPtr <= qY - 1025) {
+      if (rPtr < qY + 2147482624) {
         yk = MAX_int32_T;
       } else {
-        yk = (b_rPtr - rPtr) - 1025;
+        yk = (qY - rPtr) - 1025;
       }
       if (yk > 2147483646) {
-        qY = MAX_int32_T;
+        b_wPtr = MAX_int32_T;
       } else {
-        qY = yk + 1;
+        b_wPtr = yk + 1;
       }
     }
   } else {
-    if (b_rPtr < wPtr) {
-      n = 0;
-    } else {
-      n = (b_rPtr - wPtr) + 1;
-    }
-    yk = bc->size[0] * bc->size[1];
-    bc->size[0] = 1;
-    bc->size[1] = n;
-    emxEnsureCapacity_int32_T(bc, yk);
+    b_eml_integer_colon_dispatcher(wPtr, qY, bc);
     bc_data = bc->data;
-    if (n > 0) {
-      bc_data[0] = wPtr;
-      b_n = wPtr;
-      for (k = 2; k <= n; k++) {
-        b_n++;
-        bc_data[k - 1] = b_n;
-      }
-    }
-    if ((wPtr <= rPtr) && (rPtr <= b_rPtr)) {
-      if ((b_rPtr >= 0) && (rPtr < b_rPtr - MAX_int32_T)) {
+    if ((wPtr <= rPtr) && (rPtr <= qY)) {
+      if ((qY >= 0) && (rPtr < qY - MAX_int32_T)) {
         yk = MAX_int32_T;
-      } else if ((b_rPtr < 0) && (rPtr > b_rPtr - MIN_int32_T)) {
+      } else if ((qY < 0) && (rPtr > qY - MIN_int32_T)) {
         yk = MIN_int32_T;
       } else {
-        yk = b_rPtr - rPtr;
+        yk = qY - rPtr;
       }
       if (yk > 2147483646) {
-        qY = MAX_int32_T;
+        b_wPtr = MAX_int32_T;
       } else {
-        qY = yk + 1;
+        b_wPtr = yk + 1;
       }
     }
   }
-  yk = bc->size[1];
-  for (k = 0; k < yk; k++) {
-    tmp_data[k] = (short)((short)bc_data[k] - 1);
+  emxInit_int16_T(&r);
+  n = bc->size[1];
+  yk = r->size[0];
+  r->size[0] = bc->size[1];
+  emxEnsureCapacity_int16_T(r, yk);
+  r1 = r->data;
+  for (k = 0; k < n; k++) {
+    r1[k] = (short)((short)bc_data[k] - 1);
   }
-  for (k = 0; k < yk; k++) {
-    obj->pObj.pBuff.pBuffer.Cache[tmp_data[k]] = 0.0;
+  for (k = 0; k < n; k++) {
+    obj->pObj.pBuff.pBuffer.Cache[r1[k]] = u_data[k];
   }
+  emxFree_int16_T(&r);
   if (c + 1 > 1025) {
     wPtr = 1;
   } else {
     wPtr = c + 1;
   }
-  if (qY != 0) {
+  if (b_wPtr != 0) {
     rPtr = wPtr;
   }
   yk = obj->pObj.pBuff.pBuffer.CumulativeOverrun;
-  if ((yk < 0) && (qY < MIN_int32_T - yk)) {
+  if ((yk < 0) && (b_wPtr < MIN_int32_T - yk)) {
     yk = MIN_int32_T;
-  } else if ((yk > 0) && (qY > MAX_int32_T - yk)) {
+  } else if ((yk > 0) && (b_wPtr > MAX_int32_T - yk)) {
     yk = MAX_int32_T;
   } else {
-    yk += qY;
+    yk += b_wPtr;
   }
   obj->pObj.pBuff.pBuffer.CumulativeOverrun = yk;
   obj->pObj.pBuff.pBuffer.WritePointer = wPtr;
@@ -1305,9 +1300,9 @@ void STFT_step(dsp_STFT *obj, const emxArray_real_T *u, creal_T y_data[],
     yk -= n;
   }
   if (yk < -2147483647) {
-    b_n = MIN_int32_T;
+    b_rPtr = MIN_int32_T;
   } else {
-    b_n = yk - 1;
+    b_rPtr = yk - 1;
   }
   yk = obj->pObj.pBuff.pBuffer.ReadPointer;
   if (yk < -2147482623) {
@@ -1327,17 +1322,17 @@ void STFT_step(dsp_STFT *obj, const emxArray_real_T *u, creal_T y_data[],
       obj->pObj.pBuff.pBuffer.WritePointer) {
     if (obj->pObj.pBuff.pBuffer.ReadPointer ==
         obj->pObj.pBuff.pBuffer.WritePointer) {
-      b_n = 1024;
+      b_rPtr = 1024;
     } else {
-      b_n = yk;
+      b_rPtr = yk;
     }
   }
-  if (b_n >= 512) {
+  if (b_rPtr >= 512) {
+    creal_T yTwoSided[1024];
     int b_c;
-    int b_qY;
-    c = obj->pObj.pBuff.pBuffer.WritePointer;
-    b_qY = 0;
+    b_wPtr = obj->pObj.pBuff.pBuffer.WritePointer;
     rPtr = 0;
+    c = 0;
     yk = obj->pObj.pBuff.pBuffer.ReadPointer;
     if (yk > 2147483646) {
       b_rPtr = MAX_int32_T;
@@ -1348,195 +1343,185 @@ void STFT_step(dsp_STFT *obj, const emxArray_real_T *u, creal_T y_data[],
       b_rPtr = 1;
     }
     if (b_rPtr < -2147483136) {
-      wPtr = MIN_int32_T;
       qY = MIN_int32_T;
+      wPtr = MIN_int32_T;
     } else {
-      wPtr = b_rPtr - 512;
       qY = b_rPtr - 512;
+      wPtr = b_rPtr - 512;
     }
-    b_c = qY + 1023;
-    if (wPtr < 1) {
-      b_n = 1 - wPtr;
-      yk = bc->size[0] * bc->size[1];
-      bc->size[0] = 1;
-      bc->size[1] = 1 - wPtr;
-      emxEnsureCapacity_int32_T(bc, yk);
-      bc_data = bc->data;
-      bc_data[0] = wPtr + 1025;
-      yk = wPtr + 1025;
-      for (k = 2; k <= b_n; k++) {
-        yk++;
-        bc_data[k - 1] = yk;
+    b_c = wPtr + 1023;
+    if (qY < 1) {
+      eml_integer_colon_dispatcher(qY + 1025, b_y);
+      y_data = b_y->data;
+      if (wPtr + 1023 < 1) {
+        n = 0;
+      } else {
+        n = wPtr + 1023;
       }
-      y_size_idx_1 = qY + 1023;
-      b_y_data[0] = 1;
-      yk = 1;
-      for (k = 2; k <= b_c; k++) {
-        yk++;
-        b_y_data[k - 1] = yk;
-      }
-      n = bc->size[1];
-      yk = bc->size[0] * bc->size[1];
-      bc->size[0] = 1;
-      bc->size[1] = (bc->size[1] + qY) + 1023;
-      emxEnsureCapacity_int32_T(bc, yk);
-      bc_data = bc->data;
-      for (k = 0; k < y_size_idx_1; k++) {
-        bc_data[k + n] = b_y_data[k];
-      }
-      if ((b_rPtr <= c) && (c <= qY + 1023)) {
-        if ((qY + 1023 >= 0) && (c < qY - 2147482624)) {
-          yk = MAX_int32_T;
-        } else if ((qY + 1023 < 0) && (c > qY - 2147482625)) {
-          yk = MIN_int32_T;
-        } else {
-          yk = (qY - c) + 1023;
-        }
-        if (yk > 2147483646) {
-          b_qY = MAX_int32_T;
-        } else {
-          b_qY = yk + 1;
-        }
-      } else if (c < b_rPtr) {
-        if (wPtr + 1025 < -2147482622) {
-          yk = MAX_int32_T;
-        } else {
-          yk = -wPtr;
-        }
-        if (yk > 2147483646) {
-          yk = MAX_int32_T;
-        } else {
+      yk = c_y->size[0] * c_y->size[1];
+      c_y->size[0] = 1;
+      c_y->size[1] = n;
+      emxEnsureCapacity_int32_T(c_y, yk);
+      b_y_data = c_y->data;
+      if (n > 0) {
+        b_y_data[0] = 1;
+        yk = 1;
+        for (k = 2; k <= n; k++) {
           yk++;
+          b_y_data[k - 1] = yk;
         }
-        if ((yk < 0) && (c < MIN_int32_T - yk)) {
-          rPtr = MIN_int32_T;
-        } else if ((yk > 0) && (c > MAX_int32_T - yk)) {
-          rPtr = MAX_int32_T;
-        } else {
-          rPtr = yk + c;
-        }
-      } else if (c > wPtr + 1025) {
-        if ((c >= 0) && (wPtr + 1025 < c - MAX_int32_T)) {
+      }
+      yk = bc->size[0] * bc->size[1];
+      bc->size[0] = 1;
+      bc->size[1] = b_y->size[1] + c_y->size[1];
+      emxEnsureCapacity_int32_T(bc, yk);
+      bc_data = bc->data;
+      yk = b_y->size[1];
+      for (k = 0; k < yk; k++) {
+        bc_data[k] = y_data[k];
+      }
+      for (k = 0; k < n; k++) {
+        bc_data[k + b_y->size[1]] = b_y_data[k];
+      }
+      if ((b_rPtr <= b_wPtr) && (b_wPtr <= wPtr + 1023)) {
+        if ((wPtr + 1023 >= 0) && (b_wPtr < wPtr - 2147482624)) {
           yk = MAX_int32_T;
-        } else if ((c < 0) && (wPtr + 1025 > c - MIN_int32_T)) {
+        } else if ((wPtr + 1023 < 0) && (b_wPtr > wPtr - 2147482625)) {
           yk = MIN_int32_T;
         } else {
-          yk = (c - wPtr) - 1025;
+          yk = (wPtr - b_wPtr) + 1023;
         }
         if (yk > 2147483646) {
           rPtr = MAX_int32_T;
         } else {
           rPtr = yk + 1;
         }
+      } else if (b_wPtr < b_rPtr) {
+        if (qY + 1025 < -2147482622) {
+          yk = MAX_int32_T;
+        } else {
+          yk = -qY;
+        }
+        if (yk > 2147483646) {
+          yk = MAX_int32_T;
+        } else {
+          yk++;
+        }
+        if ((yk < 0) && (b_wPtr < MIN_int32_T - yk)) {
+          c = MIN_int32_T;
+        } else if ((yk > 0) && (b_wPtr > MAX_int32_T - yk)) {
+          c = MAX_int32_T;
+        } else {
+          c = yk + b_wPtr;
+        }
+      } else if (b_wPtr > qY + 1025) {
+        if ((b_wPtr >= 0) && (qY + 1025 < b_wPtr - MAX_int32_T)) {
+          yk = MAX_int32_T;
+        } else if ((b_wPtr < 0) && (qY + 1025 > b_wPtr - MIN_int32_T)) {
+          yk = MIN_int32_T;
+        } else {
+          yk = (b_wPtr - qY) - 1025;
+        }
+        if (yk > 2147483646) {
+          c = MAX_int32_T;
+        } else {
+          c = yk + 1;
+        }
       }
-    } else if (qY + 1023 > 1025) {
-      b_c = qY - 2;
-      n = 1026 - wPtr;
-      yk = bc->size[0] * bc->size[1];
-      bc->size[0] = 1;
-      bc->size[1] = 1026 - wPtr;
-      emxEnsureCapacity_int32_T(bc, yk);
-      bc_data = bc->data;
-      bc_data[0] = wPtr;
-      yk = wPtr;
-      for (k = 2; k <= n; k++) {
-        yk++;
-        bc_data[k - 1] = yk;
-      }
-      y_size_idx_1 = qY - 2;
+    } else if (wPtr + 1023 > 1025) {
+      b_c = wPtr - 2;
+      eml_integer_colon_dispatcher(qY, b_y);
+      y_data = b_y->data;
+      yk = c_y->size[0] * c_y->size[1];
+      c_y->size[0] = 1;
+      c_y->size[1] = wPtr - 2;
+      emxEnsureCapacity_int32_T(c_y, yk);
+      b_y_data = c_y->data;
       b_y_data[0] = 1;
       yk = 1;
       for (k = 2; k <= b_c; k++) {
         yk++;
         b_y_data[k - 1] = yk;
       }
-      n = bc->size[1];
       yk = bc->size[0] * bc->size[1];
       bc->size[0] = 1;
-      bc->size[1] = (bc->size[1] + qY) - 2;
+      bc->size[1] = b_y->size[1] + c_y->size[1];
       emxEnsureCapacity_int32_T(bc, yk);
       bc_data = bc->data;
-      for (k = 0; k < y_size_idx_1; k++) {
-        bc_data[k + n] = b_y_data[k];
+      yk = b_y->size[1];
+      for (k = 0; k < yk; k++) {
+        bc_data[k] = y_data[k];
       }
-      if (b_rPtr <= c) {
-        if (c < -2147482622) {
+      yk = c_y->size[1];
+      for (k = 0; k < yk; k++) {
+        bc_data[k + b_y->size[1]] = b_y_data[k];
+      }
+      if (b_rPtr <= b_wPtr) {
+        if (b_wPtr < -2147482622) {
           yk = MAX_int32_T;
         } else {
-          yk = 1025 - c;
+          yk = 1025 - b_wPtr;
         }
         if (yk > 2147483646) {
           yk = MAX_int32_T;
         } else {
           yk++;
         }
-        if ((yk < 0) && (qY - 2 < MIN_int32_T - yk)) {
-          b_qY = MIN_int32_T;
-        } else if ((yk > 0) && (qY - 2 > MAX_int32_T - yk)) {
-          b_qY = MAX_int32_T;
+        if ((yk < 0) && (wPtr - 2 < MIN_int32_T - yk)) {
+          rPtr = MIN_int32_T;
+        } else if ((yk > 0) && (wPtr - 2 > MAX_int32_T - yk)) {
+          rPtr = MAX_int32_T;
         } else {
-          b_qY = (yk + qY) - 2;
+          rPtr = (yk + wPtr) - 2;
         }
-      } else if (c <= qY - 2) {
-        if (c < qY + MAX_int32_T) {
+      } else if (b_wPtr <= wPtr - 2) {
+        if (b_wPtr < wPtr + MAX_int32_T) {
           yk = MAX_int32_T;
         } else {
-          yk = (qY - c) - 2;
+          yk = (wPtr - b_wPtr) - 2;
         }
         if (yk > 2147483646) {
-          b_qY = MAX_int32_T;
+          rPtr = MAX_int32_T;
         } else {
-          b_qY = yk + 1;
+          rPtr = yk + 1;
         }
-      } else if ((wPtr < c) && (c < b_rPtr)) {
-        rPtr = (c - wPtr) + 1;
+      } else if ((qY < b_wPtr) && (b_wPtr < b_rPtr)) {
+        c = (b_wPtr - qY) + 1;
       }
     } else {
-      if (qY + 1023 < wPtr) {
-        n = 0;
-      } else {
-        n = (qY - wPtr) + 1024;
-      }
-      yk = bc->size[0] * bc->size[1];
-      bc->size[0] = 1;
-      bc->size[1] = n;
-      emxEnsureCapacity_int32_T(bc, yk);
+      b_eml_integer_colon_dispatcher(qY, wPtr + 1023, bc);
       bc_data = bc->data;
-      if (n > 0) {
-        bc_data[0] = wPtr;
-        yk = wPtr;
-        for (k = 2; k <= n; k++) {
-          yk++;
-          bc_data[k - 1] = yk;
-        }
-      }
-      if ((b_rPtr <= c) && (c <= qY + 1023)) {
-        if ((qY + 1023 >= 0) && (c < qY - 2147482624)) {
+      if ((b_rPtr <= b_wPtr) && (b_wPtr <= wPtr + 1023)) {
+        if ((wPtr + 1023 >= 0) && (b_wPtr < wPtr - 2147482624)) {
           yk = MAX_int32_T;
-        } else if ((qY + 1023 < 0) && (c > qY - 2147482625)) {
+        } else if ((wPtr + 1023 < 0) && (b_wPtr > wPtr - 2147482625)) {
           yk = MIN_int32_T;
         } else {
-          yk = (qY - c) + 1023;
+          yk = (wPtr - b_wPtr) + 1023;
         }
         if (yk > 2147483646) {
-          b_qY = MAX_int32_T;
+          rPtr = MAX_int32_T;
         } else {
-          b_qY = yk + 1;
+          rPtr = yk + 1;
         }
-      } else if ((wPtr <= c) && (c < b_rPtr)) {
-        rPtr = (c - wPtr) + 1;
+      } else if ((qY <= b_wPtr) && (b_wPtr < b_rPtr)) {
+        c = (b_wPtr - qY) + 1;
       }
     }
-    yk = bc->size[1];
-    b_n = bc->size[1];
-    for (k = 0; k < yk; k++) {
-      out_data[k] = obj->pObj.pBuff.pBuffer.Cache[bc_data[k] - 1];
+    emxInit_real_T(&d_y, 1);
+    n = bc->size[1];
+    yk = d_y->size[0];
+    d_y->size[0] = bc->size[1];
+    emxEnsureCapacity_real_T(d_y, yk);
+    c_y_data = d_y->data;
+    for (k = 0; k < n; k++) {
+      c_y_data[k] = obj->pObj.pBuff.pBuffer.Cache[bc_data[k] - 1];
     }
-    if (b_qY != 0) {
-      if (b_qY < -2147482623) {
+    if (rPtr != 0) {
+      if (rPtr < -2147482623) {
         yk = MAX_int32_T;
       } else {
-        yk = 1024 - b_qY;
+        yk = 1024 - rPtr;
       }
       if (yk > 2147483646) {
         yk = MAX_int32_T;
@@ -1551,31 +1536,36 @@ void STFT_step(dsp_STFT *obj, const emxArray_real_T *u, creal_T y_data[],
         yk = 1023;
       }
       yk -= n;
-      if (yk >= 0) {
-        memset(&out_data[n], 0, (unsigned int)(yk + 1) * sizeof(double));
+      for (k = 0; k <= yk; k++) {
+        c_y_data[n + k] = 0.0;
       }
-    } else if (rPtr != 0) {
-      if (rPtr == 1024) {
-        b_n = 1024;
-        memset(&out_data[0], 0, 1024U * sizeof(double));
+    } else if (c != 0) {
+      if (c == 1024) {
+        yk = d_y->size[0];
+        d_y->size[0] = 1024;
+        emxEnsureCapacity_real_T(d_y, yk);
+        c_y_data = d_y->data;
+        for (k = 0; k < 1024; k++) {
+          c_y_data[k] = 0.0;
+        }
       } else {
-        if (rPtr < 1) {
+        if (c < 1) {
           yk = -1;
         } else {
-          yk = rPtr - 1;
+          yk = c - 1;
         }
-        if (yk >= 0) {
-          memset(&out_data[0], 0, (unsigned int)(yk + 1) * sizeof(double));
+        for (k = 0; k <= yk; k++) {
+          c_y_data[k] = 0.0;
         }
       }
     }
     yk = obj->pObj.pBuff.pBuffer.CumulativeUnderrun;
-    if ((yk < 0) && (b_qY < MIN_int32_T - yk)) {
+    if ((yk < 0) && (rPtr < MIN_int32_T - yk)) {
       yk = MIN_int32_T;
-    } else if ((yk > 0) && (b_qY > MAX_int32_T - yk)) {
+    } else if ((yk > 0) && (rPtr > MAX_int32_T - yk)) {
       yk = MAX_int32_T;
     } else {
-      yk += b_qY;
+      yk += rPtr;
     }
     obj->pObj.pBuff.pBuffer.CumulativeUnderrun = yk;
     yk = obj->pObj.pBuff.pBuffer.WritePointer;
@@ -1584,30 +1574,35 @@ void STFT_step(dsp_STFT *obj, const emxArray_real_T *u, creal_T y_data[],
     } else {
       yk--;
     }
-    if (b_qY != 0) {
+    if (rPtr != 0) {
       obj->pObj.pBuff.pBuffer.ReadPointer = yk;
     } else {
       obj->pObj.pBuff.pBuffer.ReadPointer = b_c;
     }
-    yk = (b_n / 2) << 1;
-    n = yk - 2;
-    for (k = 0; k <= n; k += 2) {
-      __m128d r;
-      r = _mm_loadu_pd(&out_data[k]);
-      _mm_storeu_pd(&win[k],
-                    _mm_mul_pd(r, _mm_loadu_pd(&obj->pObj.pWindow[k])));
+    if (d_y->size[0] == 1024) {
+      for (k = 0; k <= 1022; k += 2) {
+        _mm_storeu_pd(&win[k], _mm_mul_pd(_mm_loadu_pd(&c_y_data[k]),
+                                          _mm_loadu_pd(&obj->pObj.pWindow[k])));
+      }
+    } else {
+      binary_expand_op(win, d_y, obj);
     }
-    for (k = yk; k < b_n; k++) {
-      win[k] = out_data[k] * obj->pObj.pWindow[k];
+    emxFree_real_T(&d_y);
+    e_FFTImplementationCallback_doH(win, yTwoSided);
+    yk = y->size[0] * y->size[1];
+    y->size[0] = 513;
+    y->size[1] = 1;
+    emxEnsureCapacity_creal_T(y, yk);
+    d_y_data = y->data;
+    for (k = 0; k < 513; k++) {
+      d_y_data[k] = yTwoSided[k];
     }
-    d_FFTImplementationCallback_doH(win, yTwoSided);
-    y_size[0] = 513;
-    y_size[1] = 1;
-    memcpy(&y_data[0], &yTwoSided[0], 513U * sizeof(creal_T));
   } else {
-    y_size[0] = 513;
-    y_size[1] = 0;
+    y->size[0] = 513;
+    y->size[1] = 0;
   }
+  emxFree_int32_T(&c_y);
+  emxFree_int32_T(&b_y);
   emxFree_int32_T(&bc);
 }
 
