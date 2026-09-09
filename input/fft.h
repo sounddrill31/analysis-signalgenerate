@@ -2,7 +2,7 @@
  * File: fft.h
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 09-Sep-2026 15:36:09
+ * C/C++ source code generated on  : 09-Sep-2026 16:05:27
  */
 
 #ifndef FFT_H
@@ -19,7 +19,7 @@ extern "C" {
 #endif
 
 /* Function Declarations */
-void fft(emxArray_creal_T *y);
+void fft(const emxArray_real_T *x, emxArray_creal_T *y);
 
 #ifdef __cplusplus
 }

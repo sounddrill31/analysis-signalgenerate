@@ -2,7 +2,7 @@
  * File: _coder_genAnalysisLogic_mex.h
  *
  * MATLAB Coder version            : 26.1
- * C/C++ source code generated on  : 09-Sep-2026 15:36:09
+ * C/C++ source code generated on  : 09-Sep-2026 16:05:27
  */
 
 #ifndef _CODER_GENANALYSISLOGIC_MEX_H
